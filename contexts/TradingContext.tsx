@@ -147,6 +147,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     const loadData = async () => {
       console.log('[TradingContext] Starting to load data...');
       
+      const hardTimeout = setTimeout(() => {
+        console.log('[TradingContext] HARD TIMEOUT - forcing load complete');
+        setIsLoading(false);
+      }, 1000);
+      
       try {
         setCounterparties(MOCK_COUNTERPARTIES);
         setTrades(MOCK_TRADES);
@@ -155,8 +160,8 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         try {
           const storedUser = await Promise.race([
             AsyncStorage.getItem('current_user'),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Storage timeout')), 300))
-          ]) as string | null;
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 200))
+          ]);
           
           if (storedUser) {
             setCurrentUser(JSON.parse(storedUser));
@@ -167,80 +172,12 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         }
 
         console.log('[TradingContext] Finished loading user data');
-
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Supabase timeout')), 800)
-        );
-
-        try {
-          const cpPromise = supabase
-            .from('counterparties')
-            .select('*');
-          
-          const { data: cpData, error: cpError } = await Promise.race([
-            cpPromise,
-            timeoutPromise
-          ]) as any;
-          
-          if (!cpError && cpData && cpData.length > 0) {
-            console.log('[TradingContext] Loaded counterparties from Supabase:', cpData.length);
-            setCounterparties(cpData.map((cp: any) => ({
-              id: cp.id,
-              name: cp.name,
-              country: cp.country,
-              type: cp.type,
-              onboardedAt: new Date(cp.onboarded_at),
-              riskScore: cp.risk_score,
-              documents: cp.documents || [],
-              approved: cp.approved,
-              approvalConditions: cp.approval_conditions,
-              status: cp.status,
-            })));
-          }
-        } catch (cpError) {
-          console.log('[TradingContext] Supabase counterparties error/timeout, keeping mocks:', cpError);
-        }
-
-        try {
-          const tradesPromise = supabase
-            .from('trades')
-            .select('*');
-          
-          const { data: tradesData, error: tradesError } = await Promise.race([
-            tradesPromise,
-            timeoutPromise
-          ]) as any;
-          
-          if (!tradesError && tradesData && tradesData.length > 0) {
-            console.log('[TradingContext] Loaded trades from Supabase:', tradesData.length);
-            setTrades(tradesData.map((t: any) => ({
-              id: t.id,
-              commodity: t.commodity,
-              counterpartyId: t.counterparty_id,
-              counterpartyName: t.counterparty_name,
-              quantity: t.quantity,
-              unit: t.unit,
-              pricePerUnit: t.price_per_unit,
-              totalValue: t.total_value,
-              currency: t.currency,
-              incoterm: t.incoterm,
-              deliveryWindow: t.delivery_window,
-              status: t.status,
-              createdAt: new Date(t.created_at),
-              createdBy: t.created_by,
-              documents: t.documents || [],
-              riskLevel: t.risk_level,
-              alerts: t.alerts || [],
-            })));
-          }
-        } catch (tradesError) {
-          console.log('[TradingContext] Supabase trades error/timeout, keeping mocks:', tradesError);
-        }
       } catch (error) {
         console.error('[TradingContext] Error loading data:', error);
         setCounterparties(MOCK_COUNTERPARTIES);
         setTrades(MOCK_TRADES);
       } finally {
+        clearTimeout(hardTimeout);
         setIsLoading(false);
         console.log('[TradingContext] Loading complete');
       }

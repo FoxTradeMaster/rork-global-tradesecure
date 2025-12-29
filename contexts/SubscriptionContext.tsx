@@ -54,14 +54,14 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     expiresAt: null,
     isActive: true,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
 
   useEffect(() => {
     const init = async () => {
       try {
         const stored = await Promise.race([
           AsyncStorage.getItem('subscription_status'),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 500))
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 200))
         ]);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -82,8 +82,6 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
         }
       } catch (error) {
         console.error('[SubscriptionContext] Error loading subscription:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
     init();

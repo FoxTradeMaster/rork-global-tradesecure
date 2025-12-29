@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading, usePortfolioMetrics, useTradesByStatus } from '@/contexts/TradingContext';
 import { 
@@ -15,38 +15,28 @@ import {
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { currentUser, isLoading, trades } = useTrading();
+  const { currentUser, trades } = useTrading();
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus();
 
-  const [maxLoadTime, setMaxLoadTime] = useState(false);
-
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log('[Dashboard] Max load time reached, forcing display');
-      setMaxLoadTime(true);
-    }, 2000);
+      if (!currentUser) {
+        console.log('[Dashboard] No user found, redirecting to role select');
+        router.replace('/role-select');
+      }
+    }, 500);
     return () => clearTimeout(timeout);
-  }, []);
+  }, [currentUser, router]);
 
-  useEffect(() => {
-    if (!isLoading && !currentUser) {
-      router.replace('/role-select');
-    }
-  }, [currentUser, isLoading, router]);
-
-  if (isLoading && !maxLoadTime) {
+  if (!currentUser) {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar barStyle="light-content" />
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={styles.loadingText}>Loading dashboard...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
-  }
-
-  if (!currentUser) {
-    return null;
   }
 
   const recentTrades = trades.slice(0, 3);
