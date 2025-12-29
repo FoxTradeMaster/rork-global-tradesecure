@@ -1,14 +1,27 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput } from 'react-native';
-import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert } from 'react-native';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
-import { Search, Users, Building2, MapPin, CheckCircle, AlertTriangle, XCircle } from 'lucide-react-native';
+import { Search, Users, Building2, MapPin, CheckCircle, AlertTriangle, XCircle, Upload } from 'lucide-react-native';
+import ImportModal from '@/components/ImportModal';
+import { ParsedRow } from '@/lib/fileParser';
+import { Counterparty, RiskLevel } from '@/types';
+
+const COUNTERPARTY_IMPORT_FIELDS = [
+  { field: 'name', label: 'Company Name', required: true },
+  { field: 'country', label: 'Country', required: true },
+  { field: 'type', label: 'Type (buyer/seller)', required: false },
+  { field: 'email', label: 'Email', required: false },
+  { field: 'phone', label: 'Phone', required: false },
+  { field: 'address', label: 'Address', required: false },
+];
 
 export default function CounterpartiesScreen() {
   const router = useRouter();
-  const { counterparties } = useTrading();
+  const { counterparties, addCounterparties } = useTrading();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const filteredCounterparties = counterparties.filter(cp =>
     cp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,15 +46,72 @@ export default function CounterpartiesScreen() {
     }
   };
 
+  const handleImport = useCallback((data: ParsedRow[]) => {
+    console.log('[Counterparties] Importing', data.length, 'rows');
+    
+    const newCounterparties: Counterparty[] = data.map((row, index) => {
+      const name = String(row.name || '');
+      const country = String(row.country || 'Unknown');
+      const typeValue = String(row.type || 'buyer').toLowerCase();
+      const type = (typeValue === 'seller' ? 'seller' : 'buyer') as 'buyer' | 'seller';
+      
+      const riskLevel: RiskLevel = 'amber';
+      
+      return {
+        id: `imported_${Date.now()}_${index}`,
+        name,
+        country,
+        type,
+        onboardedAt: new Date(),
+        riskScore: {
+          legal_licensing: 50,
+          financial_strength: 50,
+          compliance_sanctions: 50,
+          operations_logistics: 50,
+          commodity_specific: 50,
+          overall: 50,
+          level: riskLevel,
+        },
+        documents: [],
+        approved: false,
+        status: 'pending_ddq' as const,
+      };
+    }).filter(cp => cp.name.trim() !== '');
+
+    if (newCounterparties.length > 0) {
+      addCounterparties(newCounterparties);
+      Alert.alert(
+        'Import Successful',
+        `Successfully imported ${newCounterparties.length} counterparties.`,
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'Import Failed',
+        'No valid counterparties found in the file.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [addCounterparties]);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
-          <Text style={styles.title}>Counterparties</Text>
-          <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeText}>{counterparties.length}</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.title}>Counterparties</Text>
+            <View style={styles.headerBadge}>
+              <Text style={styles.headerBadgeText}>{counterparties.length}</Text>
+            </View>
           </View>
+          <TouchableOpacity 
+            style={styles.importButton}
+            onPress={() => setShowImportModal(true)}
+          >
+            <Upload size={16} color="#FFFFFF" />
+            <Text style={styles.importButtonText}>Import</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.searchContainer}>
@@ -190,6 +260,14 @@ export default function CounterpartiesScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <ImportModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        title="Import Counterparties"
+        targetFields={COUNTERPARTY_IMPORT_FIELDS}
+      />
     </View>
   );
 }
@@ -205,10 +283,29 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 2,
-    paddingBottom: 2,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  importButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
     gap: 6,
+  },
+  importButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 14,

@@ -746,6 +746,8 @@ export const edibleOilsBuyers: TradingHouse[] = [
   },
 ];
 
+let importedParticipants: MarketParticipant[] = [];
+
 export const allMarketParticipants: MarketParticipant[] = [
   ...tradingHouses,
   ...edibleOilsBuyers,
@@ -753,6 +755,15 @@ export const allMarketParticipants: MarketParticipant[] = [
   ...brokers,
   ...platforms,
 ];
+
+export const addMarketParticipants = (participants: MarketParticipant[]) => {
+  importedParticipants = [...importedParticipants, ...participants];
+  console.log('[MarketParticipants] Added', participants.length, 'participants. Total imported:', importedParticipants.length);
+};
+
+export const getImportedParticipants = (): MarketParticipant[] => {
+  return importedParticipants;
+};
 
 export const getCommodityLabel = (commodity: string): string => {
   const labels: Record<string, string> = {

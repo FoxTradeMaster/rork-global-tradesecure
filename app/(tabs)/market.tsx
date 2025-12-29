@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal } from 'react-native';
-import { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert } from 'react-native';
+import { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   Search, 
@@ -14,10 +14,23 @@ import {
   ExternalLink,
   Award,
   Users,
-  ChevronRight
+  ChevronRight,
+  Upload
 } from 'lucide-react-native';
-import { allMarketParticipants, getCommodityLabel, getCategoryLabel } from '@/mocks/market-participants';
-import type { MarketParticipant, TradingHouse, Broker, MarketPlatform } from '@/types';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants } from '@/mocks/market-participants';
+import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType } from '@/types';
+import ImportModal from '@/components/ImportModal';
+import { ParsedRow } from '@/lib/fileParser';
+
+const MARKET_IMPORT_FIELDS = [
+  { field: 'name', label: 'Company Name', required: true },
+  { field: 'headquarters', label: 'Headquarters/Location', required: true },
+  { field: 'type', label: 'Type (trading_house/broker/platform)', required: false },
+  { field: 'description', label: 'Description', required: false },
+  { field: 'website', label: 'Website', required: false },
+  { field: 'commodities', label: 'Commodities (comma-separated)', required: false },
+  { field: 'specialization', label: 'Specialization', required: false },
+];
 
 export default function MarketDirectoryScreen() {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -25,11 +38,17 @@ export default function MarketDirectoryScreen() {
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
   const [selectedParticipant, setSelectedParticipant] = useState<MarketParticipant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
+  const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea'];
 
+  const allParticipants = useMemo(() => {
+    return [...allMarketParticipants, ...importedParticipants];
+  }, [importedParticipants]);
+
   const filteredParticipants = useMemo(() => {
-    return allMarketParticipants.filter(participant => {
+    return allParticipants.filter(participant => {
       const matchesSearch = participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            participant.description.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -40,16 +59,16 @@ export default function MarketDirectoryScreen() {
       
       return matchesSearch && matchesType && matchesCommodity;
     });
-  }, [searchQuery, selectedType, selectedCommodity]);
+  }, [searchQuery, selectedType, selectedCommodity, allParticipants]);
 
   const stats = useMemo(() => {
     return {
-      total: allMarketParticipants.length,
-      tradingHouses: allMarketParticipants.filter(p => p.type === 'trading_house').length,
-      brokers: allMarketParticipants.filter(p => p.type === 'broker').length,
-      platforms: allMarketParticipants.filter(p => p.type === 'platform').length,
+      total: allParticipants.length,
+      tradingHouses: allParticipants.filter(p => p.type === 'trading_house').length,
+      brokers: allParticipants.filter(p => p.type === 'broker').length,
+      platforms: allParticipants.filter(p => p.type === 'platform').length,
     };
-  }, []);
+  }, [allParticipants]);
 
   const openDetail = (participant: MarketParticipant) => {
     setSelectedParticipant(participant);
@@ -61,12 +80,94 @@ export default function MarketDirectoryScreen() {
     setTimeout(() => setSelectedParticipant(null), 300);
   };
 
+  const handleImport = useCallback((data: ParsedRow[]) => {
+    console.log('[Market] Importing', data.length, 'market participants');
+    
+    const newParticipants: MarketParticipant[] = data.map((row, index) => {
+      const name = String(row.name || '');
+      const headquarters = String(row.headquarters || 'Unknown');
+      const typeValue = String(row.type || 'trading_house').toLowerCase();
+      const description = String(row.description || `${name} - Market participant`);
+      const website = row.website ? String(row.website) : undefined;
+      const specialization = String(row.specialization || 'General trading');
+      
+      const commoditiesStr = String(row.commodities || 'gold');
+      const commodities = commoditiesStr.split(',').map(c => {
+        const trimmed = c.trim().toLowerCase().replace(/\s+/g, '_');
+        const validCommodities: CommodityType[] = ['gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
+        return validCommodities.includes(trimmed as CommodityType) ? trimmed as CommodityType : 'gold';
+      }).filter((v, i, a) => a.indexOf(v) === i) as CommodityType[];
+
+      const baseParticipant = {
+        id: `imported_market_${Date.now()}_${index}`,
+        name,
+        headquarters,
+        description,
+        verified: false,
+        website,
+        commodities,
+      };
+
+      if (typeValue === 'broker') {
+        return {
+          ...baseParticipant,
+          type: 'broker' as const,
+          brokerType: ['physical_broker' as const],
+          regulatedBy: [],
+          clearingRelationships: [],
+          licenseNumbers: [],
+        } as Broker;
+      } else if (typeValue === 'platform') {
+        return {
+          ...baseParticipant,
+          type: 'platform' as const,
+          category: 'exchange' as const,
+          framework: specialization,
+        } as MarketPlatform;
+      } else {
+        return {
+          ...baseParticipant,
+          type: 'trading_house' as const,
+          category: ['diversified' as const],
+          offices: [headquarters],
+          licenses: [],
+          specialization,
+        } as TradingHouse;
+      }
+    }).filter(p => p.name.trim() !== '');
+
+    if (newParticipants.length > 0) {
+      setImportedParticipants(prev => [...prev, ...newParticipants]);
+      addMarketParticipants(newParticipants);
+      Alert.alert(
+        'Import Successful',
+        `Successfully imported ${newParticipants.length} market participants.`,
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'Import Failed',
+        'No valid market participants found in the file.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
-          <Text style={styles.title}>Verified Market Directory</Text>
+          <View style={styles.headerTop}>
+            <Text style={styles.title}>Verified Market Directory</Text>
+            <TouchableOpacity 
+              style={styles.importButton}
+              onPress={() => setShowImportModal(true)}
+            >
+              <Upload size={16} color="#FFFFFF" />
+              <Text style={styles.importButtonText}>Import</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.subtitle}>
             Legitimate counterparties and licensed brokers
           </Text>
@@ -516,6 +617,14 @@ export default function MarketDirectoryScreen() {
           </SafeAreaView>
         </View>
       </Modal>
+
+      <ImportModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        title="Import Market Participants"
+        targetFields={MARKET_IMPORT_FIELDS}
+      />
     </View>
   );
 }
@@ -530,8 +639,28 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  importButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  importButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 18,

@@ -254,6 +254,33 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     await AsyncStorage.setItem('current_user', JSON.stringify(user));
   };
 
+  const addCounterparties = async (newCounterparties: Counterparty[]) => {
+    console.log('[TradingContext] Adding', newCounterparties.length, 'counterparties');
+    
+    for (const counterparty of newCounterparties) {
+      const { error } = await supabase
+        .from('counterparties')
+        .insert({
+          name: counterparty.name,
+          country: counterparty.country,
+          type: counterparty.type,
+          email: '',
+          onboarded_at: counterparty.onboardedAt.toISOString(),
+          risk_score: counterparty.riskScore,
+          documents: counterparty.documents,
+          approved: counterparty.approved,
+          approval_conditions: counterparty.approvalConditions,
+          status: counterparty.status,
+        });
+
+      if (error) {
+        console.error('Error adding counterparty:', error);
+      }
+    }
+    
+    setCounterparties(prev => [...prev, ...newCounterparties]);
+  };
+
   const addCounterparty = async (counterparty: Counterparty) => {
     const { data, error } = await supabase
       .from('counterparties')
@@ -367,6 +394,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     trades,
     isLoading,
     addCounterparty,
+    addCounterparties,
     updateCounterparty,
     addTrade,
     updateTrade
