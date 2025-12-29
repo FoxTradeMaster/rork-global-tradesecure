@@ -14,6 +14,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['NYSE Listed', 'SEC Registered'],
     website: 'https://www.kroger.com',
     specialization: 'US retail edible oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'albertsons',
@@ -28,6 +29,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['NYSE Listed', 'SEC Registered'],
     website: 'https://www.albertsons.com',
     specialization: 'Multi-banner retail oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'ruchi-soya',
@@ -42,6 +44,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['NSE Listed', 'BSE Listed'],
     website: 'https://www.ruchisoya.com',
     specialization: 'Indian edible oils market',
+    businessType: 'both' as const,
   },
   {
     id: 'sainsburys-plc',
@@ -56,6 +59,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['LSE Listed', 'UK Companies House'],
     website: 'https://www.sainsburys.co.uk',
     specialization: 'UK retail premium oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'asda-stores',
@@ -70,6 +74,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['UK Companies House'],
     website: 'https://www.asda.com',
     specialization: 'Value retail edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'rewe-group',
@@ -84,6 +89,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['German Cooperative Registry'],
     website: 'https://www.rewe-group.com',
     specialization: 'European retail oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'auchan',
@@ -98,6 +104,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['French Commercial Registry'],
     website: 'https://www.auchan.com',
     specialization: 'French retail oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'migros',
@@ -112,6 +119,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Swiss Cooperative Registry'],
     website: 'https://www.migros.ch',
     specialization: 'Swiss retail oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'ica-gruppen',
@@ -126,6 +134,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Stockholm Stock Exchange Listed'],
     website: 'https://www.icagruppen.se',
     specialization: 'Nordic market oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'mitsui-food',
@@ -140,6 +149,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['TSE Listed'],
     website: 'https://www.mitsui.com',
     specialization: 'Japanese trading and distribution',
+    businessType: 'both' as const,
   },
   {
     id: 'lotte-holdings',
@@ -154,6 +164,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['KRX Listed'],
     website: 'https://www.lotte.co.kr',
     specialization: 'Asian food business oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'indofood-tbk',
@@ -168,6 +179,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['IDX Listed'],
     website: 'https://www.indofood.com',
     specialization: 'Indonesian food manufacturing oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'thai-union',
@@ -182,6 +194,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['SET Listed'],
     website: 'https://www.thaiunion.com',
     specialization: 'Seafood processing oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'gordon-food',
@@ -196,6 +209,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Michigan Business Registry'],
     website: 'https://www.gfs.com',
     specialization: 'Food service oils distribution',
+    businessType: 'buyer' as const,
   },
   {
     id: 'ben-keith',
@@ -210,6 +224,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Texas Business Registry'],
     website: 'https://www.benekeith.com',
     specialization: 'Southwest US food distribution',
+    businessType: 'buyer' as const,
   },
   {
     id: 'arcor-group',
@@ -224,6 +239,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Argentine Business Registry'],
     website: 'https://www.arcor.com',
     specialization: 'Argentine confectionery oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'ferrero',
@@ -238,6 +254,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Italian Business Registry'],
     website: 'https://www.ferrero.com',
     specialization: 'Confectionery manufacturing oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'barilla',
@@ -252,6 +269,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Italian Business Registry'],
     website: 'https://www.barillagroup.com',
     specialization: 'Pasta and bakery oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'danone',
@@ -266,6 +284,7 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Euronext Listed'],
     website: 'https://www.danone.com',
     specialization: 'Dairy and plant-based oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'orkla',
@@ -280,5 +299,6 @@ export const edibleOilsBuyersExtended: TradingHouse[] = [
     licenses: ['Oslo Stock Exchange Listed'],
     website: 'https://www.orkla.com',
     specialization: 'Nordic food manufacturing',
+    businessType: 'buyer' as const,
   },
 ];

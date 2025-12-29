@@ -17,6 +17,7 @@ export const tradingHouses: TradingHouse[] = [
     tradingVolume: '300+ million tons/year',
     founded: 1966,
     specialization: 'Crude oil, refined products, and global energy logistics with extensive shipping assets',
+    businessType: 'both' as const,
   },
   {
     id: 'trafigura',
@@ -33,6 +34,7 @@ export const tradingHouses: TradingHouse[] = [
     tradingVolume: '250+ million tons/year',
     founded: 1993,
     specialization: 'Integrated oil, coal, and metals trading with global logistics infrastructure',
+    businessType: 'both' as const,
   },
   {
     id: 'glencore',
@@ -49,6 +51,7 @@ export const tradingHouses: TradingHouse[] = [
     tradingVolume: '400+ million tons/year',
     founded: 1974,
     specialization: 'Diversified global commodities with mining and trading operations',
+    businessType: 'both' as const,
   },
   {
     id: 'mercuria',
@@ -65,6 +68,7 @@ export const tradingHouses: TradingHouse[] = [
     tradingVolume: '150+ million tons/year',
     founded: 2004,
     specialization: 'Energy trading, fuel supplies, and structured financing',
+    businessType: 'both' as const,
   },
   {
     id: 'gunvor',
@@ -81,6 +85,7 @@ export const tradingHouses: TradingHouse[] = [
     tradingVolume: '200+ million tons/year',
     founded: 2000,
     specialization: 'Crude oil, refined products, and emerging precious metals desk',
+    businessType: 'both' as const,
   },
   {
     id: 'alkagesta',
@@ -96,6 +101,7 @@ export const tradingHouses: TradingHouse[] = [
     website: 'https://www.alkagesta.com',
     founded: 2012,
     specialization: 'Diversified fuel and fertilizer supply with compliance frameworks',
+    businessType: 'both' as const,
   },
   {
     id: 'phibro',
@@ -111,6 +117,7 @@ export const tradingHouses: TradingHouse[] = [
     website: 'https://www.phibro.com',
     founded: 1901,
     specialization: 'Legacy commodities firm with energy and metals focus',
+    businessType: 'both' as const,
   },
   {
     id: 'adani-global',
@@ -125,6 +132,7 @@ export const tradingHouses: TradingHouse[] = [
     licenses: ['SCoTA Licensed Member', 'Singapore ACRA'],
     website: 'https://www.adani.com',
     specialization: 'Coal mining, trading, and port logistics in Asia-Pacific',
+    businessType: 'both' as const,
   },
   {
     id: 'anglo-american',
@@ -139,6 +147,7 @@ export const tradingHouses: TradingHouse[] = [
     licenses: ['SCoTA Licensed Member', 'FTSE 100 Listed', 'FCA Authorized'],
     website: 'https://www.angloamerican.com',
     specialization: 'Integrated mining and commodities marketing',
+    businessType: 'both' as const,
   },
   {
     id: 'bhp-billiton',
@@ -153,6 +162,7 @@ export const tradingHouses: TradingHouse[] = [
     licenses: ['SCoTA Licensed Member', 'Swiss Commercial Registry'],
     website: 'https://www.bhp.com',
     specialization: 'Global coal and bulk commodities marketing',
+    businessType: 'both' as const,
   },
   {
     id: 'arcelormittal',
@@ -167,6 +177,7 @@ export const tradingHouses: TradingHouse[] = [
     licenses: ['SCoTA Licensed Member', 'EU Trading License'],
     website: 'https://www.arcelormittal.com',
     specialization: 'Coal and industrial raw materials for steel production',
+    businessType: 'both' as const,
   },
   {
     id: 'bulk-trading',
@@ -180,6 +191,7 @@ export const tradingHouses: TradingHouse[] = [
     verified: true,
     licenses: ['SCoTA Licensed Member', 'Swiss Commercial Registry'],
     specialization: 'Specialized coal trading and logistics',
+    businessType: 'both' as const,
   },
 ];
 
@@ -407,6 +419,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['German Trade Registry'],
     website: 'https://www.metro.de',
     specialization: 'Wholesale distribution of edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'carrefour-group',
@@ -421,6 +434,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['French Commercial Registry'],
     website: 'https://www.carrefour.com',
     specialization: 'Retail procurement of edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'tesco-plc',
@@ -435,6 +449,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['FCA Listed', 'UK Companies House'],
     website: 'https://www.tesco.com',
     specialization: 'Supermarket edible oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'walmart-inc',
@@ -449,6 +464,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['SEC Registered', 'NYSE Listed'],
     website: 'https://www.walmart.com',
     specialization: 'Large-scale retail edible oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'sainsburys',
@@ -463,6 +479,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['LSE Listed', 'UK Companies House'],
     website: 'https://www.sainsburys.co.uk',
     specialization: 'Premium retail edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'costco-wholesale',
@@ -477,6 +494,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NASDAQ Listed', 'SEC Registered'],
     website: 'https://www.costco.com',
     specialization: 'Bulk edible oils wholesale',
+    businessType: 'buyer' as const,
   },
   {
     id: 'aldi-group',
@@ -491,6 +509,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['German Trade Registry'],
     website: 'https://www.aldi.com',
     specialization: 'Value edible oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'lidl-stiftung',
@@ -505,6 +524,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['German Trade Registry'],
     website: 'https://www.lidl.com',
     specialization: 'Discount edible oils sourcing',
+    businessType: 'buyer' as const,
   },
   {
     id: 'reliance-retail',
@@ -519,6 +539,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['Indian ROC'],
     website: 'https://www.relianceretail.com',
     specialization: 'Indian market edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'unilever-plc',
@@ -533,6 +554,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['LSE Listed', 'NYSE Listed'],
     website: 'https://www.unilever.com',
     specialization: 'FMCG edible oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'nestle-sa',
@@ -547,6 +569,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['SIX Swiss Listed'],
     website: 'https://www.nestle.com',
     specialization: 'Food manufacturing oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'pepsico-inc',
@@ -561,6 +584,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NASDAQ Listed'],
     website: 'https://www.pepsico.com',
     specialization: 'Snack food oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'mondelez-international',
@@ -575,6 +599,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NASDAQ Listed'],
     website: 'https://www.mondelezinternational.com',
     specialization: 'Confectionery oils sourcing',
+    businessType: 'buyer' as const,
   },
   {
     id: 'general-mills',
@@ -589,6 +614,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NYSE Listed'],
     website: 'https://www.generalmills.com',
     specialization: 'Packaged foods oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'wilmar-international',
@@ -603,6 +629,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['SGX Listed'],
     website: 'https://www.wilmar-international.com',
     specialization: 'Palm oil and tropical oils',
+    businessType: 'both' as const,
   },
   {
     id: 'cargill-india',
@@ -617,6 +644,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['Indian ROC'],
     website: 'https://www.cargill.co.in',
     specialization: 'Agricultural commodity oils',
+    businessType: 'both' as const,
   },
   {
     id: 'adani-wilmar',
@@ -631,6 +659,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NSE Listed', 'BSE Listed'],
     website: 'https://www.adaniwilmar.com',
     specialization: 'Indian edible oils market leader',
+    businessType: 'both' as const,
   },
   {
     id: 'cofco-international',
@@ -645,6 +674,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['Chinese State Enterprise'],
     website: 'https://www.cofcointernational.com',
     specialization: 'Chinese market oils procurement',
+    businessType: 'buyer' as const,
   },
   {
     id: 'savola-group',
@@ -659,6 +689,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['Tadawul Listed'],
     website: 'https://www.savola.com',
     specialization: 'Middle East edible oils',
+    businessType: 'both' as const,
   },
   {
     id: 'bidco-africa',
@@ -673,6 +704,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['Kenyan Business Registry'],
     website: 'https://www.bidcoafrica.com',
     specialization: 'African market edible oils',
+    businessType: 'both' as const,
   },
   {
     id: 'bunge-brasil',
@@ -687,6 +719,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NYSE Listed'],
     website: 'https://www.bunge.com.br',
     specialization: 'South American oilseeds',
+    businessType: 'both' as const,
   },
   {
     id: 'sysco-corporation',
@@ -701,6 +734,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NYSE Listed'],
     website: 'https://www.sysco.com',
     specialization: 'Food service oils distribution',
+    businessType: 'buyer' as const,
   },
   {
     id: 'us-foods',
@@ -715,6 +749,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NYSE Listed'],
     website: 'https://www.usfoods.com',
     specialization: 'Commercial kitchen oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'woolworths-group',
@@ -729,6 +764,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['ASX Listed'],
     website: 'https://www.woolworthsgroup.com.au',
     specialization: 'Australian market edible oils',
+    businessType: 'buyer' as const,
   },
   {
     id: 'itc-limited',
@@ -743,6 +779,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
     licenses: ['NSE Listed', 'BSE Listed'],
     website: 'https://www.itcportal.com',
     specialization: 'Indian FMCG oils',
+    businessType: 'buyer' as const,
   },
 ];
 

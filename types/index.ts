@@ -126,6 +126,7 @@ export interface TradingHouse {
   tradingVolume?: string;
   founded?: number;
   specialization: string;
+  businessType?: 'buyer' | 'seller' | 'both';
 }
 
 export interface Broker {

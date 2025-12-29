@@ -36,12 +36,13 @@ export default function MarketDirectoryScreen() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
+  const [selectedBusinessType, setSelectedBusinessType] = useState<'all' | 'buyer' | 'seller' | 'both'>('all');
   const [selectedParticipant, setSelectedParticipant] = useState<MarketParticipant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
 
-  const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea'];
+  const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
 
   const allParticipants = useMemo(() => {
     return [...allMarketParticipants, ...importedParticipants];
@@ -57,9 +58,14 @@ export default function MarketDirectoryScreen() {
       const matchesCommodity = selectedCommodity === 'all' || 
                                participant.commodities.includes(selectedCommodity as any);
       
-      return matchesSearch && matchesType && matchesCommodity;
+      const matchesBusinessType = selectedBusinessType === 'all' || 
+                                  (participant.type === 'trading_house' && 
+                                   (participant.businessType === selectedBusinessType || 
+                                    participant.businessType === 'both'));
+      
+      return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
     });
-  }, [searchQuery, selectedType, selectedCommodity, allParticipants]);
+  }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
 
   const stats = useMemo(() => {
     return {
@@ -267,6 +273,46 @@ export default function MarketDirectoryScreen() {
               </Text>
             </TouchableOpacity>
           ))}
+        </ScrollView>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.businessTypeScroll}
+          contentContainerStyle={styles.filterScrollContent}
+        >
+          <TouchableOpacity
+            style={[styles.businessTypeChip, selectedBusinessType === 'all' && styles.businessTypeChipActive]}
+            onPress={() => setSelectedBusinessType('all')}
+          >
+            <Text style={[styles.businessTypeChipText, selectedBusinessType === 'all' && styles.businessTypeChipTextActive]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.businessTypeChip, selectedBusinessType === 'buyer' && styles.businessTypeChipActive]}
+            onPress={() => setSelectedBusinessType('buyer')}
+          >
+            <Text style={[styles.businessTypeChipText, selectedBusinessType === 'buyer' && styles.businessTypeChipTextActive]}>
+              Buyers
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.businessTypeChip, selectedBusinessType === 'seller' && styles.businessTypeChipActive]}
+            onPress={() => setSelectedBusinessType('seller')}
+          >
+            <Text style={[styles.businessTypeChipText, selectedBusinessType === 'seller' && styles.businessTypeChipTextActive]}>
+              Sellers
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.businessTypeChip, selectedBusinessType === 'both' && styles.businessTypeChipActive]}
+            onPress={() => setSelectedBusinessType('both')}
+          >
+            <Text style={[styles.businessTypeChipText, selectedBusinessType === 'both' && styles.businessTypeChipTextActive]}>
+              Both
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
 
         <ScrollView 
@@ -718,6 +764,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   commodityScroll: {
+    marginBottom: 6,
+  },
+  businessTypeScroll: {
     marginBottom: 8,
   },
   filterScrollContent: {
@@ -762,6 +811,25 @@ const styles = StyleSheet.create({
   },
   commodityChipTextActive: {
     color: '#10B981',
+  },
+  businessTypeChip: {
+    backgroundColor: '#1F2937',
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 1,
+  },
+  businessTypeChipActive: {
+    backgroundColor: '#F59E0B20',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  businessTypeChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  businessTypeChipTextActive: {
+    color: '#F59E0B',
   },
   scrollView: {
     flex: 1,
