@@ -60,7 +60,8 @@ export default function PaywallModal({ visible, onClose, onUpgrade, feature }: P
             <Text style={styles.title}>Upgrade to Premium</Text>
             {feature && (
               <Text style={styles.featureNote}>
-                &ldquo;{feature}&rdquo; requires a Premium subscription
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
+                "{feature}" requires a Premium subscription
               </Text>
             )}
             <Text style={styles.subtitle}>
