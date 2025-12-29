@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading, usePortfolioMetrics, useTradesByStatus } from '@/contexts/TradingContext';
 import { 
@@ -19,13 +19,23 @@ export default function DashboardScreen() {
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus();
 
+  const [maxLoadTime, setMaxLoadTime] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log('[Dashboard] Max load time reached, forcing display');
+      setMaxLoadTime(true);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   useEffect(() => {
     if (!isLoading && !currentUser) {
       router.replace('/role-select');
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading) {
+  if (isLoading && !maxLoadTime) {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar barStyle="light-content" />

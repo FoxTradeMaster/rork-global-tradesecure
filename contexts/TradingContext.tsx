@@ -155,7 +155,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         try {
           const storedUser = await Promise.race([
             AsyncStorage.getItem('current_user'),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Storage timeout')), 500))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Storage timeout')), 300))
           ]) as string | null;
           
           if (storedUser) {
@@ -169,7 +169,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         console.log('[TradingContext] Finished loading user data');
 
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Supabase timeout')), 1000)
+          setTimeout(() => reject(new Error('Supabase timeout')), 800)
         );
 
         try {

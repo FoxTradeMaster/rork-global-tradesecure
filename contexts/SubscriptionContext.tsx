@@ -59,7 +59,10 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   useEffect(() => {
     const init = async () => {
       try {
-        const stored = await AsyncStorage.getItem('subscription_status');
+        const stored = await Promise.race([
+          AsyncStorage.getItem('subscription_status'),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 500))
+        ]);
         if (stored) {
           const parsed = JSON.parse(stored);
           const status: SubscriptionStatus = {
