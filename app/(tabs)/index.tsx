@@ -238,7 +238,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 2,
-    textAlign: 'center',
   },
   userRole: {
     fontSize: 12,
@@ -317,7 +316,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   sectionLink: {
     fontSize: 14,

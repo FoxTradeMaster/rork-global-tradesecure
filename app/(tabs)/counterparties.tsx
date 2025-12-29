@@ -346,7 +346,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   headerBadge: {
     backgroundColor: '#3B82F6',
