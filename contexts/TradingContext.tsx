@@ -332,6 +332,38 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     setCounterparties(updated);
   };
 
+  const addTrades = async (newTrades: Trade[]) => {
+    console.log('[TradingContext] Adding', newTrades.length, 'trades');
+    
+    for (const trade of newTrades) {
+      const { error } = await supabase
+        .from('trades')
+        .insert({
+          commodity: trade.commodity,
+          counterparty_id: trade.counterpartyId,
+          counterparty_name: trade.counterpartyName,
+          quantity: trade.quantity,
+          unit: trade.unit,
+          price_per_unit: trade.pricePerUnit,
+          total_value: trade.totalValue,
+          currency: trade.currency,
+          incoterm: trade.incoterm,
+          delivery_window: trade.deliveryWindow,
+          status: trade.status,
+          created_by: trade.createdBy,
+          documents: trade.documents,
+          risk_level: trade.riskLevel,
+          alerts: trade.alerts,
+        });
+
+      if (error) {
+        console.error('Error adding trade:', error);
+      }
+    }
+    
+    setTrades(prev => [...prev, ...newTrades]);
+  };
+
   const addTrade = async (trade: Trade) => {
     const { data, error } = await supabase
       .from('trades')
@@ -397,6 +429,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     addCounterparties,
     updateCounterparty,
     addTrade,
+    addTrades,
     updateTrade
   };
 });

@@ -1,15 +1,29 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput } from 'react-native';
-import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert } from 'react-native';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
-import { Search, TrendingUp, AlertCircle, Plus } from 'lucide-react-native';
+import { Search, TrendingUp, AlertCircle, Plus, Upload } from 'lucide-react-native';
+import ImportModal from '@/components/ImportModal';
+import { ParsedRow } from '@/lib/fileParser';
+import { Trade } from '@/types';
+
+const TRADE_IMPORT_FIELDS = [
+  { field: 'commodity', label: 'Commodity', required: true },
+  { field: 'counterpartyName', label: 'Counterparty Name', required: true },
+  { field: 'quantity', label: 'Quantity', required: true },
+  { field: 'unit', label: 'Unit (MT/kg)', required: false },
+  { field: 'pricePerUnit', label: 'Price per Unit', required: true },
+  { field: 'incoterm', label: 'Incoterm (FOB/CIF)', required: false },
+  { field: 'status', label: 'Status', required: false },
+];
 
 export default function TradesScreen() {
   const router = useRouter();
-  const { trades } = useTrading();
+  const { trades, addTrades } = useTrading();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const filteredTrades = trades.filter(trade => {
     const matchesSearch = trade.counterpartyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -20,18 +34,82 @@ export default function TradesScreen() {
 
   const statusFilters = ['all', 'active', 'financing_pending', 'legal_review', 'in_transit'];
 
+  const handleImport = useCallback((data: ParsedRow[]) => {
+    console.log('[Trades] Importing', data.length, 'rows');
+    
+    const newTrades: Trade[] = data.map((row, index) => {
+      const commodityRaw = String(row.commodity || '').toLowerCase().replace(/\s+/g, '_');
+      const counterpartyName = String(row.counterpartyName || 'Unknown');
+      const quantity = Number(row.quantity) || 0;
+      const unit = String(row.unit || 'MT');
+      const pricePerUnit = Number(row.pricePerUnit) || 0;
+      const incoterm = String(row.incoterm || 'FOB');
+      const statusValue = String(row.status || 'active').toLowerCase().replace(/\s+/g, '_');
+      
+      const validCommodities = ['gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
+      const commodity = validCommodities.includes(commodityRaw) ? commodityRaw : 'gold';
+      
+      return {
+        id: `imported_${Date.now()}_${index}`,
+        commodity: commodity as Trade['commodity'],
+        counterpartyId: '',
+        counterpartyName,
+        quantity,
+        unit,
+        pricePerUnit,
+        totalValue: quantity * pricePerUnit,
+        currency: 'USD',
+        incoterm,
+        deliveryWindow: {
+          start: new Date(),
+          end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        },
+        status: statusValue as Trade['status'],
+        createdAt: new Date(),
+        createdBy: 'Import',
+        riskLevel: 'amber' as const,
+        alerts: [],
+        documents: [],
+      };
+    }).filter(trade => trade.commodity && trade.counterpartyName && trade.quantity > 0);
+
+    if (newTrades.length > 0) {
+      addTrades(newTrades);
+      Alert.alert(
+        'Import Successful',
+        `Successfully imported ${newTrades.length} trades.`,
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'Import Failed',
+        'No valid trades found in the file.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [addTrades]);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <Text style={styles.title}>Trade Portfolio</Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/trade/create')}
-          >
-            <Plus size={20} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.importButton}
+              onPress={() => setShowImportModal(true)}
+            >
+              <Upload size={16} color="#FFFFFF" />
+              <Text style={styles.importButtonText}>Import</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => router.push('/trade/create')}
+            >
+              <Plus size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.searchContainer}>
@@ -186,6 +264,14 @@ export default function TradesScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <ImportModal
+        visible={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        title="Import Trades"
+        targetFields={TRADE_IMPORT_FIELDS}
+      />
     </View>
   );
 }
@@ -210,7 +296,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#FFFFFF',
-    textAlign: 'center',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  importButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1F2937',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  importButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   addButton: {
     width: 36,
