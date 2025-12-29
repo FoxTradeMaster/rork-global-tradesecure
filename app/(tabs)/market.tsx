@@ -1,0 +1,1026 @@
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal } from 'react-native';
+import { useState, useMemo } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { 
+  Search, 
+  Building2, 
+  TrendingUp, 
+  Briefcase,
+  CheckCircle,
+  MapPin,
+  Globe,
+  X,
+  Shield,
+  ExternalLink,
+  Award,
+  Users,
+  ChevronRight
+} from 'lucide-react-native';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel } from '@/mocks/market-participants';
+import type { MarketParticipant, TradingHouse, Broker, MarketPlatform } from '@/types';
+
+export default function MarketDirectoryScreen() {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
+  const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
+  const [selectedParticipant, setSelectedParticipant] = useState<MarketParticipant | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+
+  const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea'];
+
+  const filteredParticipants = useMemo(() => {
+    return allMarketParticipants.filter(participant => {
+      const matchesSearch = participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           participant.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesType = selectedType === 'all' || participant.type === selectedType;
+      
+      const matchesCommodity = selectedCommodity === 'all' || 
+                               participant.commodities.includes(selectedCommodity as any);
+      
+      return matchesSearch && matchesType && matchesCommodity;
+    });
+  }, [searchQuery, selectedType, selectedCommodity]);
+
+  const stats = useMemo(() => {
+    return {
+      total: allMarketParticipants.length,
+      tradingHouses: allMarketParticipants.filter(p => p.type === 'trading_house').length,
+      brokers: allMarketParticipants.filter(p => p.type === 'broker').length,
+      platforms: allMarketParticipants.filter(p => p.type === 'platform').length,
+    };
+  }, []);
+
+  const openDetail = (participant: MarketParticipant) => {
+    setSelectedParticipant(participant);
+    setShowDetailModal(true);
+  };
+
+  const closeDetail = () => {
+    setShowDetailModal(false);
+    setTimeout(() => setSelectedParticipant(null), 300);
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Verified Market Directory</Text>
+          <Text style={styles.subtitle}>
+            Legitimate counterparties and licensed brokers
+          </Text>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Shield size={18} color="#10B981" />
+            <Text style={styles.statValue}>{stats.total}</Text>
+            <Text style={styles.statLabel}>Verified</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Building2 size={18} color="#3B82F6" />
+            <Text style={styles.statValue}>{stats.tradingHouses}</Text>
+            <Text style={styles.statLabel}>Traders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Briefcase size={18} color="#8B5CF6" />
+            <Text style={styles.statValue}>{stats.brokers}</Text>
+            <Text style={styles.statLabel}>Brokers</Text>
+          </View>
+          <View style={styles.statCard}>
+            <TrendingUp size={18} color="#F59E0B" />
+            <Text style={styles.statValue}>{stats.platforms}</Text>
+            <Text style={styles.statLabel}>Platforms</Text>
+          </View>
+        </View>
+
+        <View style={styles.searchContainer}>
+          <Search size={20} color="#6B7280" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search traders, brokers, platforms..."
+            placeholderTextColor="#6B7280"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterScrollContent}
+        >
+          <TouchableOpacity
+            style={[styles.filterChip, selectedType === 'all' && styles.filterChipActive]}
+            onPress={() => setSelectedType('all')}
+          >
+            <Text style={[styles.filterChipText, selectedType === 'all' && styles.filterChipTextActive]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, selectedType === 'trading_house' && styles.filterChipActive]}
+            onPress={() => setSelectedType('trading_house')}
+          >
+            <Building2 size={12} color={selectedType === 'trading_house' ? '#FFFFFF' : '#9CA3AF'} />
+            <Text style={[styles.filterChipText, selectedType === 'trading_house' && styles.filterChipTextActive]}>
+              Trading Houses
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, selectedType === 'broker' && styles.filterChipActive]}
+            onPress={() => setSelectedType('broker')}
+          >
+            <Briefcase size={12} color={selectedType === 'broker' ? '#FFFFFF' : '#9CA3AF'} />
+            <Text style={[styles.filterChipText, selectedType === 'broker' && styles.filterChipTextActive]}>
+              Brokers
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, selectedType === 'platform' && styles.filterChipActive]}
+            onPress={() => setSelectedType('platform')}
+          >
+            <TrendingUp size={12} color={selectedType === 'platform' ? '#FFFFFF' : '#9CA3AF'} />
+            <Text style={[styles.filterChipText, selectedType === 'platform' && styles.filterChipTextActive]}>
+              Platforms
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.commodityScroll}
+          contentContainerStyle={styles.filterScrollContent}
+        >
+          {commodities.map(commodity => (
+            <TouchableOpacity
+              key={commodity}
+              style={[styles.commodityChip, selectedCommodity === commodity && styles.commodityChipActive]}
+              onPress={() => setSelectedCommodity(commodity)}
+            >
+              <Text style={[styles.commodityChipText, selectedCommodity === commodity && styles.commodityChipTextActive]}>
+                {commodity === 'all' ? 'All Commodities' : getCommodityLabel(commodity)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.resultsCount}>
+            {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
+          </Text>
+
+          {filteredParticipants.map(participant => (
+            <TouchableOpacity
+              key={participant.id}
+              style={styles.participantCard}
+              onPress={() => openDetail(participant)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.participantHeader}>
+                <View style={styles.participantTitleRow}>
+                  <View style={[
+                    styles.participantIcon,
+                    { backgroundColor: 
+                      participant.type === 'trading_house' ? '#3B82F620' :
+                      participant.type === 'broker' ? '#8B5CF620' :
+                      '#F59E0B20'
+                    }
+                  ]}>
+                    {participant.type === 'trading_house' && <Building2 size={20} color="#3B82F6" />}
+                    {participant.type === 'broker' && <Briefcase size={20} color="#8B5CF6" />}
+                    {participant.type === 'platform' && <TrendingUp size={20} color="#F59E0B" />}
+                  </View>
+                  <View style={styles.participantTitleContainer}>
+                    <View style={styles.nameRow}>
+                      <Text style={styles.participantName}>{participant.name}</Text>
+                      <ChevronRight size={18} color="#3B82F6" style={styles.chevronIcon} />
+                    </View>
+                    <View style={styles.participantMeta}>
+                      <MapPin size={12} color="#6B7280" />
+                      <Text style={styles.participantLocation}>{participant.headquarters}</Text>
+                    </View>
+                  </View>
+                </View>
+                {participant.verified && (
+                  <View style={styles.verifiedBadge}>
+                    <CheckCircle size={16} color="#10B981" />
+                  </View>
+                )}
+              </View>
+
+              <Text style={styles.participantDescription} numberOfLines={2}>
+                {participant.description}
+              </Text>
+
+              <View style={styles.commodityTags}>
+                {participant.commodities.slice(0, 3).map(commodity => (
+                  <View key={commodity} style={styles.commodityTag}>
+                    <Text style={styles.commodityTagText}>{getCommodityLabel(commodity)}</Text>
+                  </View>
+                ))}
+                {participant.commodities.length > 3 && (
+                  <View style={styles.commodityTag}>
+                    <Text style={styles.commodityTagText}>+{participant.commodities.length - 3}</Text>
+                  </View>
+                )}
+              </View>
+
+              {participant.type === 'trading_house' && (
+                <View style={styles.participantFooter}>
+                  <Text style={styles.footerLabel}>Specialization:</Text>
+                  <Text style={styles.footerValue} numberOfLines={1}>
+                    {(participant as TradingHouse).specialization}
+                  </Text>
+                </View>
+              )}
+
+              {participant.type === 'broker' && (
+                <View style={styles.participantFooter}>
+                  <Text style={styles.footerLabel}>Regulated by:</Text>
+                  <View style={styles.regulationTags}>
+                    {(participant as Broker).regulatedBy.slice(0, 3).map(auth => (
+                      <View key={auth} style={styles.regulationTag}>
+                        <Text style={styles.regulationTagText}>{auth}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {participant.type === 'platform' && (
+                <View style={styles.participantFooter}>
+                  <Text style={styles.footerLabel}>Framework:</Text>
+                  <Text style={styles.footerValue} numberOfLines={1}>
+                    {(participant as MarketPlatform).framework}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+
+          {filteredParticipants.length === 0 && (
+            <View style={styles.emptyState}>
+              <Search size={48} color="#374151" />
+              <Text style={styles.emptyStateTitle}>No results found</Text>
+              <Text style={styles.emptyStateText}>
+                Try adjusting your search or filters
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.bottomPadding} />
+        </ScrollView>
+      </SafeAreaView>
+
+      <Modal
+        visible={showDetailModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeDetail}
+      >
+        <View style={styles.modalContainer}>
+          <StatusBar barStyle="light-content" />
+          <SafeAreaView edges={['top']} style={styles.modalSafeArea}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Details</Text>
+              <TouchableOpacity onPress={closeDetail} style={styles.closeButton}>
+                <X size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              {selectedParticipant && (
+                <>
+                  <View style={styles.detailHeader}>
+                    <View style={[
+                      styles.detailIcon,
+                      { backgroundColor: 
+                        selectedParticipant.type === 'trading_house' ? '#3B82F620' :
+                        selectedParticipant.type === 'broker' ? '#8B5CF620' :
+                        '#F59E0B20'
+                      }
+                    ]}>
+                      {selectedParticipant.type === 'trading_house' && <Building2 size={24} color="#3B82F6" />}
+                      {selectedParticipant.type === 'broker' && <Briefcase size={24} color="#8B5CF6" />}
+                      {selectedParticipant.type === 'platform' && <TrendingUp size={24} color="#F59E0B" />}
+                    </View>
+                    <Text style={styles.detailName}>{selectedParticipant.name}</Text>
+                    {selectedParticipant.verified && (
+                      <View style={styles.detailVerifiedBadge}>
+                        <CheckCircle size={16} color="#10B981" />
+                        <Text style={styles.detailVerifiedText}>Verified</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <View style={styles.detailRow}>
+                      <MapPin size={18} color="#6B7280" />
+                      <Text style={styles.detailLabel}>Headquarters</Text>
+                    </View>
+                    <Text style={styles.detailValue}>{selectedParticipant.headquarters}</Text>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailSectionTitle}>Description</Text>
+                    <Text style={styles.detailDescription}>{selectedParticipant.description}</Text>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailSectionTitle}>Commodities</Text>
+                    <View style={styles.detailCommodities}>
+                      {selectedParticipant.commodities.map(commodity => (
+                        <View key={commodity} style={styles.detailCommodityChip}>
+                          <Text style={styles.detailCommodityText}>{getCommodityLabel(commodity)}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+
+                  {selectedParticipant.type === 'trading_house' && (
+                    <>
+                      <View style={styles.detailSection}>
+                        <View style={styles.detailRow}>
+                          <Award size={18} color="#6B7280" />
+                          <Text style={styles.detailLabel}>Specialization</Text>
+                        </View>
+                        <Text style={styles.detailValue}>
+                          {(selectedParticipant as TradingHouse).specialization}
+                        </Text>
+                      </View>
+
+                      {(selectedParticipant as TradingHouse).offices && (
+                        <View style={styles.detailSection}>
+                          <Text style={styles.detailSectionTitle}>Global Offices</Text>
+                          <View style={styles.officeList}>
+                            {(selectedParticipant as TradingHouse).offices.map(office => (
+                              <View key={office} style={styles.officeChip}>
+                                <MapPin size={12} color="#3B82F6" />
+                                <Text style={styles.officeText}>{office}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {(selectedParticipant as TradingHouse).tradingVolume && (
+                        <View style={styles.detailSection}>
+                          <View style={styles.detailRow}>
+                            <TrendingUp size={18} color="#6B7280" />
+                            <Text style={styles.detailLabel}>Trading Volume</Text>
+                          </View>
+                          <Text style={styles.detailValue}>
+                            {(selectedParticipant as TradingHouse).tradingVolume}
+                          </Text>
+                        </View>
+                      )}
+
+                      {(selectedParticipant as TradingHouse).founded && (
+                        <View style={styles.detailSection}>
+                          <View style={styles.detailRow}>
+                            <Building2 size={18} color="#6B7280" />
+                            <Text style={styles.detailLabel}>Founded</Text>
+                          </View>
+                          <Text style={styles.detailValue}>
+                            {(selectedParticipant as TradingHouse).founded}
+                          </Text>
+                        </View>
+                      )}
+
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Categories</Text>
+                        <View style={styles.categoryList}>
+                          {(selectedParticipant as TradingHouse).category.map(cat => (
+                            <View key={cat} style={styles.categoryChip}>
+                              <Text style={styles.categoryText}>{getCategoryLabel(cat)}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Licenses & Compliance</Text>
+                        {(selectedParticipant as TradingHouse).licenses.map(license => (
+                          <View key={license} style={styles.licenseItem}>
+                            <Shield size={16} color="#10B981" />
+                            <Text style={styles.licenseText}>{license}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </>
+                  )}
+
+                  {selectedParticipant.type === 'broker' && (
+                    <>
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Regulatory Authorities</Text>
+                        <View style={styles.regulationList}>
+                          {(selectedParticipant as Broker).regulatedBy.map(auth => (
+                            <View key={auth} style={styles.regulationChip}>
+                              <Shield size={14} color="#10B981" />
+                              <Text style={styles.regulationChipText}>{auth}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>License Numbers</Text>
+                        {(selectedParticipant as Broker).licenseNumbers.map((license, idx) => (
+                          <View key={idx} style={styles.licenseNumberItem}>
+                            <Text style={styles.licenseAuthority}>{license.authority}</Text>
+                            <Text style={styles.licenseNumber}>{license.number}</Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Broker Type</Text>
+                        <View style={styles.brokerTypeList}>
+                          {(selectedParticipant as Broker).brokerType.map(type => (
+                            <View key={type} style={styles.brokerTypeChip}>
+                              <Text style={styles.brokerTypeText}>
+                                {type.replace(/_/g, ' ').toUpperCase()}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+
+                      <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Clearing Relationships</Text>
+                        {(selectedParticipant as Broker).clearingRelationships.map(rel => (
+                          <View key={rel} style={styles.clearingItem}>
+                            <CheckCircle size={16} color="#3B82F6" />
+                            <Text style={styles.clearingText}>{rel}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </>
+                  )}
+
+                  {selectedParticipant.type === 'platform' && (
+                    <>
+                      <View style={styles.detailSection}>
+                        <View style={styles.detailRow}>
+                          <Award size={18} color="#6B7280" />
+                          <Text style={styles.detailLabel}>Framework</Text>
+                        </View>
+                        <Text style={styles.detailValue}>
+                          {(selectedParticipant as MarketPlatform).framework}
+                        </Text>
+                      </View>
+
+                      {(selectedParticipant as MarketPlatform).members && (
+                        <View style={styles.detailSection}>
+                          <View style={styles.detailRow}>
+                            <Users size={18} color="#6B7280" />
+                            <Text style={styles.detailLabel}>Key Members</Text>
+                          </View>
+                          {(selectedParticipant as MarketPlatform).members!.slice(0, 8).map(member => (
+                            <View key={member} style={styles.memberItem}>
+                              <CheckCircle size={14} color="#10B981" />
+                              <Text style={styles.memberText}>{member}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </>
+                  )}
+
+                  {selectedParticipant.website && (
+                    <View style={styles.detailSection}>
+                      <View style={styles.detailRow}>
+                        <Globe size={18} color="#6B7280" />
+                        <Text style={styles.detailLabel}>Website</Text>
+                      </View>
+                      <View style={styles.websiteLink}>
+                        <Text style={styles.websiteText}>{selectedParticipant.website}</Text>
+                        <ExternalLink size={16} color="#3B82F6" />
+                      </View>
+                    </View>
+                  )}
+
+                  <View style={styles.modalBottomPadding} />
+                </>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0E27',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 4,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 11,
+    color: '#9CA3AF',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 8,
+    marginBottom: 10,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1F2937',
+    borderRadius: 8,
+    padding: 4,
+    alignItems: 'center',
+    gap: 2,
+  },
+  statValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  statLabel: {
+    fontSize: 9,
+    color: '#9CA3AF',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1F2937',
+    borderRadius: 8,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 32,
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  filterScroll: {
+    marginBottom: 6,
+  },
+  commodityScroll: {
+    marginBottom: 8,
+  },
+  filterScrollContent: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1F2937',
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    gap: 3,
+  },
+  filterChipActive: {
+    backgroundColor: '#3B82F6',
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+  },
+  commodityChip: {
+    backgroundColor: '#1F2937',
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 1,
+  },
+  commodityChipActive: {
+    backgroundColor: '#10B98120',
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  commodityChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  commodityChipTextActive: {
+    color: '#10B981',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+  },
+  resultsCount: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 10,
+  },
+  participantCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  participantHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  participantTitleRow: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  participantIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  participantTitleContainer: {
+    flex: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  participantName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3B82F6',
+    flex: 1,
+  },
+  chevronIcon: {
+    marginLeft: 4,
+  },
+  participantMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  participantLocation: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  verifiedBadge: {
+    marginLeft: 8,
+  },
+  participantDescription: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  commodityTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
+  },
+  commodityTag: {
+    backgroundColor: '#374151',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  commodityTagText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  participantFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#374151',
+    paddingTop: 12,
+  },
+  footerLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 6,
+  },
+  footerValue: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  regulationTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  regulationTag: {
+    backgroundColor: '#10B98120',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  regulationTagText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  bottomPadding: {
+    height: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#111827',
+  },
+  modalSafeArea: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderBottomWidth: 0,
+    backgroundColor: '#1F2937',
+  },
+  modalTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    flex: 1,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  detailHeader: {
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    backgroundColor: '#1F2937',
+    marginBottom: 0,
+  },
+  detailIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  detailName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  detailVerifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B98120',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  detailVerifiedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  detailSection: {
+    paddingHorizontal: 16,
+    marginBottom: 0,
+    backgroundColor: '#1F2937',
+    marginHorizontal: 0,
+    paddingVertical: 8,
+    borderRadius: 0,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#374151',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  detailValue: {
+    fontSize: 15,
+    color: '#FFFFFF',
+    lineHeight: 22,
+  },
+  detailSectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  detailDescription: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    lineHeight: 22,
+  },
+  detailCommodities: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  detailCommodityChip: {
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  detailCommodityText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  officeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  officeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  officeText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  categoryList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryChip: {
+    backgroundColor: '#3B82F620',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  categoryText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  licenseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  licenseText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  regulationList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  regulationChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B98120',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  regulationChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  licenseNumberItem: {
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 6,
+  },
+  licenseAuthority: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  licenseNumber: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  brokerTypeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  brokerTypeChip: {
+    backgroundColor: '#8B5CF620',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  brokerTypeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8B5CF6',
+  },
+  clearingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  clearingText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  memberItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  memberText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    flex: 1,
+  },
+  websiteLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    padding: 10,
+  },
+  websiteText: {
+    fontSize: 13,
+    color: '#3B82F6',
+    flex: 1,
+  },
+  modalBottomPadding: {
+    height: 20,
+  },
+});

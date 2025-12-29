@@ -1,0 +1,411 @@
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput } from 'react-native';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTrading } from '@/contexts/TradingContext';
+import { Search, Users, Building2, MapPin, CheckCircle, AlertTriangle, XCircle } from 'lucide-react-native';
+
+export default function CounterpartiesScreen() {
+  const router = useRouter();
+  const { counterparties } = useTrading();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredCounterparties = counterparties.filter(cp =>
+    cp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cp.country.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'green': return '#10B981';
+      case 'amber': return '#F59E0B';
+      case 'red': return '#EF4444';
+      default: return '#6B7280';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved': return CheckCircle;
+      case 'under_review': return AlertTriangle;
+      case 'rejected': return XCircle;
+      default: return AlertTriangle;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Counterparties</Text>
+          <View style={styles.headerBadge}>
+            <Text style={styles.headerBadgeText}>{counterparties.length}</Text>
+          </View>
+        </View>
+
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Search size={20} color="#6B7280" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search counterparties..."
+              placeholderTextColor="#6B7280"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.counterpartiesContainer}>
+            {filteredCounterparties.map(cp => {
+              const StatusIcon = getStatusIcon(cp.status);
+              return (
+                <TouchableOpacity
+                  key={cp.id}
+                  style={styles.counterpartyCard}
+                  onPress={() => router.push(`/counterparty/${cp.id}`)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardHeaderLeft}>
+                      <View style={[
+                        styles.iconContainer,
+                        { backgroundColor: cp.type === 'buyer' ? '#3B82F620' : '#8B5CF620' }
+                      ]}>
+                        <Building2 
+                          size={24} 
+                          color={cp.type === 'buyer' ? '#3B82F6' : '#8B5CF6'} 
+                        />
+                      </View>
+                      <View style={styles.cardInfo}>
+                        <Text style={styles.counterpartyName}>{cp.name}</Text>
+                        <View style={styles.locationContainer}>
+                          <MapPin size={12} color="#6B7280" />
+                          <Text style={styles.countryText}>{cp.country}</Text>
+                          <View style={[
+                            styles.typeBadge,
+                            { backgroundColor: cp.type === 'buyer' ? '#3B82F620' : '#8B5CF620' }
+                          ]}>
+                            <Text style={[
+                              styles.typeText,
+                              { color: cp.type === 'buyer' ? '#3B82F6' : '#8B5CF6' }
+                            ]}>
+                              {cp.type}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    <StatusIcon 
+                      size={20} 
+                      color={
+                        cp.status === 'approved' ? '#10B981' :
+                        cp.status === 'rejected' ? '#EF4444' :
+                        '#F59E0B'
+                      } 
+                    />
+                  </View>
+
+                  <View style={styles.riskScoreContainer}>
+                    <View style={styles.riskScoreHeader}>
+                      <Text style={styles.riskScoreLabel}>Risk Score</Text>
+                      <View style={[
+                        styles.riskLevelBadge,
+                        { backgroundColor: getRiskColor(cp.riskScore.level) + '20' }
+                      ]}>
+                        <Text style={[
+                          styles.riskLevelText,
+                          { color: getRiskColor(cp.riskScore.level) }
+                        ]}>
+                          {cp.riskScore.level.toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.riskBar}>
+                      <View 
+                        style={[
+                          styles.riskBarFill,
+                          { 
+                            width: `${cp.riskScore.overall}%`,
+                            backgroundColor: getRiskColor(cp.riskScore.level)
+                          }
+                        ]} 
+                      />
+                    </View>
+
+                    <View style={styles.riskMetrics}>
+                      <View style={styles.riskMetricItem}>
+                        <Text style={styles.riskMetricValue}>{cp.riskScore.legal_licensing}</Text>
+                        <Text style={styles.riskMetricLabel}>Legal</Text>
+                      </View>
+                      <View style={styles.riskMetricItem}>
+                        <Text style={styles.riskMetricValue}>{cp.riskScore.financial_strength}</Text>
+                        <Text style={styles.riskMetricLabel}>Financial</Text>
+                      </View>
+                      <View style={styles.riskMetricItem}>
+                        <Text style={styles.riskMetricValue}>{cp.riskScore.compliance_sanctions}</Text>
+                        <Text style={styles.riskMetricLabel}>Compliance</Text>
+                      </View>
+                      <View style={styles.riskMetricItem}>
+                        <Text style={styles.riskMetricValue}>{cp.riskScore.operations_logistics}</Text>
+                        <Text style={styles.riskMetricLabel}>Operations</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {cp.approvalConditions && cp.approvalConditions.length > 0 && (
+                    <View style={styles.conditionsContainer}>
+                      <AlertTriangle size={14} color="#F59E0B" />
+                      <Text style={styles.conditionsText}>
+                        {cp.approvalConditions[0]}
+                      </Text>
+                    </View>
+                  )}
+
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.documentsText}>
+                      {cp.documents.length} documents
+                    </Text>
+                    <Text style={styles.onboardedText}>
+                      Onboarded {new Date(cp.onboardedAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+
+            {filteredCounterparties.length === 0 && (
+              <View style={styles.emptyState}>
+                <Users size={48} color="#374151" />
+                <Text style={styles.emptyStateText}>No counterparties found</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  {searchQuery ? 'Try adjusting your search' : 'Start by onboarding a counterparty'}
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0E27',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 2,
+    paddingBottom: 2,
+    gap: 6,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  headerBadge: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+  },
+  headerBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 4,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1F2937',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#FFFFFF',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  counterpartiesContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  counterpartyCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  cardHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  counterpartyName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  countryText: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  typeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  typeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  riskScoreContainer: {
+    backgroundColor: '#111827',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 8,
+  },
+  riskScoreHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  riskScoreLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  riskLevelBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  riskLevelText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  riskBar: {
+    height: 6,
+    backgroundColor: '#374151',
+    borderRadius: 3,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  riskBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  riskMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  riskMetricItem: {
+    alignItems: 'center',
+  },
+  riskMetricValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  riskMetricLabel: {
+    fontSize: 10,
+    color: '#6B7280',
+  },
+  conditionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: '#F59E0B20',
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  conditionsText: {
+    fontSize: 12,
+    color: '#F59E0B',
+    flex: 1,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#374151',
+  },
+  documentsText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '600',
+  },
+  onboardedText: {
+    fontSize: 11,
+    color: '#6B7280',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+});
