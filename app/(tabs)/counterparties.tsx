@@ -3,8 +3,10 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Search, Users, Building2, MapPin, CheckCircle, AlertTriangle, XCircle, Upload } from 'lucide-react-native';
 import ImportModal from '@/components/ImportModal';
+import PaywallModal from '@/components/PaywallModal';
 import { ParsedRow } from '@/lib/fileParser';
 import { Counterparty, RiskLevel } from '@/types';
 
@@ -20,8 +22,11 @@ const COUNTERPARTY_IMPORT_FIELDS = [
 export default function CounterpartiesScreen() {
   const router = useRouter();
   const { counterparties, addCounterparties } = useTrading();
+  const { isPremium, checkFeatureAccess, getFeatureLimit, upgradeSubscription } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState<string>();
 
   const filteredCounterparties = counterparties.filter(cp =>
     cp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,6 +49,15 @@ export default function CounterpartiesScreen() {
       case 'rejected': return XCircle;
       default: return AlertTriangle;
     }
+  };
+
+  const handleImportClick = () => {
+    if (!checkFeatureAccess('bulkImport')) {
+      setPaywallFeature('Bulk Import');
+      setShowPaywall(true);
+      return;
+    }
+    setShowImportModal(true);
   };
 
   const handleImport = useCallback((data: ParsedRow[]) => {
@@ -79,6 +93,20 @@ export default function CounterpartiesScreen() {
     }).filter(cp => cp.name.trim() !== '');
 
     if (newCounterparties.length > 0) {
+      if (!isPremium) {
+        const maxCounterparties = getFeatureLimit('maxCounterparties');
+        if (maxCounterparties !== null && counterparties.length + newCounterparties.length > maxCounterparties) {
+          setShowPaywall(true);
+          setPaywallFeature('Unlimited Counterparties');
+          Alert.alert(
+            'Limit Reached',
+            `Free plan is limited to ${maxCounterparties} counterparties. Upgrade to add more.`,
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      }
+      
       addCounterparties(newCounterparties);
       Alert.alert(
         'Import Successful',
@@ -92,7 +120,7 @@ export default function CounterpartiesScreen() {
         [{ text: 'OK' }]
       );
     }
-  }, [addCounterparties]);
+  }, [addCounterparties, counterparties.length, isPremium, getFeatureLimit]);
 
   return (
     <View style={styles.container}>
@@ -107,7 +135,7 @@ export default function CounterpartiesScreen() {
           </View>
           <TouchableOpacity 
             style={styles.importButton}
-            onPress={() => setShowImportModal(true)}
+            onPress={handleImportClick}
           >
             <Upload size={16} color="#FFFFFF" />
             <Text style={styles.importButtonText}>Import</Text>
@@ -267,6 +295,13 @@ export default function CounterpartiesScreen() {
         onImport={handleImport}
         title="Import Counterparties"
         targetFields={COUNTERPARTY_IMPORT_FIELDS}
+      />
+
+      <PaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onUpgrade={upgradeSubscription}
+        feature={paywallFeature}
       />
     </View>
   );

@@ -1,6 +1,6 @@
 // template
 import { Tabs } from "expo-router";
-import { LayoutDashboard, Users, FileText, TrendingUp, Building } from "lucide-react-native";
+import { LayoutDashboard, Users, FileText, TrendingUp, Building, Settings } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -54,6 +54,13 @@ export default function TabLayout() {
         options={{
           title: "Market",
           tabBarIcon: ({ color }) => <Building size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
         }}
       />
     </Tabs>

@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search } from 'lucide-react-native';
 import { useTrading } from '@/contexts/TradingContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { CommodityType, Trade } from '@/types';
+import PaywallModal from '@/components/PaywallModal';
 
 const COMMODITIES: { value: CommodityType; label: string }[] = [
   { value: 'gold', label: 'Gold' },
@@ -18,13 +20,15 @@ const INCOTERMS = ['CIF', 'FOB', 'CFR', 'DDP', 'EXW', 'FCA', 'DAP'];
 
 export default function CreateTradeScreen() {
   const router = useRouter();
-  const { counterparties, addTrade, currentUser } = useTrading();
+  const { counterparties, addTrade, currentUser, trades } = useTrading();
+  const { isPremium, getFeatureLimit, upgradeSubscription } = useSubscription();
   const [selectedCounterparty, setSelectedCounterparty] = useState('');
   const [commodity, setCommodity] = useState<CommodityType>('gold');
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [incoterm, setIncoterm] = useState('CIF');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const approvedCounterparties = counterparties.filter(cp => cp.approved);
   const filteredCounterparties = approvedCounterparties.filter(cp =>
@@ -34,6 +38,16 @@ export default function CreateTradeScreen() {
   const handleCreate = async () => {
     if (!selectedCounterparty || !quantity || !pricePerUnit) {
       return;
+    }
+
+    if (!isPremium) {
+      const maxTrades = getFeatureLimit('maxActiveTrades');
+      const activeTrades = trades.filter(t => ['active', 'in_transit', 'financing_pending'].includes(t.status));
+      
+      if (maxTrades !== null && activeTrades.length >= maxTrades) {
+        setShowPaywall(true);
+        return;
+      }
     }
 
     const counterparty = counterparties.find(cp => cp.id === selectedCounterparty);
@@ -207,6 +221,13 @@ export default function CreateTradeScreen() {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+
+      <PaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onUpgrade={upgradeSubscription}
+        feature="Unlimited Active Trades"
+      />
     </View>
   );
 }
