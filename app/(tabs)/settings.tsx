@@ -190,7 +190,10 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.version}>Version 1.0.0</Text>
+          <View style={styles.footer}>
+            <Text style={styles.version}>Version 1.0.0</Text>
+            <Text style={styles.copyright}>©2025 Property Power Partners LLC.</Text>
+          </View>
         </ScrollView>
       </SafeAreaView>
 
@@ -426,10 +429,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#EF4444',
   },
+  footer: {
+    alignItems: 'center',
+    marginBottom: 40,
+    gap: 4,
+  },
   version: {
     fontSize: 13,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 40,
+  },
+  copyright: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
   },
 });
