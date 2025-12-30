@@ -134,6 +134,25 @@ const MOCK_TRADES: Trade[] = [
     documents: [],
     riskLevel: 'green',
     alerts: []
+  },
+  {
+    id: 't4',
+    commodity: 'edible_oils',
+    counterpartyId: 'cp1',
+    counterpartyName: 'Emirates Gold Trading LLC',
+    quantity: 25000,
+    unit: 'MT',
+    pricePerUnit: 1250,
+    totalValue: 31250000,
+    currency: 'USD',
+    incoterm: 'CIF Dubai',
+    deliveryWindow: { start: new Date('2025-02-10'), end: new Date('2025-02-25') },
+    status: 'active',
+    createdAt: new Date('2024-12-29'),
+    createdBy: 'John Smith',
+    documents: [],
+    riskLevel: 'green',
+    alerts: []
   }
 ];
 
