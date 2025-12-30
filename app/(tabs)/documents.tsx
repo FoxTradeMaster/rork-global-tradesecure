@@ -41,11 +41,11 @@ export default function DocumentsScreen() {
       const content = generateBlankDocument(docType);
       
       if (Platform.OS === 'web') {
-        const blob = new Blob([content], { type: 'text/plain' });
+        const blob = new Blob([content], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${docType}_Blank_Template.txt`;
+        link.download = `${docType}_Blank_Template.html`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -240,8 +240,8 @@ export default function DocumentsScreen() {
         attachments: [
           {
             content: Buffer.from(documentContent).toString('base64'),
-            filename: `${selectedDocType}_${selectedTrade.id}.txt`,
-            type: 'text/plain',
+            filename: `${selectedDocType}_${selectedTrade.id}.html`,
+            type: 'text/html',
             disposition: 'attachment',
           },
         ],

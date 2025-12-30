@@ -178,48 +178,239 @@ function generateCIS(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-CORPORATE INFORMATION SHEET (CIS)
-Date: ${date}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2cm; }
+    body {
+      font-family: 'Calibri', 'Arial', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #1a1a1a;
+    }
+    .doc-title {
+      font-size: 18pt;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .doc-subtitle {
+      font-size: 10pt;
+      color: #555;
+      font-style: italic;
+    }
+    .date-ref {
+      margin: 20px 0;
+      padding: 10px 15px;
+      background: #f5f5f5;
+      border-left: 4px solid #333;
+    }
+    .section {
+      margin-bottom: 25px;
+    }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e0e0e0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field {
+      margin-bottom: 10px;
+      padding-left: 15px;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #333;
+      display: inline-block;
+      min-width: 180px;
+    }
+    .field-value {
+      color: #000;
+    }
+    .signature-section {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    .signature-line {
+      margin-top: 40px;
+      padding-top: 10px;
+      border-top: 2px solid #000;
+      max-width: 400px;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ccc;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Corporate Information Sheet</div>
+      <div class="doc-subtitle">Confidential Business Document</div>
+    </div>
 
-1. CORPORATE DETAILS
-Company Name: ${tradeDetails?.counterpartyName || '[Company Name]'}
-Registration Number: ${additionalInfo?.registrationNumber || '[Registration Number]'}
-Date of Incorporation: ${additionalInfo?.incorporationDate || '[Date]'}
-Country of Registration: ${additionalInfo?.country || '[Country]'}
+    <div class="date-ref">
+      <strong>Document Date:</strong> ${date}<br>
+      <strong>Reference:</strong> CIS-${Date.now()}
+    </div>
 
-2. REGISTERED ADDRESS
-${additionalInfo?.address || '[Registered Address]'}
+    <div class="section">
+      <div class="section-title">1. Corporate Details</div>
+      <div class="field">
+        <span class="field-label">Company Name:</span>
+        <span class="field-value">${tradeDetails?.counterpartyName || '[Company Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Registration Number:</span>
+        <span class="field-value">${additionalInfo?.registrationNumber || '[Registration Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Date of Incorporation:</span>
+        <span class="field-value">${additionalInfo?.incorporationDate || '[Date]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Country of Registration:</span>
+        <span class="field-value">${additionalInfo?.country || '[Country]'}</span>
+      </div>
+    </div>
 
-3. CONTACT INFORMATION
-Phone: ${additionalInfo?.phone || '[Phone]'}
-Email: ${additionalInfo?.email || '[Email]'}
-Website: ${additionalInfo?.website || '[Website]'}
+    <div class="section">
+      <div class="section-title">2. Registered Address</div>
+      <div class="field">
+        <span class="field-value">${additionalInfo?.address || '[Registered Address]'}</span>
+      </div>
+    </div>
 
-4. AUTHORIZED REPRESENTATIVES
-Name: ${additionalInfo?.representative || '[Name]'}
-Title: ${additionalInfo?.title || '[Title]'}
-Contact: ${additionalInfo?.representativeContact || '[Contact]'}
+    <div class="section">
+      <div class="section-title">3. Contact Information</div>
+      <div class="field">
+        <span class="field-label">Phone:</span>
+        <span class="field-value">${additionalInfo?.phone || '[Phone]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Email:</span>
+        <span class="field-value">${additionalInfo?.email || '[Email]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Website:</span>
+        <span class="field-value">${additionalInfo?.website || '[Website]'}</span>
+      </div>
+    </div>
 
-5. BANKING INFORMATION
-Bank Name: ${additionalInfo?.bankName || '[Bank Name]'}
-Bank Address: ${additionalInfo?.bankAddress || '[Bank Address]'}
-SWIFT Code: ${additionalInfo?.swiftCode || '[SWIFT Code]'}
-Account Number: ${additionalInfo?.accountNumber || '[Account Number]'}
+    <div class="section">
+      <div class="section-title">4. Authorized Representatives</div>
+      <div class="field">
+        <span class="field-label">Name:</span>
+        <span class="field-value">${additionalInfo?.representative || '[Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Title:</span>
+        <span class="field-value">${additionalInfo?.title || '[Title]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Contact:</span>
+        <span class="field-value">${additionalInfo?.representativeContact || '[Contact]'}</span>
+      </div>
+    </div>
 
-6. TRADE LICENSES & CERTIFICATIONS
-${additionalInfo?.licenses || '[License Information]'}
+    <div class="section">
+      <div class="section-title">5. Banking Information</div>
+      <div class="field">
+        <span class="field-label">Bank Name:</span>
+        <span class="field-value">${additionalInfo?.bankName || '[Bank Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Bank Address:</span>
+        <span class="field-value">${additionalInfo?.bankAddress || '[Bank Address]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">SWIFT Code:</span>
+        <span class="field-value">${additionalInfo?.swiftCode || '[SWIFT Code]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Account Number:</span>
+        <span class="field-value">${additionalInfo?.accountNumber || '[Account Number]'}</span>
+      </div>
+    </div>
 
-7. COMMODITY TRADING EXPERIENCE
-Years in Business: ${additionalInfo?.yearsInBusiness || '[Years]'}
-Primary Commodities: ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodities]'}
-Annual Trading Volume: ${additionalInfo?.annualVolume || '[Volume]'}
+    <div class="section">
+      <div class="section-title">6. Trade Licenses & Certifications</div>
+      <div class="field">
+        <span class="field-value">${additionalInfo?.licenses || '[License Information]'}</span>
+      </div>
+    </div>
 
-This CIS is provided for due diligence purposes and represents accurate information as of ${date}.
+    <div class="section">
+      <div class="section-title">7. Commodity Trading Experience</div>
+      <div class="field">
+        <span class="field-label">Years in Business:</span>
+        <span class="field-value">${additionalInfo?.yearsInBusiness || '[Years]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Primary Commodities:</span>
+        <span class="field-value">${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodities]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Annual Trading Volume:</span>
+        <span class="field-value">${additionalInfo?.annualVolume || '[Volume]'}</span>
+      </div>
+    </div>
 
-Authorized Signature: _________________________
-Name: ${additionalInfo?.signatoryName || '[Name]'}
-Title: ${additionalInfo?.signatoryTitle || '[Title]'}
-Date: ${date}
+    <div class="signature-section">
+      <p style="margin-bottom: 10px;"><em>This Corporate Information Sheet is provided for due diligence purposes and represents accurate information as of ${date}.</em></p>
+      
+      <div class="signature-line">
+        <strong>Authorized Signature</strong>
+      </div>
+      
+      <div class="field" style="margin-top: 20px;">
+        <span class="field-label">Name:</span>
+        <span class="field-value">${additionalInfo?.signatoryName || '[Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Title:</span>
+        <span class="field-value">${additionalInfo?.signatoryTitle || '[Title]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Date:</span>
+        <span class="field-value">${date}</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the recipient.<br>
+      Unauthorized distribution or disclosure is strictly prohibited.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
@@ -229,63 +420,247 @@ function generateSCO(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-SOFT CORPORATE OFFER (SCO)
-Reference: SCO-${Date.now()}
-Date: ${date}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2cm; }
+    body {
+      font-family: 'Calibri', 'Arial', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 800px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #1a1a1a;
+    }
+    .doc-title {
+      font-size: 18pt;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .doc-subtitle { font-size: 10pt; color: #555; font-style: italic; }
+    .date-ref {
+      margin: 20px 0;
+      padding: 10px 15px;
+      background: #f5f5f5;
+      border-left: 4px solid #333;
+    }
+    .parties {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 5px;
+    }
+    .section { margin-bottom: 25px; }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e0e0e0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field { margin-bottom: 10px; padding-left: 15px; }
+    .field-label {
+      font-weight: 600;
+      color: #333;
+      display: inline-block;
+      min-width: 200px;
+    }
+    .field-value { color: #000; }
+    ul { margin: 10px 0; padding-left: 30px; }
+    ul li { margin-bottom: 5px; }
+    .signature-section {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    .signature-line {
+      margin-top: 40px;
+      padding-top: 10px;
+      border-top: 2px solid #000;
+      max-width: 400px;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ccc;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Soft Corporate Offer</div>
+      <div class="doc-subtitle">Non-Binding Commercial Offer</div>
+    </div>
 
-FROM: ${additionalInfo?.sellerName || '[Seller Name]'}
-TO: ${tradeDetails?.counterpartyName || '[Buyer Name]'}
+    <div class="date-ref">
+      <strong>Reference:</strong> SCO-${Date.now()}<br>
+      <strong>Date:</strong> ${date}
+    </div>
 
-Dear Sir/Madam,
+    <div class="parties">
+      <strong>FROM:</strong> ${additionalInfo?.sellerName || '[Seller Name]'}<br>
+      <strong>TO:</strong> ${tradeDetails?.counterpartyName || '[Buyer Name]'}
+    </div>
 
-We, the undersigned, hereby confirm with full corporate responsibility that we are ready, willing, and able to supply the following commodity under the terms and conditions stated below:
+    <p><strong>Dear Sir/Madam,</strong></p>
+    
+    <p>We, the undersigned, hereby confirm with full corporate responsibility that we are ready, willing, and able to supply the following commodity under the terms and conditions stated below:</p>
 
-1. COMMODITY DETAILS
-Product: ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}
-Quantity: ${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}
-Quality: ${additionalInfo?.quality || '[As per international standards]'}
-Origin: ${additionalInfo?.origin || '[Country of Origin]'}
+    <div class="section">
+      <div class="section-title">1. Commodity Details</div>
+      <div class="field">
+        <span class="field-label">Product:</span>
+        <span class="field-value">${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity:</span>
+        <span class="field-value">${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quality:</span>
+        <span class="field-value">${additionalInfo?.quality || '[As per international standards]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Origin:</span>
+        <span class="field-value">${additionalInfo?.origin || '[Country of Origin]'}</span>
+      </div>
+    </div>
 
-2. PRICING
-Price: $${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}
-Total Contract Value: $${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'}
-Price Basis: ${additionalInfo?.priceBasis || '[Fixed/Market-linked]'}
+    <div class="section">
+      <div class="section-title">2. Pricing</div>
+      <div class="field">
+        <span class="field-label">Unit Price:</span>
+        <span class="field-value">${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Total Contract Value:</span>
+        <span class="field-value">${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Price Basis:</span>
+        <span class="field-value">${additionalInfo?.priceBasis || '[Fixed/Market-linked]'}</span>
+      </div>
+    </div>
 
-3. DELIVERY TERMS
-INCOTERM: ${tradeDetails?.incoterm || '[INCOTERM]'}
-Delivery Schedule: ${additionalInfo?.deliverySchedule || '[Delivery Period]'}
-Loading Port: ${additionalInfo?.loadingPort || '[Port Name]'}
-Discharge Port: ${additionalInfo?.dischargePort || '[Port Name]'}
+    <div class="section">
+      <div class="section-title">3. Delivery Terms</div>
+      <div class="field">
+        <span class="field-label">INCOTERM:</span>
+        <span class="field-value">${tradeDetails?.incoterm || '[INCOTERM]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Delivery Schedule:</span>
+        <span class="field-value">${additionalInfo?.deliverySchedule || '[Delivery Period]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Loading Port:</span>
+        <span class="field-value">${additionalInfo?.loadingPort || '[Port Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Discharge Port:</span>
+        <span class="field-value">${additionalInfo?.dischargePort || '[Port Name]'}</span>
+      </div>
+    </div>
 
-4. PAYMENT TERMS
-Payment Method: ${additionalInfo?.paymentMethod || 'Irrevocable Letter of Credit (LC)'}
-Payment Terms: ${additionalInfo?.paymentTerms || 'At sight'}
-Banking: ${additionalInfo?.bankName || '[Bank Name]'}
+    <div class="section">
+      <div class="section-title">4. Payment Terms</div>
+      <div class="field">
+        <span class="field-label">Payment Method:</span>
+        <span class="field-value">${additionalInfo?.paymentMethod || 'Irrevocable Letter of Credit (LC)'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Payment Terms:</span>
+        <span class="field-value">${additionalInfo?.paymentTerms || 'At sight'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Banking:</span>
+        <span class="field-value">${additionalInfo?.bankName || '[Bank Name]'}</span>
+      </div>
+    </div>
 
-5. INSPECTION
-Pre-shipment Inspection: ${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}
-Certificate of Quality and Quantity required
+    <div class="section">
+      <div class="section-title">5. Inspection</div>
+      <div class="field">
+        <span class="field-label">Pre-shipment Inspection:</span>
+        <span class="field-value">${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}</span>
+      </div>
+      <div class="field">
+        <span class="field-value">Certificate of Quality and Quantity required</span>
+      </div>
+    </div>
 
-6. DOCUMENTATION
-- Commercial Invoice
-- Bill of Lading
-- Certificate of Origin
-- Certificate of Quality
-- Certificate of Quantity
-- Packing List
+    <div class="section">
+      <div class="section-title">6. Documentation</div>
+      <ul>
+        <li>Commercial Invoice</li>
+        <li>Bill of Lading</li>
+        <li>Certificate of Origin</li>
+        <li>Certificate of Quality</li>
+        <li>Certificate of Quantity</li>
+        <li>Packing List</li>
+      </ul>
+    </div>
 
-7. VALIDITY
-This Soft Corporate Offer is valid for ${additionalInfo?.validity || '7 days'} from the date of issue.
+    <div class="section">
+      <div class="section-title">7. Validity</div>
+      <p style="padding-left: 15px;">This Soft Corporate Offer is valid for <strong>${additionalInfo?.validity || '7 days'}</strong> from the date of issue.</p>
+    </div>
 
-This offer is non-binding and subject to final contract negotiation and execution.
+    <p style="margin-top: 30px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107;"><em><strong>Important:</strong> This offer is non-binding and subject to final contract negotiation and execution.</em></p>
 
-Yours faithfully,
+    <div class="signature-section">
+      <p><strong>Yours faithfully,</strong></p>
+      
+      <div class="signature-line">
+        <strong>Authorized Signature</strong>
+      </div>
+      
+      <div style="margin-top: 20px;">
+        <div class="field">
+          <span class="field-label">Name:</span>
+          <span class="field-value">${additionalInfo?.signatoryName || '[Name]'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Title:</span>
+          <span class="field-value">${additionalInfo?.signatoryTitle || '[Title]'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Company:</span>
+          <span class="field-value">${additionalInfo?.sellerName || '[Company Name]'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Date:</span>
+          <span class="field-value">${date}</span>
+        </div>
+      </div>
+    </div>
 
-_________________________
-${additionalInfo?.signatoryName || '[Name]'}
-${additionalInfo?.signatoryTitle || '[Title]'}
-${additionalInfo?.sellerName || '[Company Name]'}
-Date: ${date}
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the recipient.<br>
+      Unauthorized distribution or disclosure is strictly prohibited.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
