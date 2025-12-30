@@ -48,7 +48,7 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
   marketInsights: true,
 };
 
-const ENTITLEMENT_ID = 'fox_trade_master_global_trading_app_pro';
+const ENTITLEMENT_ID = 'Fox Trade Master™ Global Trading App Pro';
 const REVENUECAT_API_KEY = 'test_GqTiMdqiPOKKbWazgQuZgiMTztZ';
 
 export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
