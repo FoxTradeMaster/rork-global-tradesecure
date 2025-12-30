@@ -38,10 +38,16 @@ export default function DocumentsScreen() {
 
   const handleDownloadDocument = async (doc: any) => {
     try {
-      if (doc.url) {
+      if (doc.url && doc.url.trim() !== '') {
         await Linking.openURL(doc.url);
       } else {
-        Alert.alert('Error', 'Document URL not available');
+        Alert.alert(
+          'Document Not Available', 
+          'This is a placeholder document. Upload new documents or download templates below to generate actual documents.',
+          [
+            { text: 'OK', style: 'default' }
+          ]
+        );
       }
     } catch (error) {
       console.error('Error downloading document:', error);
