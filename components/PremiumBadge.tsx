@@ -1,49 +1,103 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Crown } from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { CheckCircle, Clock, TrendingUp } from 'lucide-react-native';
+import type { CompanyVerification } from '@/types';
 
 interface PremiumBadgeProps {
-  onPress?: () => void;
-  small?: boolean;
+  verification?: CompanyVerification;
+  compact?: boolean;
 }
 
-export default function PremiumBadge({ onPress, small = false }: PremiumBadgeProps) {
-  const Container = onPress ? TouchableOpacity : View;
+export default function PremiumBadge({ verification, compact = false }: PremiumBadgeProps) {
+  if (!verification) return null;
+
+  if (compact) {
+    return (
+      <View style={styles.compactContainer}>
+        <CheckCircle size={12} color="#10B981" />
+        {verification.responseRate !== undefined && verification.responseRate > 0 && (
+          <Text style={styles.compactRate}>{Math.round(verification.responseRate)}%</Text>
+        )}
+      </View>
+    );
+  }
 
   return (
-    <Container
-      style={[styles.container, small && styles.containerSmall]}
-      onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
-    >
-      <Crown size={small ? 12 : 14} color="#FFD700" fill="#FFD700" />
-      <Text style={[styles.text, small && styles.textSmall]}>PREMIUM</Text>
-    </Container>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <CheckCircle size={14} color="#10B981" />
+        <Text style={styles.label}>Verified</Text>
+        <Text style={styles.value}>
+          {verification.verificationDate.toLocaleDateString()}
+        </Text>
+      </View>
+      
+      {verification.lastContactDate && (
+        <View style={styles.row}>
+          <Clock size={14} color="#3B82F6" />
+          <Text style={styles.label}>Last Contact</Text>
+          <Text style={styles.value}>
+            {verification.lastContactDate.toLocaleDateString()}
+          </Text>
+        </View>
+      )}
+      
+      {verification.responseRate !== undefined && verification.responseRate > 0 && (
+        <View style={styles.row}>
+          <TrendingUp size={14} color="#F59E0B" />
+          <Text style={styles.label}>Response Rate</Text>
+          <Text style={[
+            styles.value,
+            styles.rate,
+            { color: verification.responseRate >= 70 ? '#10B981' : verification.responseRate >= 40 ? '#F59E0B' : '#EF4444' }
+          ]}>
+            {Math.round(verification.responseRate)}%
+          </Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#1F2937',
+    borderRadius: 8,
+    padding: 10,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#FFD70020',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FFD700',
   },
-  containerSmall: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    gap: 4,
+  label: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
-  text: {
-    fontSize: 12,
+  value: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginLeft: 'auto',
+  },
+  rate: {
     fontWeight: '700',
-    color: '#FFD700',
   },
-  textSmall: {
+  compactContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#10B98120',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+  },
+  compactRate: {
     fontSize: 10,
+    fontWeight: '700',
+    color: '#10B981',
   },
 });

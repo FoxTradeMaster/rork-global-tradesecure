@@ -15,12 +15,24 @@ import {
   Award,
   Users,
   ChevronRight,
-  Upload
+  Upload,
+  Mail,
+  Star,
+  Bookmark,
+  FileText,
+  MoreVertical
 } from 'lucide-react-native';
 import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants } from '@/mocks/market-participants';
-import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType } from '@/types';
+import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
+import EmailOutreachModal from '@/components/EmailOutreachModal';
+import SavedSearchesModal from '@/components/SavedSearchesModal';
+import CompanyRatingsModal from '@/components/CompanyRatingsModal';
+import ReportsModal from '@/components/ReportsModal';
+import PremiumBadge from '@/components/PremiumBadge';
 import { ParsedRow } from '@/lib/fileParser';
+import { useMarket } from '@/contexts/MarketContext';
+import { useTrading } from '@/contexts/TradingContext';
 
 const MARKET_IMPORT_FIELDS = [
   { field: 'name', label: 'Company Name', required: true },
@@ -33,6 +45,8 @@ const MARKET_IMPORT_FIELDS = [
 ];
 
 export default function MarketDirectoryScreen() {
+  const { verifications, getAverageRating } = useMarket();
+  const { currentUser } = useTrading();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
@@ -40,7 +54,13 @@ export default function MarketDirectoryScreen() {
   const [selectedParticipant, setSelectedParticipant] = useState<MarketParticipant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
+  const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
+  const [showSavedSearches, setShowSavedSearches] = useState<boolean>(false);
+  const [showRatingsModal, setShowRatingsModal] = useState<boolean>(false);
+  const [showReportsModal, setShowReportsModal] = useState<boolean>(false);
+  const [selectedCompanies, setSelectedCompanies] = useState<MarketParticipant[]>([]);
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
+  const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
 
@@ -75,6 +95,33 @@ export default function MarketDirectoryScreen() {
       platforms: allParticipants.filter(p => p.type === 'platform').length,
     };
   }, [allParticipants]);
+
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+  };
+
+  const toggleCompanySelection = (participant: MarketParticipant) => {
+    setSelectedCompanies(prev => {
+      const isSelected = prev.find(p => p.id === participant.id);
+      if (isSelected) {
+        return prev.filter(p => p.id !== participant.id);
+      } else {
+        return [...prev, participant];
+      }
+    });
+  };
+
+  const handleLoadSearch = (search: SavedSearch) => {
+    setSelectedType(search.type);
+    setSelectedCommodity(search.commodity);
+    setSelectedBusinessType(search.businessType);
+    setSearchQuery(search.searchQuery);
+  };
+
+  const handleOpenRatings = (participant: MarketParticipant) => {
+    setSelectedParticipant(participant);
+    setShowRatingsModal(true);
+  };
 
   const openDetail = (participant: MarketParticipant) => {
     setSelectedParticipant(participant);
@@ -166,16 +213,26 @@ export default function MarketDirectoryScreen() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.title}>Verified Market Directory</Text>
-            <TouchableOpacity 
-              style={styles.importButton}
-              onPress={() => setShowImportModal(true)}
-            >
-              <Upload size={16} color="#FFFFFF" />
-              <Text style={styles.importButtonText}>Import</Text>
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity 
+                style={styles.iconButton}
+                onPress={() => setShowImportModal(true)}
+              >
+                <Upload size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.iconButton}
+                onPress={() => setShowActionsMenu(true)}
+              >
+                <MoreVertical size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           </View>
           <Text style={styles.subtitle}>
-            Legitimate counterparties and licensed brokers
+            {selectedCompanies.length > 0 
+              ? `${selectedCompanies.length} selected • Tap companies to select`
+              : 'Legitimate counterparties and licensed brokers'
+            }
           </Text>
         </View>
 
@@ -209,8 +266,14 @@ export default function MarketDirectoryScreen() {
             placeholder="Search traders, brokers, platforms..."
             placeholderTextColor="#6B7280"
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchChange}
           />
+          <TouchableOpacity 
+            style={styles.searchIconButton}
+            onPress={() => setShowSavedSearches(true)}
+          >
+            <Bookmark size={18} color="#3B82F6" />
+          </TouchableOpacity>
         </View>
 
         <ScrollView 
@@ -324,11 +387,17 @@ export default function MarketDirectoryScreen() {
             {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
           </Text>
 
-          {filteredParticipants.map(participant => (
+          {filteredParticipants.map(participant => {
+            const isSelected = selectedCompanies.find(p => p.id === participant.id);
+            const verification = verifications[participant.id];
+            const avgRating = getAverageRating(participant.id);
+            
+            return (
             <TouchableOpacity
               key={participant.id}
-              style={styles.participantCard}
+              style={[styles.participantCard, isSelected && styles.participantCardSelected]}
               onPress={() => openDetail(participant)}
+              onLongPress={() => toggleCompanySelection(participant)}
               activeOpacity={0.7}
             >
               <View style={styles.participantHeader}>
@@ -356,12 +425,36 @@ export default function MarketDirectoryScreen() {
                     </View>
                   </View>
                 </View>
-                {participant.verified && (
-                  <View style={styles.verifiedBadge}>
-                    <CheckCircle size={16} color="#10B981" />
-                  </View>
-                )}
+                <View style={styles.badgesRow}>
+                  {participant.verified && (
+                    <View style={styles.verifiedBadge}>
+                      <CheckCircle size={16} color="#10B981" />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View style={styles.selectedBadge}>
+                      <CheckCircle size={16} color="#3B82F6" fill="#3B82F6" />
+                    </View>
+                  )}
+                </View>
               </View>
+
+              {verification && (
+                <View style={styles.verificationContainer}>
+                  <PremiumBadge verification={verification} compact />
+                </View>
+              )}
+
+              {avgRating > 0 && (
+                <TouchableOpacity 
+                  style={styles.ratingRow}
+                  onPress={() => handleOpenRatings(participant)}
+                >
+                  <Star size={14} color="#F59E0B" fill="#F59E0B" />
+                  <Text style={styles.ratingText}>{avgRating.toFixed(1)}</Text>
+                  <Text style={styles.ratingLabel}>• Tap to review</Text>
+                </TouchableOpacity>
+              )}
 
               <Text style={styles.participantDescription} numberOfLines={2}>
                 {participant.description}
@@ -411,7 +504,8 @@ export default function MarketDirectoryScreen() {
                 </View>
               )}
             </TouchableOpacity>
-          ))}
+            );
+          })}
 
           {filteredParticipants.length === 0 && (
             <View style={styles.emptyState}>
@@ -671,6 +765,111 @@ export default function MarketDirectoryScreen() {
         title="Import Market Participants"
         targetFields={MARKET_IMPORT_FIELDS}
       />
+
+      <EmailOutreachModal
+        visible={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        selectedCompanies={selectedCompanies}
+      />
+
+      <SavedSearchesModal
+        visible={showSavedSearches}
+        onClose={() => setShowSavedSearches(false)}
+        currentSearch={{
+          type: selectedType,
+          commodity: selectedCommodity,
+          businessType: selectedBusinessType,
+          searchQuery
+        }}
+        onLoadSearch={handleLoadSearch}
+      />
+
+      {selectedParticipant && (
+        <CompanyRatingsModal
+          visible={showRatingsModal}
+          onClose={() => setShowRatingsModal(false)}
+          company={selectedParticipant}
+          currentUserId={currentUser?.id || 'user1'}
+          currentUserName={currentUser?.name || 'User'}
+        />
+      )}
+
+      <ReportsModal
+        visible={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+        selectedCompanies={selectedCompanies}
+      />
+
+      <Modal
+        visible={showActionsMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowActionsMenu(false)}
+      >
+        <TouchableOpacity 
+          style={styles.actionsOverlay}
+          activeOpacity={1}
+          onPress={() => setShowActionsMenu(false)}
+        >
+          <View style={styles.actionsMenu}>
+            <TouchableOpacity
+              style={styles.actionsMenuItem}
+              onPress={() => {
+                setShowActionsMenu(false);
+                setShowEmailModal(true);
+              }}
+            >
+              <Mail size={20} color="#3B82F6" />
+              <Text style={styles.actionsMenuText}>Email Outreach</Text>
+              {selectedCompanies.length > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{selectedCompanies.length}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionsMenuItem}
+              onPress={() => {
+                setShowActionsMenu(false);
+                setShowSavedSearches(true);
+              }}
+            >
+              <Bookmark size={20} color="#8B5CF6" />
+              <Text style={styles.actionsMenuText}>Saved Searches</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionsMenuItem}
+              onPress={() => {
+                setShowActionsMenu(false);
+                setShowReportsModal(true);
+              }}
+            >
+              <FileText size={20} color="#10B981" />
+              <Text style={styles.actionsMenuText}>Generate Report</Text>
+              {selectedCompanies.length > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{selectedCompanies.length}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {selectedCompanies.length > 0 && (
+              <TouchableOpacity
+                style={[styles.actionsMenuItem, styles.clearMenuItem]}
+                onPress={() => {
+                  setSelectedCompanies([]);
+                  setShowActionsMenu(false);
+                }}
+              >
+                <X size={20} color="#EF4444" />
+                <Text style={[styles.actionsMenuText, styles.clearText]}>Clear Selection</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -694,19 +893,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  importButton: {
+  headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
+    gap: 8,
   },
-  importButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#FFFFFF',
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#3B82F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 18,
@@ -759,6 +956,9 @@ const styles = StyleSheet.create({
     height: 32,
     color: '#FFFFFF',
     fontSize: 14,
+  },
+  searchIconButton: {
+    padding: 6,
   },
   filterScroll: {
     marginBottom: 6,
@@ -848,6 +1048,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
+  participantCardSelected: {
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+  },
   participantHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -892,8 +1096,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
   },
-  verifiedBadge: {
+  badgesRow: {
+    flexDirection: 'row',
+    gap: 8,
     marginLeft: 8,
+  },
+  verifiedBadge: {},
+  selectedBadge: {},
+  verificationContainer: {
+    marginBottom: 12,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 12,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#F59E0B',
+  },
+  ratingLabel: {
+    fontSize: 12,
+    color: '#6B7280',
   },
   participantDescription: {
     fontSize: 14,
@@ -1219,5 +1445,51 @@ const styles = StyleSheet.create({
   },
   modalBottomPadding: {
     height: 20,
+  },
+  actionsOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  actionsMenu: {
+    backgroundColor: '#1F2937',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+  },
+  actionsMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+    gap: 12,
+  },
+  actionsMenuText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  badge: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  clearMenuItem: {
+    borderBottomWidth: 0,
+  },
+  clearText: {
+    color: '#EF4444',
   },
 });

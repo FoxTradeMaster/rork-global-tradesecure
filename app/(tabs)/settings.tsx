@@ -65,7 +65,7 @@ export default function SettingsScreen() {
                   {currentUser?.role.replace(/_/g, ' ').toUpperCase() || 'ROLE'}
                 </Text>
               </View>
-              {isPremium && <PremiumBadge small />}
+              {isPremium && <PremiumBadge compact />}
             </View>
           </View>
 

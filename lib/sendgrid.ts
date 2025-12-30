@@ -759,3 +759,55 @@ Date: ${date}
 export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA'): string {
   return generateDocumentContent(documentType, null, {});
 }
+
+export interface BulkEmailParams {
+  to: string;
+  from: string;
+  subject: string;
+  body: string;
+}
+
+export async function sendBulkEmails(emails: BulkEmailParams[]): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sendPromises = emails.map(email => 
+      fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [
+            {
+              to: [{ email: email.to }],
+              subject: email.subject,
+            },
+          ],
+          from: {
+            email: email.from,
+            name: 'Commodity Trading Platform',
+          },
+          content: [
+            {
+              type: 'text/plain',
+              value: email.body,
+            },
+          ],
+        }),
+      })
+    );
+
+    const results = await Promise.all(sendPromises);
+    
+    const failures = results.filter(r => !r.ok);
+    if (failures.length > 0) {
+      console.error('Some emails failed to send:', failures.length);
+      return { success: false, error: `${failures.length} emails failed to send` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending bulk emails:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}

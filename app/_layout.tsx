@@ -6,6 +6,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { MarketProvider } from "@/contexts/MarketContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -66,9 +67,11 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <SubscriptionProvider>
         <TradingProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <RootLayoutNav />
-          </GestureHandlerRootView>
+          <MarketProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
+          </MarketProvider>
         </TradingProvider>
       </SubscriptionProvider>
     </QueryClientProvider>

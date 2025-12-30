@@ -159,3 +159,48 @@ export interface MarketPlatform {
 }
 
 export type MarketParticipant = TradingHouse | Broker | MarketPlatform;
+
+export interface CompanyVerification {
+  verificationDate: Date;
+  lastContactDate?: Date;
+  responseRate?: number;
+  contactCount?: number;
+  respondedCount?: number;
+}
+
+export interface CompanyRating {
+  id: string;
+  companyId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  review: string;
+  date: Date;
+  verified: boolean;
+}
+
+export interface SavedSearch {
+  id: string;
+  name: string;
+  type: 'all' | 'trading_house' | 'broker' | 'platform';
+  commodity: string;
+  businessType: 'all' | 'buyer' | 'seller' | 'both';
+  searchQuery: string;
+  createdAt: Date;
+}
+
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  type: 'rfq' | 'partnership' | 'inquiry' | 'follow_up' | 'custom';
+}
+
+export interface EmailOutreach {
+  id: string;
+  recipientIds: string[];
+  template: EmailTemplate;
+  sentAt: Date;
+  status: 'draft' | 'sent' | 'failed';
+}
