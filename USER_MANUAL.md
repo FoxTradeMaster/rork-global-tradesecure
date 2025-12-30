@@ -11,9 +11,10 @@
 5. [Managing Counterparties](#managing-counterparties)
 6. [Document Management](#document-management)
 7. [Market Directory](#market-directory)
-8. [Understanding Risk Levels](#understanding-risk-levels)
-9. [Trade Workflow](#trade-workflow)
-10. [Document Types](#document-types)
+8. [Advanced Market Features](#advanced-market-features)
+9. [Understanding Risk Levels](#understanding-risk-levels)
+10. [Trade Workflow](#trade-workflow)
+11. [Document Types](#document-types)
 
 ---
 
@@ -453,6 +454,556 @@ Filter to see only participants dealing in specific commodities:
 - **Find brokers** for specific commodities
 - **Identify platforms** for market access
 - **Check regulatory status** of market participants
+
+---
+
+## Advanced Market Features
+
+### Email Outreach Tool
+
+The Email Outreach Tool allows you to compose and send professional emails to multiple companies directly from the platform.
+
+#### How to Use Email Outreach
+1. Navigate to the **Market** tab
+2. Tap the **Email icon** in the top right corner
+3. The Email Outreach modal opens
+
+#### Composing Your Email
+1. **Select Companies**: Choose one or multiple companies from your search results
+   - Use checkboxes to select multiple recipients
+   - Selected companies appear in the recipient list
+
+2. **Choose Template**: Select from pre-built templates:
+   - **RFQ (Request for Quote)** - Inquire about pricing and availability
+   - **Partnership Inquiry** - Express interest in business partnership
+   - **Market Information** - Request general market information
+   - **Custom** - Write your own email from scratch
+
+3. **Customize Content**:
+   - Subject line
+   - Email body with template variables
+   - Your contact information
+   - Company signature
+
+4. **Review Recipients**: Verify all selected companies before sending
+
+5. **Send**: Tap "Send Email" to dispatch to all selected companies
+
+#### Email Templates
+
+**RFQ Template**:
+```
+Subject: Request for Quote - [Your Company]
+
+Dear [Company Name],
+
+We are interested in purchasing [commodity] and would like to request a quote for:
+- Product: [commodity]
+- Quantity: [amount]
+- Delivery terms: [incoterm]
+- Delivery window: [timeframe]
+
+Please provide your best pricing and availability.
+
+Best regards,
+[Your details]
+```
+
+**Partnership Inquiry Template**:
+```
+Subject: Business Partnership Opportunity
+
+Dear [Company Name],
+
+We are exploring potential partnerships in the [commodity] market and believe there may be synergies between our organizations.
+
+We would welcome the opportunity to discuss potential collaboration.
+
+Best regards,
+[Your details]
+```
+
+#### Email Features
+- Send to multiple companies simultaneously
+- Professional templates for different scenarios
+- Automatic company name insertion
+- Track sent emails (in your email client)
+- Include your company branding and signature
+
+---
+
+### Company Verification Badges
+
+Verification badges provide trust indicators to help you assess company reliability and responsiveness.
+
+#### Understanding Verification Badges
+
+Each company in the Market Directory displays verification information:
+
+1. **Verification Status**
+   - ✓ **Verified** - Company has been verified by the platform
+   - **Pending** - Verification in progress
+   - **Unverified** - No verification completed
+
+2. **Verification Date**
+   - Shows when the company was last verified
+   - Format: "Verified Dec 2025"
+   - Recent verification indicates up-to-date information
+
+3. **Last Contact Update**
+   - When contact information was last confirmed
+   - Helps ensure you're reaching active companies
+   - Format: "Updated 2 weeks ago"
+
+4. **Response Rate**
+   - Percentage showing how often company responds to inquiries
+   - Based on community feedback and outreach history
+   - Color-coded:
+     - **Green (80-100%)** - Highly responsive
+     - **Amber (50-79%)** - Moderately responsive
+     - **Red (0-49%)** - Low response rate
+
+#### Using Verification Information
+
+**Prioritize Outreach**:
+- Focus on companies with high response rates
+- Verified companies are more reliable
+- Recently updated contacts are more likely to be accurate
+
+**Risk Assessment**:
+- Combine verification badges with risk scores
+- Verified + high response rate = reliable partner
+- Unverified + low response rate = proceed with caution
+
+**Example Badge Display**:
+```
+✓ Verified Dec 2025
+📅 Updated 1 week ago
+📊 Response Rate: 85% (Green)
+```
+
+---
+
+### Saved Searches Feature
+
+Save your frequently used search and filter combinations for instant access.
+
+#### Creating a Saved Search
+
+1. **Set Your Filters**:
+   - Navigate to Market Directory
+   - Apply desired filters (commodity, type, location, etc.)
+   - Enter search terms if needed
+   - Configure any advanced filters
+
+2. **Save the Search**:
+   - Tap the **Star icon** (Save Search) in the top right
+   - The Saved Searches modal opens
+
+3. **Name Your Search**:
+   - Enter a descriptive name (e.g., "Premium Asian Producers")
+   - Examples:
+     - "US Fuel Oil Brokers"
+     - "Gold Trading Houses - London"
+     - "Verified Coal Sellers"
+     - "High Response Urea Buyers"
+
+4. **Save**: Tap "Save Search" to store
+
+#### Using Saved Searches
+
+1. **Access Saved Searches**:
+   - Tap the **Star icon** in Market Directory
+   - View list of all saved searches
+
+2. **Apply a Saved Search**:
+   - Tap any saved search name
+   - Filters and search terms are automatically applied
+   - Results update instantly
+
+3. **Manage Saved Searches**:
+   - **Rename** - Update the search name
+   - **Delete** - Remove searches you no longer need
+   - **Update** - Modify filters and re-save
+
+#### Saved Search Examples
+
+**"Premium Asian Producers"**:
+- Type: Trading Houses
+- Location: Singapore, Hong Kong, UAE
+- Response Rate: >80%
+- Verification: Verified only
+
+**"Emergency Fuel Supply"**:
+- Commodity: Fuel Oil
+- Response Rate: >90%
+- Location: Within 500 miles
+
+**"New Market Opportunities"**:
+- Verification Date: Last 30 days
+- Type: All
+- Sorted by: Response rate (high to low)
+
+#### Benefits
+- **Time Saving** - No need to re-apply filters repeatedly
+- **Consistency** - Use same criteria across sessions
+- **Efficiency** - Quick access to specific market segments
+- **Organization** - Keep track of different market research angles
+
+---
+
+### Company Ratings & Reviews System
+
+Rate your experience with buyers and producers to help the community identify reliable partners.
+
+#### Rating Companies
+
+1. **Access Company Profile**:
+   - Tap any company in Market Directory
+   - Scroll to "Rate This Company" section
+
+2. **Provide Your Rating**:
+   - **Overall Rating** (1-5 stars)
+   - **Communication** - Responsiveness and clarity
+   - **Reliability** - Delivery and commitment adherence
+   - **Quality** - Product quality and accuracy
+   - **Payment** - Payment terms and timeliness (for buyers)
+
+3. **Write a Review** (Optional):
+   - Share specific experiences
+   - Mention positives and challenges
+   - Help others make informed decisions
+   - Keep reviews professional and factual
+
+4. **Verification**:
+   - Only verified users can leave reviews
+   - Reviews linked to actual trades are marked "Verified Trade"
+   - Anonymous reviews not permitted (maintains accountability)
+
+#### Understanding Ratings Display
+
+Each company shows:
+
+**Average Rating**:
+```
+★★★★☆ 4.2/5.0 (based on 47 reviews)
+```
+
+**Breakdown by Category**:
+- Communication: ★★★★★ 4.8/5
+- Reliability: ★★★★☆ 4.1/5
+- Quality: ★★★★☆ 4.0/5
+- Payment: ★★★★☆ 4.3/5
+
+**Recent Reviews**:
+- Displays 3 most recent reviews
+- Shows reviewer name, date, rating, and comment
+- "Verified Trade" badge for trade-based reviews
+
+#### Rating Guidelines
+
+**5 Stars - Exceptional**:
+- Exceeded expectations
+- Excellent communication and reliability
+- Would highly recommend
+
+**4 Stars - Good**:
+- Met expectations
+- Minor issues handled professionally
+- Would work with again
+
+**3 Stars - Acceptable**:
+- Mixed experience
+- Some concerns but trade completed
+- Proceed with standard caution
+
+**2 Stars - Poor**:
+- Significant issues
+- Communication or delivery problems
+- Increased monitoring recommended
+
+**1 Star - Unacceptable**:
+- Failed to meet obligations
+- Major disputes or losses
+- Not recommended for trading
+
+#### Benefits of Ratings System
+
+**For Buyers**:
+- Identify most reliable suppliers
+- Avoid problematic partners
+- Community-verified quality
+
+**For Sellers**:
+- Showcase reputation
+- Build trust with new partners
+- Demonstrate track record
+
+**For Community**:
+- Collective intelligence
+- Reduced risk through shared experiences
+- Market transparency
+
+#### Review Moderation
+
+- All reviews monitored for inappropriate content
+- Fake or malicious reviews removed
+- Companies can respond to reviews
+- Dispute resolution available for contested reviews
+
+---
+
+### Advanced Search with Auto-Complete
+
+Intelligent search that suggests companies, regions, and oil types as you type.
+
+#### How Auto-Complete Works
+
+1. **Start Typing**:
+   - Enter search terms in the Market Directory search bar
+   - Suggestions appear automatically after 2 characters
+
+2. **Suggestion Categories**:
+
+   **Companies**:
+   - Matches company names
+   - Shows company type (Trading House, Broker, Platform)
+   - Displays primary commodity
+   - Example: "Trafigura - Trading House (Multi-commodity)"
+
+   **Regions**:
+   - Country names
+   - Major cities
+   - Trading hubs
+   - Example: "Singapore (Hub - 45 companies)"
+
+   **Commodities & Oil Types**:
+   - Commodity categories
+   - Specific oil grades
+   - Niche products
+   - Example: "Fuel Oil - High Sulfur (23 suppliers)"
+
+3. **Select Suggestion**:
+   - Tap any suggestion to apply
+   - Search results update instantly
+   - Relevant filters auto-applied
+
+#### Search Intelligence Features
+
+**Fuzzy Matching**:
+- Handles typos and misspellings
+- "trafigyra" → suggests "Trafigura"
+- "sngapore" → suggests "Singapore"
+
+**Synonym Recognition**:
+- "Brokers" also matches "FCM", "Intermediaries"
+- "Fuel" also matches "Petroleum", "Oil Products"
+
+**Context-Aware**:
+- Learns from your search patterns
+- Prioritizes suggestions based on:
+  - Your previous searches
+  - Your commodity focus
+  - Your regional preferences
+
+**Multi-Field Search**:
+- Searches across:
+  - Company names
+  - Descriptions
+  - Locations
+  - Commodities
+  - Licenses
+  - Tags
+
+#### Advanced Search Tips
+
+**Combining Terms**:
+- Use spaces for AND logic
+- "Singapore fuel" → companies in Singapore dealing with fuel
+
+**Specific Searches**:
+- Company names: Direct match prioritized
+- Regions: "companies in [region]"
+- Commodities: "[commodity] suppliers/buyers"
+
+**Quick Filters**:
+- Type "verified" to see only verified companies
+- Type "high response" for companies with >80% response rate
+- Type "new" for recently added companies
+
+#### Search Performance
+
+- **Instant Results** - Sub-100ms response time
+- **Live Updates** - Results update as you type
+- **Smart Ranking** - Most relevant results first
+- **Cached Suggestions** - Common searches load instantly
+
+---
+
+### Custom Reports Builder
+
+Generate professional, branded PDF reports combining company data, comparisons, and analytics.
+
+#### Creating a Report
+
+1. **Access Report Builder**:
+   - Tap the **Report icon** (top right in Market Directory)
+   - The Reports modal opens
+
+2. **Select Companies**:
+   - Choose companies to include in report
+   - Select from:
+     - Current search results
+     - Saved searches
+     - Individual company selection
+   - Maximum 20 companies per report
+
+3. **Choose Report Type**:
+
+   **Supplier Comparison Report**:
+   - Side-by-side comparison of multiple suppliers
+   - Includes pricing, reliability ratings, verification status
+   - Best for: Procurement decisions
+
+   **Market Overview Report**:
+   - Comprehensive view of market segment
+   - Statistics and trends
+   - Company listings with key details
+   - Best for: Market research, stakeholder briefings
+
+   **Due Diligence Report**:
+   - Detailed company profiles
+   - Risk assessment data
+   - Verification details and ratings
+   - Best for: Compliance review, risk assessment
+
+   **Custom Report**:
+   - Select specific data fields to include
+   - Customize layout and sections
+   - Add your own commentary
+   - Best for: Specialized analysis
+
+4. **Customize Report**:
+
+   **Branding**:
+   - Add your company logo
+   - Choose color scheme
+   - Include company information
+
+   **Sections to Include**:
+   - ☑ Company summaries
+   - ☑ Verification badges and ratings
+   - ☑ Contact information
+   - ☑ Commodity focus areas
+   - ☑ Comparison tables
+   - ☑ Risk scores
+   - ☑ Response rate analytics
+   - ☑ Geographic distribution
+   - ☑ Market statistics
+
+   **Additional Options**:
+   - Include/exclude unverified companies
+   - Sort order (rating, alphabetical, response rate)
+   - Date range for data
+   - Add executive summary
+
+5. **Generate Report**:
+   - Tap "Generate PDF"
+   - Report builds in 5-10 seconds
+   - Preview available before download
+
+6. **Share Report**:
+   - Download PDF to device
+   - Share via email
+   - Export to cloud storage
+   - Print directly
+
+#### Report Sections
+
+**Executive Summary**:
+- Key findings and recommendations
+- Market overview statistics
+- Top-rated companies
+
+**Company Profiles**:
+- Full company details
+- Ratings and reviews summary
+- Verification status
+- Contact information
+
+**Comparison Tables**:
+- Side-by-side data comparison
+- Rating comparisons
+- Response rate analysis
+- Geographic presence
+
+**Market Analytics**:
+- Distribution charts (by region, commodity, type)
+- Average ratings by category
+- Response rate trends
+- Verification statistics
+
+**Appendix**:
+- Methodology notes
+- Data sources
+- Glossary of terms
+- Disclaimers
+
+#### Report Use Cases
+
+**Internal Team Sharing**:
+- Present market research to management
+- Share supplier options with procurement team
+- Distribute to regional offices
+
+**Stakeholder Communication**:
+- Board presentations
+- Investor updates
+- Partner briefings
+
+**Due Diligence Documentation**:
+- Compliance records
+- Audit trail for partner selection
+- Risk committee reviews
+
+**Client Proposals**:
+- Demonstrate market knowledge
+- Present sourcing options
+- Competitive analysis
+
+#### Report Features
+
+**Professional Formatting**:
+- Clean, branded design
+- Clear data visualization
+- Easy-to-read tables and charts
+
+**Data Accuracy**:
+- Real-time data at time of generation
+- Timestamp on all reports
+- Data source citations
+
+**Customization**:
+- Flexible layout options
+- Include/exclude sections
+- Add custom commentary
+- Choose data fields
+
+**Export Options**:
+- PDF (primary format)
+- CSV (data export)
+- Email attachment
+- Cloud storage integration
+
+#### Report Best Practices
+
+1. **Define Purpose**: Know what decision the report will support
+2. **Select Relevant Companies**: Include only pertinent organizations
+3. **Keep Updated**: Generate reports with current data when needed
+4. **Add Context**: Include executive summary with key insights
+5. **Verify Data**: Double-check critical information before sharing
+6. **Brand Professionally**: Use consistent branding for external reports
+7. **Control Distribution**: Limit sharing of sensitive competitive intelligence
 
 ---
 
