@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
 import { useState } from 'react';
@@ -34,6 +34,19 @@ export default function DocumentsScreen() {
     if (type.includes('contract') || type.includes('spa') || type.includes('msa')) return '#3B82F6';
     if (type.includes('certificate')) return '#8B5CF6';
     return '#6B7280';
+  };
+
+  const handleDownloadDocument = async (doc: any) => {
+    try {
+      if (doc.url) {
+        await Linking.openURL(doc.url);
+      } else {
+        Alert.alert('Error', 'Document URL not available');
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      Alert.alert('Error', 'Failed to open document');
+    }
   };
 
   const handleDownloadBlankTemplate = (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA') => {
@@ -368,7 +381,10 @@ export default function DocumentsScreen() {
                     <Text style={styles.dateText}>
                       {new Date(doc.uploadedAt).toLocaleDateString()}
                     </Text>
-                    <TouchableOpacity style={styles.downloadButton}>
+                    <TouchableOpacity 
+                      style={styles.downloadButton}
+                      onPress={() => handleDownloadDocument(doc)}
+                    >
                       <Download size={16} color="#3B82F6" />
                       <Text style={styles.downloadText}>Download</Text>
                     </TouchableOpacity>
