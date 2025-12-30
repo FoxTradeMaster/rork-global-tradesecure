@@ -10,7 +10,8 @@ export default function NotFoundScreen() {
       <AlertTriangle size={64} color="#EF4444" />
       <Text style={styles.title}>Page Not Found</Text>
       <Text style={styles.description}>
-        The page you&apos;re looking for doesn&apos;t exist.
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
+        The page you're looking for doesn't exist.
       </Text>
       <TouchableOpacity style={styles.button} onPress={() => router.replace('/')}>
         <Text style={styles.buttonText}>Go to Dashboard</Text>
