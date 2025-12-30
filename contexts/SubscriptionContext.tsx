@@ -64,11 +64,17 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
 
   useEffect(() => {
     const init = async () => {
+      const timeout = setTimeout(() => {
+        console.log('[RevenueCat] Initialization timeout, proceeding with free tier');
+        setIsLoading(false);
+      }, 5000);
+
       try {
         console.log('[RevenueCat] Configuring SDK...');
         
         if (Platform.OS === 'web') {
           console.log('[RevenueCat] Web platform detected, using mock subscription');
+          clearTimeout(timeout);
           setIsLoading(false);
           return;
         }
@@ -94,9 +100,11 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
           updateSubscriptionFromCustomerInfo(info);
         });
 
+        clearTimeout(timeout);
         setIsLoading(false);
       } catch (error) {
         console.error('[RevenueCat] Configuration error:', error);
+        clearTimeout(timeout);
         setIsLoading(false);
       }
     };
