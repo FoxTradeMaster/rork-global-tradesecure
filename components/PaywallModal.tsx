@@ -26,9 +26,9 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
   const [selectedPackage, setSelectedPackage] = useState<string>('monthly');
 
   const packages = offerings?.availablePackages || [];
-  const monthlyPackage = packages.find(p => p.identifier === '$rc_monthly' || p.identifier.includes('monthly'));
-  const yearlyPackage = packages.find(p => p.identifier === '$rc_annual' || p.identifier.includes('yearly'));
-  const lifetimePackage = packages.find(p => p.identifier === '$rc_lifetime' || p.identifier.includes('lifetime'));
+  const monthlyPackage = packages.find(p => p.identifier === 'monthly' || p.identifier === '$rc_monthly' || p.identifier.includes('monthly'));
+  const yearlyPackage = packages.find(p => p.identifier === 'yearly' || p.identifier === '$rc_annual' || p.identifier.includes('yearly') || p.identifier.includes('annual'));
+  const lifetimePackage = packages.find(p => p.identifier === 'lifetime' || p.identifier === '$rc_lifetime' || p.identifier.includes('lifetime'));
 
   const handlePurchase = async (packageId: string) => {
     setIsPurchasing(true);
