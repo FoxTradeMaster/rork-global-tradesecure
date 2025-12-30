@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Check, X, Crown, Zap, Shield, TrendingUp, FileText, Database } from 'lucide-react-native';
+import { Check, X, Crown, Zap, Shield, TrendingUp, FileText, Database, RefreshCw } from 'lucide-react-native';
 import { useState } from 'react';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 interface PaywallModalProps {
   visible: boolean;
   onClose: () => void;
-  onUpgrade: () => Promise<void>;
   feature?: string;
 }
 
@@ -19,18 +19,46 @@ const PREMIUM_FEATURES = [
   { icon: Database, title: 'API Access', description: 'Integrate with your existing systems' },
 ];
 
-export default function PaywallModal({ visible, onClose, onUpgrade, feature }: PaywallModalProps) {
-  const [isUpgrading, setIsUpgrading] = useState(false);
+export default function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
+  const { offerings, purchasePackage, restorePurchases, isLoading } = useSubscription();
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<string>('monthly');
 
-  const handleUpgrade = async () => {
-    setIsUpgrading(true);
+  const packages = offerings?.availablePackages || [];
+  const monthlyPackage = packages.find(p => p.identifier === '$rc_monthly' || p.identifier.includes('monthly'));
+  const yearlyPackage = packages.find(p => p.identifier === '$rc_annual' || p.identifier.includes('yearly'));
+  const lifetimePackage = packages.find(p => p.identifier === '$rc_lifetime' || p.identifier.includes('lifetime'));
+
+  const handlePurchase = async (packageId: string) => {
+    setIsPurchasing(true);
     try {
-      await onUpgrade();
+      await purchasePackage(packageId);
+      Alert.alert('Success', 'Welcome to Premium! 🎉');
       onClose();
-    } catch (error) {
-      console.error('Upgrade error:', error);
+    } catch (error: any) {
+      if (!error.userCancelled) {
+        Alert.alert('Purchase Failed', error.message || 'Please try again');
+      }
     } finally {
-      setIsUpgrading(false);
+      setIsPurchasing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    try {
+      const info = await restorePurchases();
+      if (info && Object.keys(info.entitlements.active).length > 0) {
+        Alert.alert('Success', 'Purchases restored successfully! 🎉');
+        onClose();
+      } else {
+        Alert.alert('No Purchases Found', 'No active purchases to restore');
+      }
+    } catch (error: any) {
+      Alert.alert('Restore Failed', error.message || 'Please try again');
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -68,14 +96,65 @@ export default function PaywallModal({ visible, onClose, onUpgrade, feature }: P
               Unlock powerful features for professional commodity trading
             </Text>
 
-            <View style={styles.pricingCard}>
-              <View style={styles.pricingBadge}>
-                <Text style={styles.pricingBadgeText}>BEST VALUE</Text>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#3B82F6" />
+                <Text style={styles.loadingText}>Loading offers...</Text>
               </View>
-              <Text style={styles.priceAmount}>$99</Text>
-              <Text style={styles.priceLabel}>per month</Text>
-              <Text style={styles.priceSave}>Save $300 with annual plan</Text>
-            </View>
+            ) : (
+              <View style={styles.packagesContainer}>
+                {yearlyPackage && (
+                  <TouchableOpacity
+                    style={[
+                      styles.packageCard,
+                      selectedPackage === yearlyPackage.identifier && styles.packageCardSelected
+                    ]}
+                    onPress={() => setSelectedPackage(yearlyPackage.identifier)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.bestValueBadge}>
+                      <Text style={styles.bestValueText}>BEST VALUE</Text>
+                    </View>
+                    <Text style={styles.packageTitle}>Yearly</Text>
+                    <Text style={styles.packagePrice}>{yearlyPackage.product.priceString}</Text>
+                    <Text style={styles.packagePeriod}>per year</Text>
+                    {monthlyPackage && (
+                      <Text style={styles.packageSave}>Save vs monthly</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+                
+                {monthlyPackage && (
+                  <TouchableOpacity
+                    style={[
+                      styles.packageCard,
+                      selectedPackage === monthlyPackage.identifier && styles.packageCardSelected
+                    ]}
+                    onPress={() => setSelectedPackage(monthlyPackage.identifier)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.packageTitle}>Monthly</Text>
+                    <Text style={styles.packagePrice}>{monthlyPackage.product.priceString}</Text>
+                    <Text style={styles.packagePeriod}>per month</Text>
+                  </TouchableOpacity>
+                )}
+
+                {lifetimePackage && (
+                  <TouchableOpacity
+                    style={[
+                      styles.packageCard,
+                      selectedPackage === lifetimePackage.identifier && styles.packageCardSelected
+                    ]}
+                    onPress={() => setSelectedPackage(lifetimePackage.identifier)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.packageTitle}>Lifetime</Text>
+                    <Text style={styles.packagePrice}>{lifetimePackage.product.priceString}</Text>
+                    <Text style={styles.packagePeriod}>one-time payment</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
             <View style={styles.featuresContainer}>
               {PREMIUM_FEATURES.map((item, index) => {
@@ -96,17 +175,33 @@ export default function PaywallModal({ visible, onClose, onUpgrade, feature }: P
             </View>
 
             <TouchableOpacity
-              style={[styles.upgradeButton, isUpgrading && styles.upgradeButtonDisabled]}
-              onPress={handleUpgrade}
-              disabled={isUpgrading}
+              style={[styles.upgradeButton, (isPurchasing || isLoading) && styles.upgradeButtonDisabled]}
+              onPress={() => handlePurchase(selectedPackage)}
+              disabled={isPurchasing || isLoading}
               activeOpacity={0.8}
             >
-              {isUpgrading ? (
+              {isPurchasing ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <>
                   <Crown size={20} color="#FFFFFF" fill="#FFFFFF" />
-                  <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+                  <Text style={styles.upgradeButtonText}>Subscribe Now</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={handleRestore}
+              disabled={isRestoring}
+              activeOpacity={0.7}
+            >
+              {isRestoring ? (
+                <ActivityIndicator size="small" color="#3B82F6" />
+              ) : (
+                <>
+                  <RefreshCw size={16} color="#3B82F6" />
+                  <Text style={styles.restoreButtonText}>Restore Purchases</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -277,5 +372,79 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  packagesContainer: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  packageCard: {
+    backgroundColor: '#0A0E27',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#374151',
+    position: 'relative',
+  },
+  packageCardSelected: {
+    borderColor: '#3B82F6',
+    backgroundColor: '#1E3A8A15',
+  },
+  bestValueBadge: {
+    position: 'absolute',
+    top: -10,
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  bestValueText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  packageTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  packagePrice: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  packagePeriod: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  packageSave: {
+    fontSize: 13,
+    color: '#10B981',
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  restoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  restoreButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
 });

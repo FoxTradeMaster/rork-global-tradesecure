@@ -21,7 +21,7 @@ const INCOTERMS = ['CIF', 'FOB', 'CFR', 'DDP', 'EXW', 'FCA', 'DAP'];
 export default function CreateTradeScreen() {
   const router = useRouter();
   const { counterparties, addTrade, currentUser, trades } = useTrading();
-  const { isPremium, getFeatureLimit, upgradeSubscription } = useSubscription();
+  const { isPremium, getFeatureLimit } = useSubscription();
   const [selectedCounterparty, setSelectedCounterparty] = useState('');
   const [commodity, setCommodity] = useState<CommodityType>('gold');
   const [quantity, setQuantity] = useState('');
@@ -225,7 +225,6 @@ export default function CreateTradeScreen() {
       <PaywallModal
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
-        onUpgrade={upgradeSubscription}
         feature="Unlimited Active Trades"
       />
     </View>

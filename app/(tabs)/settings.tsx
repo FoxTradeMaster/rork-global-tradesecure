@@ -9,13 +9,17 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
-  const { subscriptionStatus, isPremium, upgradeSubscription, downgradeToFree } = useSubscription();
+  const { subscriptionStatus, isPremium, openCustomerCenter } = useSubscription();
   const { currentUser, setUser } = useTrading();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
 
-  const handleUpgrade = async () => {
-    await upgradeSubscription();
+  const handleManageSubscription = async () => {
+    if (isPremium) {
+      await openCustomerCenter();
+    } else {
+      setShowPaywall(true);
+    }
   };
 
   const handleLogout = () => {
@@ -108,20 +112,7 @@ export default function SettingsScreen() {
 
                   <TouchableOpacity
                     style={styles.manageButton}
-                    onPress={() => {
-                      Alert.alert(
-                        'Manage Subscription',
-                        'Downgrade to free plan?',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Downgrade',
-                            style: 'destructive',
-                            onPress: downgradeToFree,
-                          },
-                        ]
-                      );
-                    }}
+                    onPress={handleManageSubscription}
                   >
                     <Text style={styles.manageButtonText}>Manage Subscription</Text>
                   </TouchableOpacity>
@@ -206,7 +197,6 @@ export default function SettingsScreen() {
       <PaywallModal
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
-        onUpgrade={handleUpgrade}
       />
     </View>
   );

@@ -22,7 +22,7 @@ const COUNTERPARTY_IMPORT_FIELDS = [
 export default function CounterpartiesScreen() {
   const router = useRouter();
   const { counterparties, addCounterparties } = useTrading();
-  const { isPremium, checkFeatureAccess, getFeatureLimit, upgradeSubscription } = useSubscription();
+  const { isPremium, checkFeatureAccess, getFeatureLimit } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -300,7 +300,6 @@ export default function CounterpartiesScreen() {
       <PaywallModal
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
-        onUpgrade={upgradeSubscription}
         feature={paywallFeature}
       />
     </View>

@@ -1,6 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Purchases, { CustomerInfo, PurchasesOffering } from 'react-native-purchases';
+import { Platform } from 'react-native';
 
 export type SubscriptionTier = 'free' | 'premium';
 
@@ -47,6 +48,9 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
   marketInsights: true,
 };
 
+const ENTITLEMENT_ID = 'pro';
+const REVENUECAT_API_KEY = 'test_GqTiMdqiPOKKbWazgQuZgiMTztZ';
+
 export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     tier: 'free',
@@ -54,66 +58,148 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     expiresAt: null,
     isActive: true,
   });
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const stored = await Promise.race([
-          AsyncStorage.getItem('subscription_status'),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 200))
-        ]);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const status: SubscriptionStatus = {
-            ...parsed,
-            expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : null,
-          };
-          
-          if (status.tier === 'premium' && status.expiresAt) {
-            if (new Date() > status.expiresAt) {
-              await downgradeToFree();
-            } else {
-              setSubscriptionStatus(status);
-            }
-          } else {
-            setSubscriptionStatus(status);
-          }
+        console.log('[RevenueCat] Configuring SDK...');
+        
+        if (Platform.OS === 'web') {
+          console.log('[RevenueCat] Web platform detected, using mock subscription');
+          setIsLoading(false);
+          return;
         }
+
+        Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
+        await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+        
+        console.log('[RevenueCat] SDK configured successfully');
+
+        const info = await Purchases.getCustomerInfo();
+        setCustomerInfo(info);
+        updateSubscriptionFromCustomerInfo(info);
+
+        const offers = await Purchases.getOfferings();
+        if (offers.current) {
+          setOfferings(offers.current);
+          console.log('[RevenueCat] Loaded offerings:', offers.current.identifier);
+        }
+
+        Purchases.addCustomerInfoUpdateListener((info) => {
+          console.log('[RevenueCat] Customer info updated');
+          setCustomerInfo(info);
+          updateSubscriptionFromCustomerInfo(info);
+        });
+
+        setIsLoading(false);
       } catch (error) {
-        console.error('[SubscriptionContext] Error loading subscription:', error);
+        console.error('[RevenueCat] Configuration error:', error);
+        setIsLoading(false);
       }
     };
     init();
   }, []);
 
-  const upgradeSubscription = async () => {
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-    const newStatus: SubscriptionStatus = {
-      tier: 'premium',
-      features: PREMIUM_FEATURES,
-      expiresAt,
-      isActive: true,
-    };
-
-    setSubscriptionStatus(newStatus);
-    await AsyncStorage.setItem('subscription_status', JSON.stringify(newStatus));
-    console.log('[SubscriptionContext] Upgraded to premium');
+  const updateSubscriptionFromCustomerInfo = (info: CustomerInfo) => {
+    const hasProEntitlement = typeof info.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
+    
+    if (hasProEntitlement) {
+      const entitlement = info.entitlements.active[ENTITLEMENT_ID];
+      const expiresAt = entitlement.expirationDate ? new Date(entitlement.expirationDate) : null;
+      
+      setSubscriptionStatus({
+        tier: 'premium',
+        features: PREMIUM_FEATURES,
+        expiresAt,
+        isActive: true,
+      });
+      console.log('[RevenueCat] Premium subscription active until:', expiresAt);
+    } else {
+      setSubscriptionStatus({
+        tier: 'free',
+        features: FREE_FEATURES,
+        expiresAt: null,
+        isActive: true,
+      });
+      console.log('[RevenueCat] Free tier active');
+    }
   };
 
-  const downgradeToFree = async () => {
-    const newStatus: SubscriptionStatus = {
-      tier: 'free',
-      features: FREE_FEATURES,
-      expiresAt: null,
-      isActive: true,
-    };
+  const purchasePackage = async (packageId: string) => {
+    try {
+      if (Platform.OS === 'web') {
+        console.log('[RevenueCat] Mock purchase on web');
+        const expiresAt = new Date();
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        setSubscriptionStatus({
+          tier: 'premium',
+          features: PREMIUM_FEATURES,
+          expiresAt,
+          isActive: true,
+        });
+        return { customerInfo: null };
+      }
 
-    setSubscriptionStatus(newStatus);
-    await AsyncStorage.setItem('subscription_status', JSON.stringify(newStatus));
-    console.log('[SubscriptionContext] Downgraded to free');
+      if (!offerings) {
+        throw new Error('No offerings available');
+      }
+
+      const packageToPurchase = offerings.availablePackages.find(
+        pkg => pkg.identifier === packageId
+      );
+
+      if (!packageToPurchase) {
+        throw new Error(`Package ${packageId} not found`);
+      }
+
+      console.log('[RevenueCat] Purchasing package:', packageId);
+      const { customerInfo } = await Purchases.purchasePackage(packageToPurchase);
+      setCustomerInfo(customerInfo);
+      updateSubscriptionFromCustomerInfo(customerInfo);
+      
+      return { customerInfo };
+    } catch (error: any) {
+      if (error.userCancelled) {
+        console.log('[RevenueCat] Purchase cancelled by user');
+      } else {
+        console.error('[RevenueCat] Purchase error:', error);
+      }
+      throw error;
+    }
+  };
+
+  const restorePurchases = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        console.log('[RevenueCat] Restore not available on web');
+        return null;
+      }
+
+      console.log('[RevenueCat] Restoring purchases...');
+      const info = await Purchases.restorePurchases();
+      setCustomerInfo(info);
+      updateSubscriptionFromCustomerInfo(info);
+      return info;
+    } catch (error) {
+      console.error('[RevenueCat] Restore error:', error);
+      throw error;
+    }
+  };
+
+  const openCustomerCenter = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        console.log('[RevenueCat] Customer center not available on web');
+        return;
+      }
+
+      console.log('[RevenueCat] Customer center available via presentCustomerCenter in native code');
+    } catch (error) {
+      console.error('[RevenueCat] Customer center error:', error);
+    }
   };
 
   const checkFeatureAccess = (feature: keyof SubscriptionFeatures): boolean => {
@@ -129,8 +215,11 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     subscriptionStatus,
     isLoading,
     isPremium: subscriptionStatus.tier === 'premium',
-    upgradeSubscription,
-    downgradeToFree,
+    customerInfo,
+    offerings,
+    purchasePackage,
+    restorePurchases,
+    openCustomerCenter,
     checkFeatureAccess,
     getFeatureLimit,
   };
