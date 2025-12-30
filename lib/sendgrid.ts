@@ -670,85 +670,351 @@ function generateICPO(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-IRREVOCABLE CORPORATE PURCHASE ORDER (ICPO)
-Reference: ICPO-${Date.now()}
-Date: ${date}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2.5cm; }
+    body {
+      font-family: 'Times New Roman', 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 800px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .doc-title {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: #000;
+    }
+    .doc-subtitle {
+      font-size: 10pt;
+      color: #444;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+    .date-ref {
+      margin: 25px 0;
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-left: 5px solid #2c3e50;
+      font-size: 10.5pt;
+    }
+    .parties {
+      margin: 25px 0;
+      padding: 18px;
+      background: #f0f4f8;
+      border-radius: 3px;
+      line-height: 1.8;
+    }
+    .section { margin-bottom: 30px; page-break-inside: avoid; }
+    .section-title {
+      font-size: 13pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #34495e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .field {
+      margin-bottom: 12px;
+      padding-left: 20px;
+      line-height: 1.8;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #2c3e50;
+      display: inline-block;
+      min-width: 220px;
+    }
+    .field-value { color: #000; }
+    ul {
+      margin: 15px 0;
+      padding-left: 40px;
+      line-height: 2;
+    }
+    ul li { margin-bottom: 8px; }
+    .terms-box {
+      margin: 20px 0;
+      padding: 18px;
+      background: #fff9e6;
+      border-left: 5px solid #f39c12;
+      line-height: 1.9;
+    }
+    .terms-box ul { padding-left: 25px; }
+    .signature-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 2px solid #34495e;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin-top: 50px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 3px;
+    }
+    .signature-line {
+      margin-top: 45px;
+      margin-bottom: 10px;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      max-width: 450px;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+    .company-details {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    .footer {
+      margin-top: 50px;
+      padding-top: 25px;
+      border-top: 1px solid #bbb;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Irrevocable Corporate Purchase Order</div>
+      <div class="doc-subtitle">(ICPO)</div>
+    </div>
 
-FROM: ${tradeDetails?.counterpartyName || '[Buyer Name]'} (BUYER)
-TO: ${additionalInfo?.sellerName || '[Seller Name]'} (SELLER)
+    <div class="date-ref">
+      <strong>Reference Number:</strong> ICPO-${Date.now()}<br>
+      <strong>Date of Issue:</strong> ${date}
+    </div>
 
-Dear Sir/Madam,
+    <div class="parties">
+      <strong>FROM:</strong> ${tradeDetails?.counterpartyName || '[Buyer Name]'} ("BUYER")<br>
+      <strong>TO:</strong> ${additionalInfo?.sellerName || '[Seller Name]'} ("SELLER")
+    </div>
 
-We, the undersigned, as buyers, hereby issue this Irrevocable Corporate Purchase Order with full corporate and financial responsibility to purchase the following commodity:
+    <p style="margin: 25px 0; line-height: 1.8;"><strong>Dear Sir/Madam,</strong></p>
+    
+    <p style="text-align: justify; line-height: 1.8; margin-bottom: 25px;">We, the undersigned, as buyers, hereby issue this Irrevocable Corporate Purchase Order with full corporate and financial responsibility to purchase the following commodity under the terms and conditions specified herein:</p>
 
-1. COMMODITY SPECIFICATION
-Product: ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}
-Quantity: ${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}
-Quality Specification: ${additionalInfo?.quality || '[As per international standards]'}
-Country of Origin: ${additionalInfo?.origin || '[Country of Origin]'}
+    <div class="section">
+      <div class="section-title">1. Commodity Specification</div>
+      <div class="field">
+        <span class="field-label">Product:</span>
+        <span class="field-value">${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity:</span>
+        <span class="field-value">${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quality Specification:</span>
+        <span class="field-value">${additionalInfo?.quality || '[As per international standards]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Country of Origin:</span>
+        <span class="field-value">${additionalInfo?.origin || '[Country of Origin]'}</span>
+      </div>
+    </div>
 
-2. PRICE AND PAYMENT
-Unit Price: $${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}
-Total Value: $${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'}
-Currency: USD
-Payment Method: Irrevocable, Confirmed, Transferable Letter of Credit
-Payment Terms: ${additionalInfo?.paymentTerms || 'At sight'}
+    <div class="section">
+      <div class="section-title">2. Price and Payment</div>
+      <div class="field">
+        <span class="field-label">Unit Price:</span>
+        <span class="field-value">${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Total Contract Value:</span>
+        <span class="field-value">${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'} USD</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Currency:</span>
+        <span class="field-value">United States Dollars (USD)</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Payment Method:</span>
+        <span class="field-value">Irrevocable, Confirmed, Transferable Letter of Credit</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Payment Terms:</span>
+        <span class="field-value">${additionalInfo?.paymentTerms || 'At sight'}</span>
+      </div>
+    </div>
 
-3. DELIVERY TERMS
-INCOTERM 2020: ${tradeDetails?.incoterm || '[INCOTERM]'}
-Shipment Period: ${additionalInfo?.shipmentPeriod || '[Shipment Period]'}
-Partial Shipments: ${additionalInfo?.partialShipments || 'Not Allowed'}
-Transshipment: ${additionalInfo?.transshipment || 'Not Allowed'}
-Destination Port: ${additionalInfo?.destinationPort || '[Port Name]'}
+    <div class="section">
+      <div class="section-title">3. Delivery Terms</div>
+      <div class="field">
+        <span class="field-label">INCOTERM 2020:</span>
+        <span class="field-value">${tradeDetails?.incoterm || '[INCOTERM]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Shipment Period:</span>
+        <span class="field-value">${additionalInfo?.shipmentPeriod || '[Shipment Period]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Partial Shipments:</span>
+        <span class="field-value">${additionalInfo?.partialShipments || 'Not Allowed'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Transshipment:</span>
+        <span class="field-value">${additionalInfo?.transshipment || 'Not Allowed'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Destination Port:</span>
+        <span class="field-value">${additionalInfo?.destinationPort || '[Port Name]'}</span>
+      </div>
+    </div>
 
-4. INSPECTION AND CERTIFICATION
-Pre-shipment Inspection: Mandatory by ${additionalInfo?.inspector || 'SGS/Intertek/Bureau Veritas'}
-Quality Certificate: As per international standards
-Quantity Certificate: As per Bill of Lading
-All inspection costs borne by: ${additionalInfo?.inspectionCostBearer || 'Seller'}
+    <div class="section">
+      <div class="section-title">4. Inspection and Certification</div>
+      <div class="field">
+        <span class="field-label">Pre-shipment Inspection:</span>
+        <span class="field-value">Mandatory by ${additionalInfo?.inspector || 'SGS/Intertek/Bureau Veritas'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quality Certificate:</span>
+        <span class="field-value">As per international standards</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity Certificate:</span>
+        <span class="field-value">As per Bill of Lading</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Inspection Costs Borne By:</span>
+        <span class="field-value">${additionalInfo?.inspectionCostBearer || 'Seller'}</span>
+      </div>
+    </div>
 
-5. REQUIRED DOCUMENTS
-1. Commercial Invoice (Original + 3 copies)
-2. Full Set Clean on Board Bill of Lading
-3. Certificate of Origin
-4. Certificate of Quality
-5. Certificate of Quantity
-6. Packing List
-7. Insurance Certificate (if applicable)
+    <div class="section">
+      <div class="section-title">5. Required Documents</div>
+      <ul>
+        <li>Commercial Invoice (Original + 3 copies)</li>
+        <li>Full Set Clean on Board Bill of Lading</li>
+        <li>Certificate of Origin</li>
+        <li>Certificate of Quality</li>
+        <li>Certificate of Quantity</li>
+        <li>Packing List</li>
+        <li>Insurance Certificate (if applicable)</li>
+      </ul>
+    </div>
 
-6. BANKING DETAILS
-Buyer's Bank: ${additionalInfo?.buyerBank || '[Bank Name]'}
-Bank Address: ${additionalInfo?.buyerBankAddress || '[Bank Address]'}
-SWIFT Code: ${additionalInfo?.buyerSwift || '[SWIFT Code]'}
+    <div class="section">
+      <div class="section-title">6. Banking Details</div>
+      <div class="field">
+        <span class="field-label">Buyer's Bank:</span>
+        <span class="field-value">${additionalInfo?.buyerBank || '[Bank Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Bank Address:</span>
+        <span class="field-value">${additionalInfo?.buyerBankAddress || '[Bank Address]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">SWIFT Code:</span>
+        <span class="field-value">${additionalInfo?.buyerSwift || '[SWIFT Code]'}</span>
+      </div>
+    </div>
 
-7. TERMS AND CONDITIONS
-- This ICPO is irrevocable and binding upon issuance
-- Seller must provide a signed Sales and Purchase Agreement within 5 banking days
-- Letter of Credit will be established within 10 banking days of contract signing
-- Any deviation from specifications may result in rejection of goods
-- Penalties apply for late delivery as per contract terms
+    <div class="section">
+      <div class="section-title">7. Terms and Conditions</div>
+      <div class="terms-box">
+        <ul>
+          <li>This ICPO is irrevocable and binding upon issuance</li>
+          <li>Seller must provide a signed Sales and Purchase Agreement within 5 banking days</li>
+          <li>Letter of Credit will be established within 10 banking days of contract signing</li>
+          <li>Any deviation from specifications may result in rejection of goods</li>
+          <li>Penalties apply for late delivery as per contract terms</li>
+        </ul>
+      </div>
+    </div>
 
-8. VALIDITY
-This ICPO is valid from ${date} and remains valid for ${additionalInfo?.validity || '30 days'}.
+    <div class="section">
+      <div class="section-title">8. Validity</div>
+      <p style="padding-left: 20px; line-height: 1.8;">This Irrevocable Corporate Purchase Order is valid from <strong>${date}</strong> and remains valid for <strong>${additionalInfo?.validity || '30 days'}</strong>.</p>
+    </div>
 
-We confirm that we have the financial capability and full authority to fulfill this purchase order.
+    <p style="margin: 30px 0; padding: 20px; background: #e8f5e9; border-left: 5px solid #4caf50; line-height: 1.8; text-align: justify;"><strong>Declaration:</strong> We confirm that we have the financial capability and full authority to fulfill this purchase order and enter into a binding agreement for the transaction specified herein.</p>
 
-FOR AND ON BEHALF OF BUYER:
+    <div class="signature-section">
+      <p style="margin-bottom: 20px; font-weight: 600; font-size: 11pt;">FOR AND ON BEHALF OF BUYER:</p>
+      
+      <div class="signature-block">
+        <div class="signature-line">
+          AUTHORIZED SIGNATURE
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <div class="field">
+            <span class="field-label">Name:</span>
+            <span class="field-value">${additionalInfo?.buyerSignatoryName || '[Name]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Title:</span>
+            <span class="field-value">${additionalInfo?.buyerSignatoryTitle || '[Title]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Company:</span>
+            <span class="field-value">${tradeDetails?.counterpartyName || '[Buyer Company]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Date:</span>
+            <span class="field-value">${date}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Company Seal:</span>
+            <span class="field-value">[SEAL]</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-_________________________
-Signature
+    <div class="company-details">
+      <p style="font-weight: bold; margin-bottom: 15px; font-size: 11.5pt; color: #2c3e50;">BUYER COMPANY DETAILS:</p>
+      <div class="field">
+        <span class="field-label">Registration Number:</span>
+        <span class="field-value">${additionalInfo?.buyerRegistration || '[Registration Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Registered Address:</span>
+        <span class="field-value">${additionalInfo?.buyerAddress || '[Company Address]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Phone:</span>
+        <span class="field-value">${additionalInfo?.buyerPhone || '[Phone Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Email:</span>
+        <span class="field-value">${additionalInfo?.buyerEmail || '[Email Address]'}</span>
+      </div>
+    </div>
 
-Name: ${additionalInfo?.buyerSignatoryName || '[Name]'}
-Title: ${additionalInfo?.buyerSignatoryTitle || '[Title]'}
-Company: ${tradeDetails?.counterpartyName || '[Buyer Company]'}
-Company Seal: [SEAL]
-Date: ${date}
-
-BUYER COMPANY DETAILS:
-Registration Number: ${additionalInfo?.buyerRegistration || '[Registration Number]'}
-Address: ${additionalInfo?.buyerAddress || '[Company Address]'}
-Phone: ${additionalInfo?.buyerPhone || '[Phone Number]'}
-Email: ${additionalInfo?.buyerEmail || '[Email Address]'}
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the named recipient.<br>
+      Unauthorized distribution, copying, or disclosure is strictly prohibited.<br>
+      © ${new Date().getFullYear()} Commodity Trading Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
@@ -758,89 +1024,343 @@ function generateLOI(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-LETTER OF INTENT (LOI)
-Reference: LOI-${Date.now()}
-Date: ${date}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2.5cm; }
+    body {
+      font-family: 'Times New Roman', 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 800px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .doc-title {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .doc-subtitle { font-size: 10pt; color: #444; font-style: italic; }
+    .date-ref {
+      margin: 25px 0;
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-left: 5px solid #2c3e50;
+      font-size: 10.5pt;
+    }
+    .parties {
+      margin: 25px 0;
+      padding: 18px;
+      background: #f0f4f8;
+      border-radius: 3px;
+      line-height: 1.8;
+    }
+    .re-line {
+      margin: 30px 0;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 5px solid #1976d2;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .section { margin-bottom: 30px; page-break-inside: avoid; }
+    .section-title {
+      font-size: 13pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #34495e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .field {
+      margin-bottom: 12px;
+      padding-left: 20px;
+      line-height: 1.8;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #2c3e50;
+      display: inline-block;
+      min-width: 220px;
+    }
+    .field-value { color: #000; }
+    ul {
+      margin: 15px 0;
+      padding-left: 40px;
+      line-height: 2;
+    }
+    ul li { margin-bottom: 8px; }
+    .indent { padding-left: 40px; line-height: 1.9; }
+    .signature-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 2px solid #34495e;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin-top: 50px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 3px;
+    }
+    .signature-line {
+      margin-top: 45px;
+      margin-bottom: 10px;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      max-width: 450px;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+    .company-details {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    .footer {
+      margin-top: 50px;
+      padding-top: 25px;
+      border-top: 1px solid #bbb;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Letter of Intent</div>
+      <div class="doc-subtitle">(LOI)</div>
+    </div>
 
-FROM: ${tradeDetails?.counterpartyName || '[Buyer Name]'} ("Buyer")
-TO: ${additionalInfo?.sellerName || '[Seller Name]'} ("Seller")
+    <div class="date-ref">
+      <strong>Reference Number:</strong> LOI-${Date.now()}<br>
+      <strong>Date of Issue:</strong> ${date}
+    </div>
 
-Dear Sir/Madam,
+    <div class="parties">
+      <strong>FROM:</strong> ${tradeDetails?.counterpartyName || '[Buyer Name]'} ("Buyer")<br>
+      <strong>TO:</strong> ${additionalInfo?.sellerName || '[Seller Name]'} ("Seller")
+    </div>
 
-RE: LETTER OF INTENT TO PURCHASE ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[COMMODITY]'}
+    <p style="margin: 25px 0; line-height: 1.8;"><strong>Dear Sir/Madam,</strong></p>
 
-This Letter of Intent ("LOI") sets forth the understanding between the parties regarding the proposed transaction for the purchase and sale of the commodity specified below.
+    <div class="re-line">
+      RE: LETTER OF INTENT TO PURCHASE ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[COMMODITY]'}
+    </div>
+    
+    <p style="text-align: justify; line-height: 1.8; margin-bottom: 25px;">This Letter of Intent ("LOI") sets forth the understanding between the parties regarding the proposed transaction for the purchase and sale of the commodity specified below.</p>
 
-1. PARTIES
-Buyer: ${tradeDetails?.counterpartyName || '[Buyer Name]'}
-Seller: ${additionalInfo?.sellerName || '[Seller Name]'}
+    <div class="section">
+      <div class="section-title">1. Parties</div>
+      <div class="field">
+        <span class="field-label">Buyer:</span>
+        <span class="field-value">${tradeDetails?.counterpartyName || '[Buyer Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Seller:</span>
+        <span class="field-value">${additionalInfo?.sellerName || '[Seller Name]'}</span>
+      </div>
+    </div>
 
-2. COMMODITY DESCRIPTION
-Product: ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}
-Quantity: ${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}
-Quality: ${additionalInfo?.quality || '[As per international standards]'}
-Origin: ${additionalInfo?.origin || '[Country of Origin]'}
+    <div class="section">
+      <div class="section-title">2. Commodity Description</div>
+      <div class="field">
+        <span class="field-label">Product:</span>
+        <span class="field-value">${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity:</span>
+        <span class="field-value">${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quality:</span>
+        <span class="field-value">${additionalInfo?.quality || '[As per international standards]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Origin:</span>
+        <span class="field-value">${additionalInfo?.origin || '[Country of Origin]'}</span>
+      </div>
+    </div>
 
-3. COMMERCIAL TERMS
-Unit Price: ${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}
-Total Contract Value: ${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'} USD
-Price Basis: ${additionalInfo?.priceBasis || '[Fixed/Market-linked]'}
-INCOTERM 2020: ${tradeDetails?.incoterm || '[INCOTERM]'}
+    <div class="section">
+      <div class="section-title">3. Commercial Terms</div>
+      <div class="field">
+        <span class="field-label">Unit Price:</span>
+        <span class="field-value">${tradeDetails?.pricePerUnit.toLocaleString() || '[Price]'} per ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Total Contract Value:</span>
+        <span class="field-value">${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Total Value]'} USD</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Price Basis:</span>
+        <span class="field-value">${additionalInfo?.priceBasis || '[Fixed/Market-linked]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">INCOTERM 2020:</span>
+        <span class="field-value">${tradeDetails?.incoterm || '[INCOTERM]'}</span>
+      </div>
+    </div>
 
-4. DELIVERY TERMS
-Shipment Period: ${additionalInfo?.shipmentPeriod || '[Shipment Period]'}
-Loading Port: ${additionalInfo?.loadingPort || '[Port Name]'}
-Destination Port: ${additionalInfo?.destinationPort || '[Port Name]'}
-Partial Shipments: ${additionalInfo?.partialShipments || 'Not Allowed'}
+    <div class="section">
+      <div class="section-title">4. Delivery Terms</div>
+      <div class="field">
+        <span class="field-label">Shipment Period:</span>
+        <span class="field-value">${additionalInfo?.shipmentPeriod || '[Shipment Period]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Loading Port:</span>
+        <span class="field-value">${additionalInfo?.loadingPort || '[Port Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Destination Port:</span>
+        <span class="field-value">${additionalInfo?.destinationPort || '[Port Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Partial Shipments:</span>
+        <span class="field-value">${additionalInfo?.partialShipments || 'Not Allowed'}</span>
+      </div>
+    </div>
 
-5. PAYMENT TERMS
-Payment Method: ${additionalInfo?.paymentMethod || 'Irrevocable Letter of Credit (LC)'}
-Payment Terms: ${additionalInfo?.paymentTerms || 'At sight'}
-Buyer's Bank: ${additionalInfo?.buyerBank || '[Bank Name]'}
+    <div class="section">
+      <div class="section-title">5. Payment Terms</div>
+      <div class="field">
+        <span class="field-label">Payment Method:</span>
+        <span class="field-value">${additionalInfo?.paymentMethod || 'Irrevocable Letter of Credit (LC)'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Payment Terms:</span>
+        <span class="field-value">${additionalInfo?.paymentTerms || 'At sight'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Buyer's Bank:</span>
+        <span class="field-value">${additionalInfo?.buyerBank || '[Bank Name]'}</span>
+      </div>
+    </div>
 
-6. INSPECTION AND QUALITY
-Pre-shipment Inspection: ${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}
-Certificates Required:
-  - Certificate of Quality
-  - Certificate of Quantity
-  - Certificate of Origin
-  - Full set of clean on board Bills of Lading
+    <div class="section">
+      <div class="section-title">6. Inspection and Quality</div>
+      <div class="field">
+        <span class="field-label">Pre-shipment Inspection:</span>
+        <span class="field-value">${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}</span>
+      </div>
+      <p style="padding-left: 20px; margin-top: 15px; font-weight: 600;">Certificates Required:</p>
+      <ul>
+        <li>Certificate of Quality</li>
+        <li>Certificate of Quantity</li>
+        <li>Certificate of Origin</li>
+        <li>Full set of clean on board Bills of Lading</li>
+      </ul>
+    </div>
 
-7. NEXT STEPS
-Upon acceptance of this LOI, the parties agree to:
-a) Execute a formal Sales and Purchase Agreement within ${additionalInfo?.contractDays || '10 banking days'}
-b) Buyer to provide Proof of Funds (POF) within ${additionalInfo?.pofDays || '3 banking days'}
-c) Seller to provide all required corporate documents and certificates
-d) Buyer to establish Letter of Credit as per agreed terms
+    <div class="section">
+      <div class="section-title">7. Next Steps</div>
+      <p style="padding-left: 20px; line-height: 1.8; margin-bottom: 15px;">Upon acceptance of this LOI, the parties agree to:</p>
+      <div class="indent">
+        <p style="margin-bottom: 10px;"><strong>a)</strong> Execute a formal Sales and Purchase Agreement within <strong>${additionalInfo?.contractDays || '10 banking days'}</strong></p>
+        <p style="margin-bottom: 10px;"><strong>b)</strong> Buyer to provide Proof of Funds (POF) within <strong>${additionalInfo?.pofDays || '3 banking days'}</strong></p>
+        <p style="margin-bottom: 10px;"><strong>c)</strong> Seller to provide all required corporate documents and certificates</p>
+        <p style="margin-bottom: 10px;"><strong>d)</strong> Buyer to establish Letter of Credit as per agreed terms</p>
+      </div>
+    </div>
 
-8. VALIDITY AND BINDING EFFECT
-This LOI is valid for ${additionalInfo?.validity || '15 days'} from the date hereof and serves as a statement of mutual interest to proceed with the transaction. This LOI is non-binding until a formal Sales and Purchase Agreement is executed by both parties.
+    <div class="section">
+      <div class="section-title">8. Validity and Binding Effect</div>
+      <p style="padding-left: 20px; line-height: 1.8; text-align: justify;">This LOI is valid for <strong>${additionalInfo?.validity || '15 days'}</strong> from the date hereof and serves as a statement of mutual interest to proceed with the transaction. This LOI is non-binding until a formal Sales and Purchase Agreement is executed by both parties.</p>
+    </div>
 
-9. CONFIDENTIALITY
-Both parties agree to treat all information exchanged in connection with this transaction as confidential and not to disclose such information to any third party without prior written consent.
+    <div class="section">
+      <div class="section-title">9. Confidentiality</div>
+      <p style="padding-left: 20px; line-height: 1.8; text-align: justify;">Both parties agree to treat all information exchanged in connection with this transaction as confidential and not to disclose such information to any third party without prior written consent.</p>
+    </div>
 
-10. GOVERNING LAW
-This LOI shall be governed by and construed in accordance with the laws of ${additionalInfo?.governingLaw || '[Jurisdiction]'}.
+    <div class="section">
+      <div class="section-title">10. Governing Law</div>
+      <p style="padding-left: 20px; line-height: 1.8;">This LOI shall be governed by and construed in accordance with the laws of <strong>${additionalInfo?.governingLaw || '[Jurisdiction]'}</strong>.</p>
+    </div>
 
-We confirm our serious intent to proceed with this transaction subject to successful completion of due diligence and execution of definitive agreements.
+    <p style="margin: 30px 0; padding: 20px; background: #e8f5e9; border-left: 5px solid #4caf50; line-height: 1.8; text-align: justify;">We confirm our serious intent to proceed with this transaction subject to successful completion of due diligence and execution of definitive agreements.</p>
 
-Yours faithfully,
+    <p style="margin: 35px 0 20px 0; line-height: 1.8;"><strong>Yours faithfully,</strong></p>
 
-FOR AND ON BEHALF OF BUYER:
+    <div class="signature-section">
+      <p style="margin-bottom: 20px; font-weight: 600; font-size: 11pt;">FOR AND ON BEHALF OF BUYER:</p>
+      
+      <div class="signature-block">
+        <div class="signature-line">
+          AUTHORIZED SIGNATURE
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <div class="field">
+            <span class="field-label">Name:</span>
+            <span class="field-value">${additionalInfo?.buyerSignatoryName || '[Name]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Title:</span>
+            <span class="field-value">${additionalInfo?.buyerSignatoryTitle || '[Title]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Company:</span>
+            <span class="field-value">${tradeDetails?.counterpartyName || '[Buyer Company]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Date:</span>
+            <span class="field-value">${date}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-_________________________
-Signature
+    <div class="company-details">
+      <p style="font-weight: bold; margin-bottom: 15px; font-size: 11.5pt; color: #2c3e50;">BUYER COMPANY DETAILS:</p>
+      <div class="field">
+        <span class="field-label">Registration Number:</span>
+        <span class="field-value">${additionalInfo?.buyerRegistration || '[Registration Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Registered Address:</span>
+        <span class="field-value">${additionalInfo?.buyerAddress || '[Company Address]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Phone:</span>
+        <span class="field-value">${additionalInfo?.buyerPhone || '[Phone Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Email:</span>
+        <span class="field-value">${additionalInfo?.buyerEmail || '[Email Address]'}</span>
+      </div>
+    </div>
 
-Name: ${additionalInfo?.buyerSignatoryName || '[Name]'}
-Title: ${additionalInfo?.buyerSignatoryTitle || '[Title]'}
-Company: ${tradeDetails?.counterpartyName || '[Buyer Company]'}
-Date: ${date}
-
-BUYER COMPANY DETAILS:
-Registration Number: ${additionalInfo?.buyerRegistration || '[Registration Number]'}
-Address: ${additionalInfo?.buyerAddress || '[Company Address]'}
-Phone: ${additionalInfo?.buyerPhone || '[Phone Number]'}
-Email: ${additionalInfo?.buyerEmail || '[Email Address]'}
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the named recipient.<br>
+      Unauthorized distribution, copying, or disclosure is strictly prohibited.<br>
+      © ${new Date().getFullYear()} Commodity Trading Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
@@ -850,86 +1370,359 @@ function generatePOF(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-PROOF OF FUNDS (POF)
-Reference: POF-${Date.now()}
-Date: ${date}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2.5cm; }
+    body {
+      font-family: 'Times New Roman', 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 800px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .doc-title {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .doc-subtitle { font-size: 10pt; color: #444; font-style: italic; }
+    .date-ref {
+      margin: 25px 0;
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-left: 5px solid #2c3e50;
+      font-size: 10.5pt;
+    }
+    .to-whom {
+      margin: 30px 0;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12pt;
+      letter-spacing: 1px;
+    }
+    .re-line {
+      margin: 30px 0;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 5px solid #1976d2;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-box {
+      margin: 25px 0;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    .info-box-title {
+      font-weight: bold;
+      font-size: 11.5pt;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field {
+      margin-bottom: 12px;
+      padding-left: 10px;
+      line-height: 1.8;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #2c3e50;
+      display: inline-block;
+      min-width: 220px;
+    }
+    .field-value { color: #000; }
+    .section { margin-bottom: 30px; page-break-inside: avoid; }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #34495e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .certification-list {
+      margin: 20px 0;
+      padding-left: 30px;
+      line-height: 2;
+    }
+    .certification-list li {
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+    .important-box {
+      margin: 25px 0;
+      padding: 20px;
+      background: #fff9e6;
+      border-left: 5px solid #f39c12;
+      border-radius: 3px;
+    }
+    .important-box-title {
+      font-weight: bold;
+      font-size: 11pt;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .important-box ul {
+      margin: 0;
+      padding-left: 25px;
+      line-height: 1.9;
+    }
+    .important-box li { margin-bottom: 8px; }
+    .signature-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 2px solid #34495e;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin-top: 50px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 3px;
+    }
+    .signature-line {
+      margin-top: 45px;
+      margin-bottom: 10px;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      max-width: 450px;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+    .seal-box {
+      margin-top: 30px;
+      padding: 30px;
+      border: 2px solid #333;
+      text-align: center;
+      font-weight: bold;
+      background: #f5f5f5;
+    }
+    .disclaimer {
+      margin-top: 40px;
+      padding: 20px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 10pt;
+      line-height: 1.7;
+      text-align: justify;
+    }
+    .footer {
+      margin-top: 50px;
+      padding-top: 25px;
+      border-top: 1px solid #bbb;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Proof of Funds</div>
+      <div class="doc-subtitle">(POF)</div>
+    </div>
 
-TO WHOM IT MAY CONCERN
+    <div class="date-ref">
+      <strong>Reference Number:</strong> POF-${Date.now()}<br>
+      <strong>Date of Issue:</strong> ${date}
+    </div>
 
-RE: PROOF OF FUNDS FOR ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[COMMODITY]'} TRANSACTION
+    <div class="to-whom">TO WHOM IT MAY CONCERN</div>
 
-This Proof of Funds letter is issued by ${additionalInfo?.bankName || '[Bank Name]'} on behalf of our valued client:
+    <div class="re-line">
+      RE: PROOF OF FUNDS FOR ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[COMMODITY]'} TRANSACTION
+    </div>
 
-CLIENT INFORMATION:
-Company Name: ${tradeDetails?.counterpartyName || '[Company Name]'}
-Account Number: ${additionalInfo?.accountNumber || '[Account Number - Masked for Security]'}
-Registration Number: ${additionalInfo?.registrationNumber || '[Registration Number]'}
-Address: ${additionalInfo?.companyAddress || '[Company Address]'}
+    <p style="text-align: justify; line-height: 1.8; margin: 25px 0;">This Proof of Funds letter is issued by <strong>${additionalInfo?.bankName || '[Bank Name]'}</strong> on behalf of our valued client:</p>
 
-BANK INFORMATION:
-Bank Name: ${additionalInfo?.bankName || '[Bank Name]'}
-Bank Address: ${additionalInfo?.bankAddress || '[Bank Address]'}
-SWIFT Code: ${additionalInfo?.swiftCode || '[SWIFT Code]'}
-Bank License Number: ${additionalInfo?.bankLicense || '[License Number]'}
+    <div class="info-box">
+      <div class="info-box-title">Client Information:</div>
+      <div class="field">
+        <span class="field-label">Company Name:</span>
+        <span class="field-value">${tradeDetails?.counterpartyName || '[Company Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Account Number:</span>
+        <span class="field-value">${additionalInfo?.accountNumber || '[Account Number - Masked for Security]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Registration Number:</span>
+        <span class="field-value">${additionalInfo?.registrationNumber || '[Registration Number]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Registered Address:</span>
+        <span class="field-value">${additionalInfo?.companyAddress || '[Company Address]'}</span>
+      </div>
+    </div>
 
-TRANSACTION DETAILS:
-Purpose: Purchase of ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}
-Quantity: ${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}
-Estimated Transaction Value: ${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Amount]'} USD
-Counterparty: ${additionalInfo?.sellerName || '[Seller Name]'}
+    <div class="info-box">
+      <div class="info-box-title">Bank Information:</div>
+      <div class="field">
+        <span class="field-label">Bank Name:</span>
+        <span class="field-value">${additionalInfo?.bankName || '[Bank Name]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Bank Address:</span>
+        <span class="field-value">${additionalInfo?.bankAddress || '[Bank Address]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">SWIFT Code:</span>
+        <span class="field-value">${additionalInfo?.swiftCode || '[SWIFT Code]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Bank License Number:</span>
+        <span class="field-value">${additionalInfo?.bankLicense || '[License Number]'}</span>
+      </div>
+    </div>
 
-CERTIFICATION:
+    <div class="info-box">
+      <div class="info-box-title">Transaction Details:</div>
+      <div class="field">
+        <span class="field-label">Purpose:</span>
+        <span class="field-value">Purchase of ${tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '[Commodity]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Quantity:</span>
+        <span class="field-value">${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || '[Unit]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Estimated Transaction Value:</span>
+        <span class="field-value">${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Amount]'} USD</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Counterparty:</span>
+        <span class="field-value">${additionalInfo?.sellerName || '[Seller Name]'}</span>
+      </div>
+    </div>
 
-We, ${additionalInfo?.bankName || '[Bank Name]'}, hereby certify and confirm that:
+    <div class="section">
+      <div class="section-title">Certification</div>
+      <p style="line-height: 1.8; margin-bottom: 20px;">We, <strong>${additionalInfo?.bankName || '[Bank Name]'}</strong>, hereby certify and confirm that:</p>
+      
+      <ol class="certification-list">
+        <li>The above-named client maintains an active account with our institution in good standing.</li>
+        
+        <li>Our client has sufficient funds and/or approved credit facilities available to fulfill the financial obligations for the above-referenced transaction.</li>
+        
+        <li>The funds are unencumbered, of non-criminal origin, and free from any liens or legal restrictions that would prevent their use for this transaction.</li>
+        
+        <li>We confirm that funds totaling <strong>${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Amount]'} USD</strong> are available and can be transferred upon receipt of proper documentation and fulfillment of contract terms.</li>
+        
+        <li>This bank is ready, willing, and able to issue an Irrevocable Letter of Credit or effect payment via bank-to-bank transfer in accordance with the terms of the Sales and Purchase Agreement.</li>
+        
+        <li>All funds comply with international Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations.</li>
+        
+        <li>This bank is regulated by <strong>${additionalInfo?.regulator || '[Banking Regulatory Authority]'}</strong> and operates in full compliance with all applicable banking laws and international standards.</li>
+      </ol>
+    </div>
 
-1. The above-named client maintains an active account with our institution in good standing.
+    <div class="important-box">
+      <div class="important-box-title">Important Notes:</div>
+      <ul>
+        <li>This Proof of Funds is issued for the specific transaction referenced above</li>
+        <li>This letter does not constitute a commitment to transfer funds</li>
+        <li>Actual transfer of funds is subject to proper contract execution and documentation</li>
+        <li>This POF is valid for <strong>${additionalInfo?.validity || '30 days'}</strong> from the date of issue</li>
+        <li>This letter is confidential and intended solely for the transaction parties</li>
+      </ul>
+    </div>
 
-2. Our client has sufficient funds and/or approved credit facilities available to fulfill the financial obligations for the above-referenced transaction.
+    <div class="section">
+      <div class="section-title">Confidentiality</div>
+      <p style="padding-left: 10px; line-height: 1.8; text-align: justify;">This Proof of Funds letter is issued in strict confidence and may only be used for the purpose stated above. Any unauthorized disclosure or use of this document is strictly prohibited.</p>
+    </div>
 
-3. The funds are unencumbered, of non-criminal origin, and free from any liens or legal restrictions that would prevent their use for this transaction.
+    <div class="section">
+      <div class="section-title">Validity</div>
+      <p style="padding-left: 10px; line-height: 1.8;">This Proof of Funds letter is valid from <strong>${date}</strong> until <strong>${additionalInfo?.expiryDate || '[Expiry Date]'}</strong>.</p>
+      
+      <p style="padding-left: 10px; line-height: 1.8; margin-top: 20px;">For verification of this document, please contact our Corporate Banking Department:</p>
+      <div class="field">
+        <span class="field-label">Phone:</span>
+        <span class="field-value">${additionalInfo?.bankPhone || '[Bank Phone]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Email:</span>
+        <span class="field-value">${additionalInfo?.bankEmail || '[Bank Email]'}</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Reference:</span>
+        <span class="field-value">POF-${Date.now()}</span>
+      </div>
+    </div>
 
-4. We confirm that funds totaling ${tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString() : '[Amount]'} USD are available and can be transferred upon receipt of proper documentation and fulfillment of contract terms.
+    <p style="margin: 35px 0 20px 0; line-height: 1.8;"><strong>Yours faithfully,</strong></p>
 
-5. This bank is ready, willing, and able to issue an Irrevocable Letter of Credit or effect payment via bank-to-bank transfer in accordance with the terms of the Sales and Purchase Agreement.
+    <div class="signature-section">
+      <p style="margin-bottom: 20px; font-weight: 600; font-size: 11pt;">FOR AND ON BEHALF OF ${additionalInfo?.bankName || '[Bank Name]'}:</p>
+      
+      <div class="signature-block">
+        <div class="signature-line">
+          AUTHORIZED SIGNATURE
+        </div>
+        
+        <div style="margin-top: 25px;">
+          <div class="field">
+            <span class="field-label">Name:</span>
+            <span class="field-value">${additionalInfo?.bankOfficerName || '[Bank Officer Name]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Title:</span>
+            <span class="field-value">${additionalInfo?.bankOfficerTitle || '[Title - e.g., Senior Vice President, Corporate Banking]'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Department:</span>
+            <span class="field-value">Corporate Banking</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Date:</span>
+            <span class="field-value">${date}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-6. All funds comply with international Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations.
+    <div class="seal-box">
+      BANK OFFICIAL STAMP/SEAL
+    </div>
 
-7. This bank is regulated by ${additionalInfo?.regulator || '[Banking Regulatory Authority]'} and operates in full compliance with all applicable banking laws and international standards.
+    <div class="disclaimer">
+      <strong>DISCLAIMER:</strong><br><br>
+      This document is issued based on information provided by the client and the bank's internal records as of ${date}. The bank assumes no liability for the accuracy of transaction details provided by the client. This POF does not constitute a guarantee of payment and should not be construed as a financial commitment beyond certification of available funds.
+    </div>
 
-IMPORTANT NOTES:
-- This Proof of Funds is issued for the specific transaction referenced above
-- This letter does not constitute a commitment to transfer funds
-- Actual transfer of funds is subject to proper contract execution and documentation
-- This POF is valid for ${additionalInfo?.validity || '30 days'} from the date of issue
-- This letter is confidential and intended solely for the transaction parties
-
-CONFIDENTIALITY:
-This Proof of Funds letter is issued in strict confidence and may only be used for the purpose stated above. Any unauthorized disclosure or use of this document is strictly prohibited.
-
-VALIDITY:
-This Proof of Funds letter is valid from ${date} until ${additionalInfo?.expiryDate || '[Expiry Date]'}.
-
-For verification of this document, please contact our Corporate Banking Department:
-Phone: ${additionalInfo?.bankPhone || '[Bank Phone]'}
-Email: ${additionalInfo?.bankEmail || '[Bank Email]'}
-Reference: POF-${Date.now()}
-
-Yours faithfully,
-
-FOR AND ON BEHALF OF ${additionalInfo?.bankName || '[Bank Name]'}:
-
-_________________________
-Authorized Signature
-
-Name: ${additionalInfo?.bankOfficerName || '[Bank Officer Name]'}
-Title: ${additionalInfo?.bankOfficerTitle || '[Title - e.g., Senior Vice President, Corporate Banking]'}
-Department: Corporate Banking
-
-_________________________
-Bank Official Stamp/Seal
-
-DISCLAIMER:
-This document is issued based on information provided by the client and the bank's internal records as of ${date}. The bank assumes no liability for the accuracy of transaction details provided by the client. This POF does not constitute a guarantee of payment and should not be construed as a financial commitment beyond certification of available funds.
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the named recipient.<br>
+      Unauthorized distribution, copying, or disclosure is strictly prohibited.<br>
+      © ${new Date().getFullYear()} ${additionalInfo?.bankName || '[Bank Name]'}. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
@@ -939,195 +1732,490 @@ function generateNCNDA(
   additionalInfo?: Record<string, any>
 ): string {
   return `
-NON-CIRCUMVENTION AND NON-DISCLOSURE AGREEMENT (NCNDA)
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2.5cm; }
+    body {
+      font-family: 'Times New Roman', 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 850px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .doc-title {
+      font-size: 18pt;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .date-ref {
+      margin: 25px 0;
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-left: 5px solid #2c3e50;
+      font-size: 10.5pt;
+    }
+    .parties-section {
+      margin: 30px 0;
+      padding: 25px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    .party-block {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f0f4f8;
+      border-left: 4px solid #34495e;
+    }
+    .party-title {
+      font-weight: bold;
+      font-size: 11.5pt;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: #2c3e50;
+    }
+    .whereas-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #fff9e6;
+      border-left: 5px solid #f39c12;
+      border-radius: 3px;
+    }
+    .whereas-title {
+      font-weight: bold;
+      font-size: 11.5pt;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+    .section { margin-bottom: 35px; page-break-inside: avoid; }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #34495e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .subsection {
+      margin: 15px 0;
+      padding-left: 20px;
+      line-height: 1.9;
+      text-align: justify;
+    }
+    .subsection-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .clause-list {
+      margin: 10px 0;
+      padding-left: 40px;
+      line-height: 2;
+    }
+    .clause-list li {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+    .intro-text {
+      margin: 25px 0;
+      padding: 20px;
+      background: #e8f5e9;
+      border-left: 5px solid #4caf50;
+      line-height: 1.8;
+      text-align: justify;
+    }
+    .signature-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 3px double #34495e;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin: 40px 0;
+      padding: 25px;
+      background: #fafafa;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    .signature-line {
+      margin: 30px 0 15px 0;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      max-width: 400px;
+      font-weight: bold;
+    }
+    .signature-field {
+      margin: 10px 0;
+      line-height: 1.8;
+    }
+    .signature-field strong {
+      display: inline-block;
+      min-width: 120px;
+      color: #2c3e50;
+    }
+    .witness-section {
+      margin-top: 50px;
+      padding: 25px;
+      background: #f5f5f5;
+      border-radius: 3px;
+    }
+    .witness-block {
+      margin: 25px 0;
+    }
+    .footer {
+      margin-top: 50px;
+      padding-top: 25px;
+      border-top: 1px solid #bbb;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Non-Circumvention and Non-Disclosure Agreement</div>
+      <div style="font-size: 10pt; color: #444; font-style: italic;">(NCNDA)</div>
+    </div>
 
-Reference: NCNDA-${Date.now()}
-Date: ${date}
+    <div class="date-ref">
+      <strong>Reference Number:</strong> NCNDA-${Date.now()}<br>
+      <strong>Date of Agreement:</strong> ${date}
+    </div>
 
-This Non-Circumvention and Non-Disclosure Agreement ("Agreement") is entered into on ${date} by and between:
+    <p style="text-align: justify; line-height: 1.8; margin: 25px 0;">This Non-Circumvention and Non-Disclosure Agreement ("Agreement") is entered into on <strong>${date}</strong> by and between:</p>
 
-PARTY A ("Disclosing Party"):
-Company Name: ${additionalInfo?.partyAName || '[Party A Company Name]'}
-Registration Number: ${additionalInfo?.partyARegistration || '[Registration Number]'}
-Address: ${additionalInfo?.partyAAddress || '[Company Address]'}
-Represented by: ${additionalInfo?.partyARepresentative || '[Name and Title]'}
+    <div class="parties-section">
+      <div class="party-block">
+        <div class="party-title">Party A ("Disclosing Party"):</div>
+        <div style="padding-left: 15px; line-height: 1.8;">
+          <strong>Company Name:</strong> ${additionalInfo?.partyAName || '[Party A Company Name]'}<br>
+          <strong>Registration Number:</strong> ${additionalInfo?.partyARegistration || '[Registration Number]'}<br>
+          <strong>Address:</strong> ${additionalInfo?.partyAAddress || '[Company Address]'}<br>
+          <strong>Represented by:</strong> ${additionalInfo?.partyARepresentative || '[Name and Title]'}
+        </div>
+      </div>
 
-AND
+      <div style="text-align: center; font-weight: bold; margin: 20px 0; font-size: 11pt;">AND</div>
 
-PARTY B ("Receiving Party"):
-Company Name: ${additionalInfo?.partyBName || tradeDetails?.counterpartyName || '[Party B Company Name]'}
-Registration Number: ${additionalInfo?.partyBRegistration || '[Registration Number]'}
-Address: ${additionalInfo?.partyBAddress || '[Company Address]'}
-Represented by: ${additionalInfo?.partyBRepresentative || '[Name and Title]'}
+      <div class="party-block">
+        <div class="party-title">Party B ("Receiving Party"):</div>
+        <div style="padding-left: 15px; line-height: 1.8;">
+          <strong>Company Name:</strong> ${additionalInfo?.partyBName || tradeDetails?.counterpartyName || '[Party B Company Name]'}<br>
+          <strong>Registration Number:</strong> ${additionalInfo?.partyBRegistration || '[Registration Number]'}<br>
+          <strong>Address:</strong> ${additionalInfo?.partyBAddress || '[Company Address]'}<br>
+          <strong>Represented by:</strong> ${additionalInfo?.partyBRepresentative || '[Name and Title]'}
+        </div>
+      </div>
 
-Collectively referred to as the "Parties" and individually as a "Party."
+      <p style="margin-top: 20px; text-align: center; font-style: italic;">Collectively referred to as the "Parties" and individually as a "Party."</p>
+    </div>
 
-WHEREAS:
+    <div class="whereas-section">
+      <div class="whereas-title">Whereas:</div>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>A.</strong> The Parties wish to engage in discussions and business transactions related to <strong>${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : '[Commodity/Business Activity]'}</strong>.</p>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>B.</strong> In connection with such discussions and transactions, each Party may disclose to the other Party certain confidential and proprietary information.</p>
+      <p style="margin-bottom: 0; line-height: 1.8; text-align: justify;"><strong>C.</strong> The Parties desire to protect the confidentiality of such information and establish terms to prevent circumvention in their business dealings.</p>
+    </div>
 
-A. The Parties wish to engage in discussions and business transactions related to ${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : '[Commodity/Business Activity]'}.
+    <div class="intro-text">
+      <strong>NOW, THEREFORE,</strong> in consideration of the mutual covenants and agreements contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:
+    </div>
 
-B. In connection with such discussions and transactions, each Party may disclose to the other Party certain confidential and proprietary information.
+    <div class="section">
+      <div class="section-title">1. Non-Disclosure</div>
+      
+      <div class="subsection">
+        <div class="subsection-title">1.1 Definition of Confidential Information</div>
+        <p>"Confidential Information" means any and all information disclosed by one Party to the other Party, whether orally, in writing, electronically, or by any other means, including but not limited to:</p>
+        <ul class="clause-list">
+          <li>Business plans, strategies, and methods</li>
+          <li>Financial information, pricing, and terms</li>
+          <li>Customer and supplier lists and contacts</li>
+          <li>Technical data and specifications</li>
+          <li>Trade secrets and proprietary information</li>
+          <li>Market analyses and business opportunities</li>
+          <li>Contract terms and negotiations</li>
+          <li>Any information marked as "Confidential" or which would reasonably be considered confidential</li>
+        </ul>
+      </div>
 
-C. The Parties desire to protect the confidentiality of such information and establish terms to prevent circumvention in their business dealings.
+      <div class="subsection">
+        <div class="subsection-title">1.2 Obligations</div>
+        <p>Each Party agrees to:</p>
+        <ul class="clause-list">
+          <li>Keep all Confidential Information strictly confidential</li>
+          <li>Not disclose Confidential Information to any third party without prior written consent</li>
+          <li>Use Confidential Information solely for the purpose of evaluating and conducting the proposed business transaction</li>
+          <li>Protect Confidential Information with the same degree of care used to protect its own confidential information, but in no event less than reasonable care</li>
+          <li>Limit access to Confidential Information to employees, agents, or advisors who have a legitimate need to know and who are bound by confidentiality obligations</li>
+        </ul>
+      </div>
 
-NOW, THEREFORE, in consideration of the mutual covenants and agreements contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:
+      <div class="subsection">
+        <div class="subsection-title">1.3 Exceptions</div>
+        <p>Confidential Information does not include information that:</p>
+        <ul class="clause-list">
+          <li>Was publicly known at the time of disclosure</li>
+          <li>Becomes publicly known through no breach of this Agreement</li>
+          <li>Was rightfully in the possession of the Receiving Party prior to disclosure</li>
+          <li>Is independently developed by the Receiving Party without use of the Confidential Information</li>
+          <li>Is rightfully received from a third party without breach of any confidentiality obligation</li>
+        </ul>
+      </div>
+    </div>
 
-1. NON-DISCLOSURE
+    <div class="section">
+      <div class="section-title">2. Non-Circumvention</div>
+      
+      <div class="subsection">
+        <div class="subsection-title">2.1 Circumvention Prohibition</div>
+        <p>Each Party agrees not to circumvent, avoid, bypass, or obviate the other Party by:</p>
+        <ul class="clause-list">
+          <li>Directly or indirectly contacting, dealing with, or entering into any agreement with any party, contact, or source of supply introduced or disclosed by the other Party</li>
+          <li>Using Confidential Information to contact or deal with any such parties for any business purpose</li>
+          <li>Attempting to gain any financial benefit or advantage from such contacts without the full involvement and written consent of the introducing Party</li>
+        </ul>
+      </div>
 
-1.1 "Confidential Information" means any and all information disclosed by one Party to the other Party, whether orally, in writing, electronically, or by any other means, including but not limited to:
-   a) Business plans, strategies, and methods
-   b) Financial information, pricing, and terms
-   c) Customer and supplier lists and contacts
-   d) Technical data and specifications
-   e) Trade secrets and proprietary information
-   f) Market analyses and business opportunities
-   g) Contract terms and negotiations
-   h) Any information marked as "Confidential" or which would reasonably be considered confidential
+      <div class="subsection">
+        <div class="subsection-title">2.2 Scope of Application</div>
+        <p>The non-circumvention obligations shall apply to:</p>
+        <ul class="clause-list">
+          <li>All contacts, clients, suppliers, financiers, or other parties introduced by either Party</li>
+          <li>All business opportunities arising from such introductions</li>
+          <li>Any transactions, agreements, or arrangements resulting from such introductions</li>
+        </ul>
+      </div>
 
-1.2 Each Party agrees to:
-   a) Keep all Confidential Information strictly confidential
-   b) Not disclose Confidential Information to any third party without prior written consent
-   c) Use Confidential Information solely for the purpose of evaluating and conducting the proposed business transaction
-   d) Protect Confidential Information with the same degree of care used to protect its own confidential information, but in no event less than reasonable care
-   e) Limit access to Confidential Information to employees, agents, or advisors who have a legitimate need to know and who are bound by confidentiality obligations
+      <div class="subsection">
+        <div class="subsection-title">2.3 Rights of Introducing Party</div>
+        <p>In the event of any transaction with an introduced party, the introducing Party shall be entitled to:</p>
+        <ul class="clause-list">
+          <li>Full participation in such transaction as agreed between the Parties</li>
+          <li>Commission or fees as per separate agreement</li>
+          <li>Full disclosure of all terms and conditions</li>
+        </ul>
+      </div>
+    </div>
 
-1.3 Confidential Information does not include information that:
-   a) Was publicly known at the time of disclosure
-   b) Becomes publicly known through no breach of this Agreement
-   c) Was rightfully in the possession of the Receiving Party prior to disclosure
-   d) Is independently developed by the Receiving Party without use of the Confidential Information
-   e) Is rightfully received from a third party without breach of any confidentiality obligation
+    <div class="section">
+      <div class="section-title">3. Term and Termination</div>
+      
+      <div class="subsection">
+        <p><strong>3.1</strong> This Agreement shall commence on the date first written above and shall continue for a period of <strong>${additionalInfo?.termYears || '5 (five)'} years</strong>.</p>
+      </div>
 
-2. NON-CIRCUMVENTION
+      <div class="subsection">
+        <p><strong>3.2</strong> The obligations of confidentiality and non-circumvention shall survive the termination of this Agreement and continue for an additional <strong>${additionalInfo?.postTermYears || '5 (five)'} years</strong>.</p>
+      </div>
 
-2.1 Each Party agrees not to circumvent, avoid, bypass, or obviate the other Party by:
-   a) Directly or indirectly contacting, dealing with, or entering into any agreement with any party, contact, or source of supply introduced or disclosed by the other Party
-   b) Using Confidential Information to contact or deal with any such parties for any business purpose
-   c) Attempting to gain any financial benefit or advantage from such contacts without the full involvement and written consent of the introducing Party
+      <div class="subsection">
+        <p><strong>3.3</strong> Either Party may terminate this Agreement upon <strong>${additionalInfo?.noticePeriod || '30 days'}</strong> written notice to the other Party, provided that all obligations under this Agreement shall survive such termination as specified herein.</p>
+      </div>
+    </div>
 
-2.2 The non-circumvention obligations shall apply to:
-   a) All contacts, clients, suppliers, financiers, or other parties introduced by either Party
-   b) All business opportunities arising from such introductions
-   c) Any transactions, agreements, or arrangements resulting from such introductions
+    <div class="section">
+      <div class="section-title">4. Remedies</div>
+      
+      <div class="subsection">
+        <p><strong>4.1</strong> The Parties acknowledge that breach of this Agreement would cause irreparable harm for which monetary damages would be an inadequate remedy.</p>
+      </div>
 
-2.3 In the event of any transaction with an introduced party, the introducing Party shall be entitled to:
-   a) Full participation in such transaction as agreed between the Parties
-   b) Commission or fees as per separate agreement
-   c) Full disclosure of all terms and conditions
+      <div class="subsection">
+        <p><strong>4.2</strong> In the event of breach or threatened breach, the non-breaching Party shall be entitled to:</p>
+        <ul class="clause-list">
+          <li>Immediate injunctive relief without the necessity of posting bond</li>
+          <li>Recovery of all costs and expenses, including reasonable attorney's fees</li>
+          <li>Any other remedies available at law or in equity</li>
+        </ul>
+      </div>
 
-3. TERM AND TERMINATION
+      <div class="subsection">
+        <p><strong>4.3</strong> In the event of circumvention, the circumventing Party shall be liable to pay:</p>
+        <ul class="clause-list">
+          <li>All commissions, fees, or benefits that would have accrued to the circumvented Party</li>
+          <li>Liquidated damages of <strong>${additionalInfo?.liquidatedDamages || '[Amount]'}</strong></li>
+          <li>Any actual damages proven by the circumvented Party</li>
+        </ul>
+      </div>
+    </div>
 
-3.1 This Agreement shall commence on the date first written above and shall continue for a period of ${additionalInfo?.termYears || '5 (five)'} years.
+    <div class="section">
+      <div class="section-title">5. Return of Information</div>
+      
+      <div class="subsection">
+        <p><strong>5.1</strong> Upon termination of this Agreement or upon request by the Disclosing Party, the Receiving Party shall:</p>
+        <ul class="clause-list">
+          <li>Promptly return all Confidential Information in tangible form</li>
+          <li>Permanently delete all electronic copies of Confidential Information</li>
+          <li>Certify in writing that all such information has been returned or destroyed</li>
+        </ul>
+      </div>
+    </div>
 
-3.2 The obligations of confidentiality and non-circumvention shall survive the termination of this Agreement and continue for an additional ${additionalInfo?.postTermYears || '5 (five)'} years.
+    <div class="section">
+      <div class="section-title">6. No License or Transfer</div>
+      
+      <div class="subsection">
+        <p><strong>6.1</strong> Nothing in this Agreement grants any license, right, title, or interest in any Confidential Information, intellectual property, patents, trademarks, or copyrights.</p>
+      </div>
 
-3.3 Either Party may terminate this Agreement upon ${additionalInfo?.noticePeriod || '30 days'} written notice to the other Party, provided that all obligations under this Agreement shall survive such termination as specified herein.
+      <div class="subsection">
+        <p><strong>6.2</strong> All Confidential Information remains the sole property of the Disclosing Party.</p>
+      </div>
+    </div>
 
-4. REMEDIES
+    <div class="section">
+      <div class="section-title">7. No Obligation</div>
+      
+      <div class="subsection">
+        <p><strong>7.1</strong> This Agreement does not obligate either Party to:</p>
+        <ul class="clause-list">
+          <li>Disclose any particular information</li>
+          <li>Enter into any business transaction or relationship</li>
+          <li>Continue discussions beyond what either Party deems appropriate</li>
+        </ul>
+      </div>
+    </div>
 
-4.1 The Parties acknowledge that breach of this Agreement would cause irreparable harm for which monetary damages would be an inadequate remedy.
+    <div class="section">
+      <div class="section-title">8. Representations and Warranties</div>
+      
+      <div class="subsection">
+        <p><strong>8.1</strong> Each Party represents and warrants that:</p>
+        <ul class="clause-list">
+          <li>It has full authority to enter into this Agreement</li>
+          <li>This Agreement is legally binding upon it</li>
+          <li>Execution of this Agreement does not violate any other agreement or obligation</li>
+          <li>Its representatives are authorized to act on its behalf</li>
+        </ul>
+      </div>
+    </div>
 
-4.2 In the event of breach or threatened breach, the non-breaching Party shall be entitled to:
-   a) Immediate injunctive relief without the necessity of posting bond
-   b) Recovery of all costs and expenses, including reasonable attorney's fees
-   c) Any other remedies available at law or in equity
+    <div class="section">
+      <div class="section-title">9. Governing Law and Jurisdiction</div>
+      
+      <div class="subsection">
+        <p><strong>9.1</strong> This Agreement shall be governed by and construed in accordance with the laws of <strong>${additionalInfo?.governingLaw || '[Jurisdiction]'}</strong>, without regard to its conflict of law provisions.</p>
+      </div>
 
-4.3 In the event of circumvention, the circumventing Party shall be liable to pay:
-   a) All commissions, fees, or benefits that would have accrued to the circumvented Party
-   b) Liquidated damages of ${additionalInfo?.liquidatedDamages || '[Amount]'}
-   c) Any actual damages proven by the circumvented Party
+      <div class="subsection">
+        <p><strong>9.2</strong> Any disputes arising from this Agreement shall be subject to the exclusive jurisdiction of the courts of <strong>${additionalInfo?.jurisdiction || '[Jurisdiction]'}</strong>.</p>
+      </div>
 
-5. RETURN OF INFORMATION
+      <div class="subsection">
+        <p><strong>9.3</strong> The Parties agree to first attempt resolution of disputes through good faith negotiations before initiating legal proceedings.</p>
+      </div>
+    </div>
 
-5.1 Upon termination of this Agreement or upon request by the Disclosing Party, the Receiving Party shall:
-   a) Promptly return all Confidential Information in tangible form
-   b) Permanently delete all electronic copies of Confidential Information
-   c) Certify in writing that all such information has been returned or destroyed
+    <div class="section">
+      <div class="section-title">10. General Provisions</div>
+      
+      <div class="subsection">
+        <p><strong>10.1 Entire Agreement:</strong> This Agreement constitutes the entire agreement between the Parties concerning its subject matter and supersedes all prior agreements and understandings.</p>
+      </div>
 
-6. NO LICENSE OR TRANSFER
+      <div class="subsection">
+        <p><strong>10.2 Amendments:</strong> This Agreement may only be amended by written agreement signed by both Parties.</p>
+      </div>
 
-6.1 Nothing in this Agreement grants any license, right, title, or interest in any Confidential Information, intellectual property, patents, trademarks, or copyrights.
+      <div class="subsection">
+        <p><strong>10.3 Waiver:</strong> No waiver of any provision shall be deemed or constitute a waiver of any other provision.</p>
+      </div>
 
-6.2 All Confidential Information remains the sole property of the Disclosing Party.
+      <div class="subsection">
+        <p><strong>10.4 Severability:</strong> If any provision is found invalid or unenforceable, the remaining provisions shall continue in full force and effect.</p>
+      </div>
 
-7. NO OBLIGATION
+      <div class="subsection">
+        <p><strong>10.5 Assignment:</strong> Neither Party may assign this Agreement without the prior written consent of the other Party.</p>
+      </div>
 
-7.1 This Agreement does not obligate either Party to:
-   a) Disclose any particular information
-   b) Enter into any business transaction or relationship
-   c) Continue discussions beyond what either Party deems appropriate
+      <div class="subsection">
+        <p><strong>10.6 Notices:</strong> All notices shall be in writing and delivered to the addresses set forth above or such other addresses as may be designated in writing.</p>
+      </div>
 
-8. REPRESENTATIONS AND WARRANTIES
+      <div class="subsection">
+        <p><strong>10.7 Counterparts:</strong> This Agreement may be executed in counterparts, each of which shall be deemed an original.</p>
+      </div>
+    </div>
 
-8.1 Each Party represents and warrants that:
-   a) It has full authority to enter into this Agreement
-   b) This Agreement is legally binding upon it
-   c) Execution of this Agreement does not violate any other agreement or obligation
-   d) Its representatives are authorized to act on its behalf
+    <div class="signature-section">
+      <p style="text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 30px;">IN WITNESS WHEREOF, the Parties have executed this Non-Circumvention and Non-Disclosure Agreement as of the date first written above.</p>
 
-9. GOVERNING LAW AND JURISDICTION
+      <div class="signature-block">
+        <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50;">PARTY A (Disclosing Party):</div>
+        
+        <div class="signature-line">AUTHORIZED SIGNATURE</div>
+        
+        <div style="margin-top: 20px;">
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.partyASignatoryName || '[Name]'}</div>
+          <div class="signature-field"><strong>Title:</strong> ${additionalInfo?.partyASignatoryTitle || '[Title]'}</div>
+          <div class="signature-field"><strong>Company:</strong> ${additionalInfo?.partyAName || '[Party A Company Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+          <div class="signature-field"><strong>Company Seal:</strong> [SEAL]</div>
+        </div>
+      </div>
 
-9.1 This Agreement shall be governed by and construed in accordance with the laws of ${additionalInfo?.governingLaw || '[Jurisdiction]'}, without regard to its conflict of law provisions.
+      <div class="signature-block">
+        <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50;">PARTY B (Receiving Party):</div>
+        
+        <div class="signature-line">AUTHORIZED SIGNATURE</div>
+        
+        <div style="margin-top: 20px;">
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.partyBSignatoryName || '[Name]'}</div>
+          <div class="signature-field"><strong>Title:</strong> ${additionalInfo?.partyBSignatoryTitle || '[Title]'}</div>
+          <div class="signature-field"><strong>Company:</strong> ${additionalInfo?.partyBName || tradeDetails?.counterpartyName || '[Party B Company Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+          <div class="signature-field"><strong>Company Seal:</strong> [SEAL]</div>
+        </div>
+      </div>
 
-9.2 Any disputes arising from this Agreement shall be subject to the exclusive jurisdiction of the courts of ${additionalInfo?.jurisdiction || '[Jurisdiction]'}.
+      <div class="witness-section">
+        <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50; text-align: center;">WITNESSES:</div>
+        
+        <div class="witness-block">
+          <div style="font-weight: 600; margin-bottom: 10px;">Witness 1:</div>
+          <div class="signature-line">SIGNATURE</div>
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.witness1Name || '[Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+        </div>
 
-9.3 The Parties agree to first attempt resolution of disputes through good faith negotiations before initiating legal proceedings.
+        <div class="witness-block">
+          <div style="font-weight: 600; margin-bottom: 10px;">Witness 2:</div>
+          <div class="signature-line">SIGNATURE</div>
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.witness2Name || '[Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+        </div>
+      </div>
+    </div>
 
-10. GENERAL PROVISIONS
-
-10.1 Entire Agreement: This Agreement constitutes the entire agreement between the Parties concerning its subject matter and supersedes all prior agreements and understandings.
-
-10.2 Amendments: This Agreement may only be amended by written agreement signed by both Parties.
-
-10.3 Waiver: No waiver of any provision shall be deemed or constitute a waiver of any other provision.
-
-10.4 Severability: If any provision is found invalid or unenforceable, the remaining provisions shall continue in full force and effect.
-
-10.5 Assignment: Neither Party may assign this Agreement without the prior written consent of the other Party.
-
-10.6 Notices: All notices shall be in writing and delivered to the addresses set forth above or such other addresses as may be designated in writing.
-
-10.7 Counterparts: This Agreement may be executed in counterparts, each of which shall be deemed an original.
-
-IN WITNESS WHEREOF, the Parties have executed this Non-Circumvention and Non-Disclosure Agreement as of the date first written above.
-
-PARTY A (Disclosing Party):
-
-_________________________
-Signature
-
-Name: ${additionalInfo?.partyASignatoryName || '[Name]'}
-Title: ${additionalInfo?.partyASignatoryTitle || '[Title]'}
-Company: ${additionalInfo?.partyAName || '[Party A Company Name]'}
-Date: ${date}
-
-Company Seal: [SEAL]
-
-
-PARTY B (Receiving Party):
-
-_________________________
-Signature
-
-Name: ${additionalInfo?.partyBSignatoryName || '[Name]'}
-Title: ${additionalInfo?.partyBSignatoryTitle || '[Title]'}
-Company: ${additionalInfo?.partyBName || tradeDetails?.counterpartyName || '[Party B Company Name]'}
-Date: ${date}
-
-Company Seal: [SEAL]
-
-
-WITNESS:
-
-Witness 1:
-_________________________
-Name: ${additionalInfo?.witness1Name || '[Name]'}
-Date: ${date}
-
-Witness 2:
-_________________________
-Name: ${additionalInfo?.witness2Name || '[Name]'}
-Date: ${date}
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the named parties.<br>
+      Unauthorized distribution, copying, or disclosure is strictly prohibited.<br>
+      © ${new Date().getFullYear()} Commodity Trading Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
   `.trim();
 }
 
