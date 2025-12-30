@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading } from '@/contexts/TradingContext';
-import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight } from 'lucide-react-native';
+import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -178,6 +178,16 @@ export default function SettingsScreen() {
                   <Shield size={20} color="#3B82F6" />
                 </View>
                 <Text style={styles.menuItemText}>Privacy Policy</Text>
+              </View>
+              <ChevronRight size={20} color="#6B7280" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/support')}>
+              <View style={styles.menuItemLeft}>
+                <View style={styles.menuIcon}>
+                  <HelpCircle size={20} color="#3B82F6" />
+                </View>
+                <Text style={styles.menuItemText}>Support</Text>
               </View>
               <ChevronRight size={20} color="#6B7280" />
             </TouchableOpacity>

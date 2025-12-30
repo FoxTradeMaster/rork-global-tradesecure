@@ -8,7 +8,7 @@ import {
   Linking,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Mail, BookOpen, Clock, CheckCircle } from 'lucide-react-native';
+import { Mail, BookOpen, Clock, CheckCircle, ExternalLink } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SupportScreen() {
@@ -21,6 +21,10 @@ export default function SupportScreen() {
 
   const handleUserManualPress = () => {
     router.push('/user-manual');
+  };
+
+  const handleSupportWebsitePress = () => {
+    Linking.openURL('https://support.foxtrademasters.com');
   };
 
   return (
@@ -49,6 +53,16 @@ export default function SupportScreen() {
             We&apos;re here to help you succeed with your commodity trading operations
           </Text>
         </View>
+
+        {/* Support Website Button */}
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleSupportWebsitePress}
+          activeOpacity={0.8}
+        >
+          <ExternalLink size={20} color="#fff" />
+          <Text style={styles.primaryButtonText}>Visit Support Website</Text>
+        </TouchableOpacity>
 
         {/* Support Channels Card */}
         <View style={styles.card}>
@@ -306,5 +320,20 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 12,
     color: '#4b5563',
+  },
+  primaryButton: {
+    backgroundColor: '#4a90e2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
 });
