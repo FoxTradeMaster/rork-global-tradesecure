@@ -162,7 +162,7 @@ export default function SettingsScreen() {
               <ChevronRight size={20} color="#6B7280" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/terms-of-service')}>
               <View style={styles.menuItemLeft}>
                 <View style={styles.menuIcon}>
                   <FileText size={20} color="#3B82F6" />
@@ -172,7 +172,7 @@ export default function SettingsScreen() {
               <ChevronRight size={20} color="#6B7280" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/privacy-policy')}>
               <View style={styles.menuItemLeft}>
                 <View style={styles.menuIcon}>
                   <Shield size={20} color="#3B82F6" />
