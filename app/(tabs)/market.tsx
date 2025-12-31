@@ -36,12 +36,14 @@ import { useTrading } from '@/contexts/TradingContext';
 
 const MARKET_IMPORT_FIELDS = [
   { field: 'name', label: 'Company Name', required: true },
-  { field: 'headquarters', label: 'Headquarters/Location', required: true },
-  { field: 'type', label: 'Type (trading_house/broker/platform)', required: false },
-  { field: 'description', label: 'Description', required: false },
+  { field: 'headquarters', label: 'Country/Headquarters', required: true },
+  { field: 'address', label: 'Address', required: false },
+  { field: 'phone', label: 'Phone', required: false },
+  { field: 'email', label: 'Email', required: false },
   { field: 'website', label: 'Website', required: false },
-  { field: 'commodities', label: 'Commodities (comma-separated)', required: false },
-  { field: 'specialization', label: 'Specialization', required: false },
+  { field: 'contact_person', label: 'Contact Person', required: false },
+  { field: 'commodities', label: 'Products/Commodities', required: false },
+  { field: 'type', label: 'Company Type', required: false },
 ];
 
 export default function MarketDirectoryScreen() {
