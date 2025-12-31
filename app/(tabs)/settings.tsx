@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading } from '@/contexts/TradingContext';
-import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle } from 'lucide-react-native';
+import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -20,6 +20,23 @@ export default function SettingsScreen() {
     } else {
       setShowPaywall(true);
     }
+  };
+
+  const handleChangeRole = () => {
+    Alert.alert(
+      'Change Role',
+      'Switch to a different role?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Change Role',
+          onPress: () => {
+            setUser(null as any);
+            router.replace('/role-select');
+          },
+        },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -147,6 +164,20 @@ export default function SettingsScreen() {
                 </>
               )}
             </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+
+            <TouchableOpacity style={styles.menuItem} onPress={handleChangeRole}>
+              <View style={styles.menuItemLeft}>
+                <View style={styles.menuIcon}>
+                  <RefreshCw size={20} color="#3B82F6" />
+                </View>
+                <Text style={styles.menuItemText}>Change Role</Text>
+              </View>
+              <ChevronRight size={20} color="#6B7280" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
