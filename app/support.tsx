@@ -8,7 +8,7 @@ import {
   Linking,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Mail, BookOpen, Clock, CheckCircle, ExternalLink } from 'lucide-react-native';
+import { Mail, BookOpen, Clock, CheckCircle, ExternalLink, Phone } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SupportScreen() {
@@ -16,7 +16,11 @@ export default function SupportScreen() {
   const insets = useSafeAreaInsets();
 
   const handleEmailPress = () => {
-    Linking.openURL('mailto:Support@FoxTradeMaster.com');
+    Linking.openURL('mailto:support@foxtrademaster.com');
+  };
+
+  const handlePhonePress = () => {
+    Linking.openURL('tel:+18045069939');
   };
 
   const handleUserManualPress = () => {
@@ -46,7 +50,6 @@ export default function SupportScreen() {
           { paddingBottom: insets.bottom + 20 },
         ]}
       >
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Fox Trade Master™ Support</Text>
           <Text style={styles.subtitle}>
@@ -54,7 +57,6 @@ export default function SupportScreen() {
           </Text>
         </View>
 
-        {/* Support Website Button */}
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={handleSupportWebsitePress}
@@ -64,11 +66,9 @@ export default function SupportScreen() {
           <Text style={styles.primaryButtonText}>Visit Support Website</Text>
         </TouchableOpacity>
 
-        {/* Support Channels Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Get Help</Text>
           
-          {/* Email Support */}
           <TouchableOpacity
             style={styles.supportItem}
             onPress={handleEmailPress}
@@ -79,14 +79,30 @@ export default function SupportScreen() {
             </View>
             <View style={styles.supportContent}>
               <Text style={styles.supportTitle}>Email Support</Text>
-              <Text style={styles.supportEmail}>Support@FoxTradeMaster.com</Text>
+              <Text style={styles.supportEmail}>support@foxtrademaster.com</Text>
               <Text style={styles.supportDescription}>
                 Send us your questions, issues, or feedback. We typically respond within 24 hours.
               </Text>
             </View>
           </TouchableOpacity>
 
-          {/* User Manual */}
+          <TouchableOpacity
+            style={styles.supportItem}
+            onPress={handlePhonePress}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Phone size={24} color="#8b5cf6" />
+            </View>
+            <View style={styles.supportContent}>
+              <Text style={styles.supportTitle}>Phone Support</Text>
+              <Text style={styles.supportEmail}>+1-804-506-9939</Text>
+              <Text style={styles.supportDescription}>
+                Call us for immediate assistance with your trading operations.
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.supportItem}
             onPress={handleUserManualPress}
@@ -104,22 +120,19 @@ export default function SupportScreen() {
             </View>
           </TouchableOpacity>
 
-          {/* Support Hours */}
-          <View style={styles.supportItem}>
+          <View style={styles.supportItemLast}>
             <View style={styles.iconContainer}>
               <Clock size={24} color="#f59e0b" />
             </View>
             <View style={styles.supportContent}>
               <Text style={styles.supportTitle}>Support Hours</Text>
               <Text style={styles.supportDescription}>
-                24/7 for critical issues{'\n'}
-                Business Hours (Mon-Fri, 9AM-6PM EST) for general inquiries
+                24/7 for critical issues
               </Text>
             </View>
           </View>
         </View>
 
-        {/* What We Can Help With */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>What We Can Help With</Text>
           
@@ -131,7 +144,6 @@ export default function SupportScreen() {
           ))}
         </View>
 
-        {/* Before Contacting Support */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Before Contacting Support</Text>
           <Text style={styles.bodyText}>
@@ -146,7 +158,6 @@ export default function SupportScreen() {
           </View>
         </View>
 
-        {/* User Manual Highlights */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>User Manual Highlights</Text>
           <Text style={styles.bodyText}>
@@ -166,7 +177,6 @@ export default function SupportScreen() {
           </View>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             Fox Trade Master™ - Professional Commodity Trading Platform
@@ -238,6 +248,10 @@ const styles = StyleSheet.create({
   supportItem: {
     flexDirection: 'row',
     marginBottom: 24,
+  },
+  supportItemLast: {
+    flexDirection: 'row',
+    marginBottom: 0,
   },
   iconContainer: {
     width: 48,
