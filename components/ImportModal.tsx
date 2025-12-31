@@ -13,10 +13,16 @@ interface ColumnMapping {
 interface ImportModalProps {
   visible: boolean;
   onClose: () => void;
-  onImport: (data: ParsedRow[]) => void;
+  onImport: (data: ParsedRow[], categorySettings?: CategorySettings) => void;
   title: string;
   targetFields: { field: string; label: string; required?: boolean }[];
   validateRow?: (row: ParsedRow) => { valid: boolean; error?: string };
+  showCategorySelection?: boolean;
+}
+
+interface CategorySettings {
+  commodity: string;
+  businessType: 'buyer' | 'seller' | 'both';
 }
 
 export default function ImportModal({ 
@@ -25,13 +31,16 @@ export default function ImportModal({
   onImport, 
   title, 
   targetFields,
-  validateRow 
+  validateRow,
+  showCategorySelection = false
 }: ImportModalProps) {
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [mappings, setMappings] = useState<ColumnMapping[]>([]);
   const [showPreview, setShowPreview] = useState(true);
   const [importError, setImportError] = useState<string | null>(null);
+  const [selectedCommodity, setSelectedCommodity] = useState<string>('gold');
+  const [selectedBusinessType, setSelectedBusinessType] = useState<'buyer' | 'seller' | 'both'>('both');
 
   const handlePickFile = useCallback(async () => {
     setIsLoading(true);
@@ -98,7 +107,12 @@ export default function ImportModal({
     });
 
     console.log('[ImportModal] Importing', validData.length, 'rows');
-    onImport(validData);
+    
+    const categorySettings: CategorySettings | undefined = showCategorySelection
+      ? { commodity: selectedCommodity, businessType: selectedBusinessType }
+      : undefined;
+    
+    onImport(validData, categorySettings);
     handleClose();
   };
 
@@ -107,6 +121,8 @@ export default function ImportModal({
     setMappings([]);
     setImportError(null);
     setShowPreview(true);
+    setSelectedCommodity('gold');
+    setSelectedBusinessType('both');
     onClose();
   };
 
@@ -186,6 +202,69 @@ export default function ImportModal({
                     <Text style={styles.changeFileText}>Change</Text>
                   </TouchableOpacity>
                 </View>
+
+                {showCategorySelection && (
+                  <>
+                    <Text style={styles.sectionTitle}>Industry Category</Text>
+                    <Text style={styles.sectionSubtitle}>
+                      Select where these participants should be categorized
+                    </Text>
+
+                    <View style={styles.categorySection}>
+                      <Text style={styles.categoryLabel}>Commodity Type</Text>
+                      <ScrollView 
+                        horizontal 
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.categoryOptions}
+                      >
+                        {['gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'].map(commodity => (
+                          <TouchableOpacity
+                            key={commodity}
+                            style={[
+                              styles.categoryOption,
+                              selectedCommodity === commodity && styles.categoryOptionSelected
+                            ]}
+                            onPress={() => setSelectedCommodity(commodity)}
+                          >
+                            <Text style={[
+                              styles.categoryOptionText,
+                              selectedCommodity === commodity && styles.categoryOptionTextSelected
+                            ]}>
+                              {commodity === 'fuel_oil' ? 'Fuel Oil' :
+                               commodity === 'steam_coal' ? 'Steam Coal' :
+                               commodity === 'anthracite_coal' ? 'Anthracite Coal' :
+                               commodity === 'edible_oils' ? 'Edible Oils' :
+                               commodity.charAt(0).toUpperCase() + commodity.slice(1)}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+
+                    <View style={styles.categorySection}>
+                      <Text style={styles.categoryLabel}>Business Type</Text>
+                      <View style={styles.categoryOptions}>
+                        {(['buyer', 'seller', 'both'] as const).map(type => (
+                          <TouchableOpacity
+                            key={type}
+                            style={[
+                              styles.categoryOption,
+                              selectedBusinessType === type && styles.categoryOptionSelected
+                            ]}
+                            onPress={() => setSelectedBusinessType(type)}
+                          >
+                            <Text style={[
+                              styles.categoryOptionText,
+                              selectedBusinessType === type && styles.categoryOptionTextSelected
+                            ]}>
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  </>
+                )}
 
                 <Text style={styles.sectionTitle}>Column Mapping</Text>
                 <Text style={styles.sectionSubtitle}>
@@ -619,5 +698,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  categorySection: {
+    marginBottom: 20,
+  },
+  categoryLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  categoryOptions: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  categoryOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoryOptionSelected: {
+    backgroundColor: '#10B98120',
+    borderColor: '#10B981',
+  },
+  categoryOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  categoryOptionTextSelected: {
+    color: '#10B981',
   },
 });

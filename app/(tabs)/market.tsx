@@ -135,8 +135,8 @@ export default function MarketDirectoryScreen() {
     setTimeout(() => setSelectedParticipant(null), 300);
   };
 
-  const handleImport = useCallback((data: ParsedRow[]) => {
-    console.log('[Market] Importing', data.length, 'market participants');
+  const handleImport = useCallback((data: ParsedRow[], categorySettings?: { commodity: string; businessType: 'buyer' | 'seller' | 'both' }) => {
+    console.log('[Market] Importing', data.length, 'market participants', categorySettings);
     
     const newParticipants: MarketParticipant[] = data.map((row, index) => {
       const name = String(row.name || '');
@@ -146,12 +146,17 @@ export default function MarketDirectoryScreen() {
       const website = row.website ? String(row.website) : undefined;
       const specialization = String(row.specialization || 'General trading');
       
-      const commoditiesStr = String(row.commodities || 'gold');
-      const commodities = commoditiesStr.split(',').map(c => {
-        const trimmed = c.trim().toLowerCase().replace(/\s+/g, '_');
-        const validCommodities: CommodityType[] = ['gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
-        return validCommodities.includes(trimmed as CommodityType) ? trimmed as CommodityType : 'gold';
-      }).filter((v, i, a) => a.indexOf(v) === i) as CommodityType[];
+      let commodities: CommodityType[];
+      if (categorySettings) {
+        commodities = [categorySettings.commodity as CommodityType];
+      } else {
+        const commoditiesStr = String(row.commodities || 'gold');
+        commodities = commoditiesStr.split(',').map(c => {
+          const trimmed = c.trim().toLowerCase().replace(/\s+/g, '_');
+          const validCommodities: CommodityType[] = ['gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
+          return validCommodities.includes(trimmed as CommodityType) ? trimmed as CommodityType : 'gold';
+        }).filter((v, i, a) => a.indexOf(v) === i) as CommodityType[];
+      }
 
       const baseParticipant = {
         id: `imported_market_${Date.now()}_${index}`,
@@ -180,6 +185,7 @@ export default function MarketDirectoryScreen() {
           framework: specialization,
         } as MarketPlatform;
       } else {
+        const businessType = categorySettings?.businessType || 'both';
         return {
           ...baseParticipant,
           type: 'trading_house' as const,
@@ -187,6 +193,7 @@ export default function MarketDirectoryScreen() {
           offices: [headquarters],
           licenses: [],
           specialization,
+          businessType,
         } as TradingHouse;
       }
     }).filter(p => p.name.trim() !== '');
@@ -766,6 +773,7 @@ export default function MarketDirectoryScreen() {
         onImport={handleImport}
         title="Import Market Participants"
         targetFields={MARKET_IMPORT_FIELDS}
+        showCategorySelection={true}
       />
 
       <EmailOutreachModal
