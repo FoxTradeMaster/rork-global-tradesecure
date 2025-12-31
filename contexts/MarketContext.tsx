@@ -13,11 +13,20 @@ export const [MarketProvider, useMarket] = createContextHook(() => {
   }, []);
 
   const loadData = async () => {
+    const timeout = setTimeout(() => {
+      console.log('[MarketContext] Load timeout, continuing with empty data');
+    }, 500);
+
     try {
-      const [storedVerifications, storedRatings, storedSearches] = await Promise.all([
-        AsyncStorage.getItem('company_verifications'),
-        AsyncStorage.getItem('company_ratings'),
-        AsyncStorage.getItem('saved_searches')
+      const [storedVerifications, storedRatings, storedSearches] = await Promise.race([
+        Promise.all([
+          AsyncStorage.getItem('company_verifications'),
+          AsyncStorage.getItem('company_ratings'),
+          AsyncStorage.getItem('saved_searches')
+        ]),
+        new Promise<[null, null, null]>((resolve) => 
+          setTimeout(() => resolve([null, null, null]), 300)
+        )
       ]);
 
       if (storedVerifications) {
@@ -50,6 +59,8 @@ export const [MarketProvider, useMarket] = createContextHook(() => {
       }
     } catch (error) {
       console.error('Error loading market data:', error);
+    } finally {
+      clearTimeout(timeout);
     }
   };
 

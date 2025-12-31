@@ -67,7 +67,7 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
       const timeout = setTimeout(() => {
         console.log('[RevenueCat] Initialization timeout, proceeding with free tier');
         setIsLoading(false);
-      }, 5000);
+      }, 1500);
 
       try {
         console.log('[RevenueCat] Configuring SDK...');

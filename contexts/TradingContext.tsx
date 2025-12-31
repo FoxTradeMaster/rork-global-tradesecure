@@ -168,8 +168,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       
       const hardTimeout = setTimeout(() => {
         console.log('[TradingContext] HARD TIMEOUT - forcing load complete');
+        setCounterparties(MOCK_COUNTERPARTIES);
+        setTrades(MOCK_TRADES);
         setIsLoading(false);
-      }, 1000);
+      }, 800);
       
       try {
         setCounterparties(MOCK_COUNTERPARTIES);
@@ -179,7 +181,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         try {
           const storedUser = await Promise.race([
             AsyncStorage.getItem('current_user'),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 200))
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 150))
           ]);
           
           if (storedUser) {
