@@ -17,6 +17,7 @@ export default function DocumentsScreen() {
   const [isSending, setIsSending] = useState(false);
   const [showTradeSelector, setShowTradeSelector] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showUploadTargetSelector, setShowUploadTargetSelector] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTarget, setUploadTarget] = useState<{ type: 'trade' | 'counterparty'; id: string; name: string } | null>(null);
 
@@ -307,13 +308,7 @@ export default function DocumentsScreen() {
                   Alert.alert('No Targets', 'Create a trade or counterparty first to upload documents');
                   return;
                 }
-                const firstTrade = trades[0];
-                const firstCounterparty = counterparties[0];
-                if (firstTrade) {
-                  showUploadOptions('trade', firstTrade.id, firstTrade.counterpartyName);
-                } else if (firstCounterparty) {
-                  showUploadOptions('counterparty', firstCounterparty.id, firstCounterparty.name);
-                }
+                setShowUploadTargetSelector(true);
               }}
             >
               <Plus size={20} color="#FFFFFF" />
@@ -563,6 +558,70 @@ export default function DocumentsScreen() {
                   </>
                 )}
               </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {showUploadTargetSelector && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modal}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Upload Target</Text>
+                <TouchableOpacity onPress={() => setShowUploadTargetSelector(false)}>
+                  <X size={24} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.targetList} showsVerticalScrollIndicator={false}>
+                {trades.length > 0 && (
+                  <View>
+                    <Text style={styles.sectionLabel}>Trades</Text>
+                    {trades.map(trade => (
+                      <TouchableOpacity
+                        key={`target-trade-${trade.id}`}
+                        style={styles.targetItem}
+                        onPress={() => {
+                          showUploadOptions('trade', trade.id, trade.counterpartyName);
+                          setShowUploadTargetSelector(false);
+                        }}
+                      >
+                        <View style={styles.targetIconContainer}>
+                          <FileText size={20} color="#3B82F6" />
+                        </View>
+                        <View style={styles.targetInfo}>
+                          <Text style={styles.targetName}>
+                            {trade.commodity.replace(/_/g, ' ').toUpperCase()}
+                          </Text>
+                          <Text style={styles.targetSubname}>{trade.counterpartyName}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                {counterparties.length > 0 && (
+                  <View style={{ marginTop: trades.length > 0 ? 16 : 0 }}>
+                    <Text style={styles.sectionLabel}>Counterparties</Text>
+                    {counterparties.map(cp => (
+                      <TouchableOpacity
+                        key={`target-cp-${cp.id}`}
+                        style={styles.targetItem}
+                        onPress={() => {
+                          showUploadOptions('counterparty', cp.id, cp.name);
+                          setShowUploadTargetSelector(false);
+                        }}
+                      >
+                        <View style={styles.targetIconContainer}>
+                          <File size={20} color="#10B981" />
+                        </View>
+                        <View style={styles.targetInfo}>
+                          <Text style={styles.targetName}>{cp.name}</Text>
+                          <Text style={styles.targetSubname}>Counterparty</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
             </View>
           </View>
         )}
@@ -1072,5 +1131,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600' as const,
     color: '#3B82F6',
+  },
+  targetList: {
+    maxHeight: 500,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    color: '#6B7280',
+    textTransform: 'uppercase' as const,
+    marginBottom: 12,
+    letterSpacing: 0.5,
+  },
+  targetItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A0E27',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    gap: 12,
+  },
+  targetIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  targetInfo: {
+    flex: 1,
+  },
+  targetName: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  targetSubname: {
+    fontSize: 12,
+    color: '#9CA3AF',
   },
 });
