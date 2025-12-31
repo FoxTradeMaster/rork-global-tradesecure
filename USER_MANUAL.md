@@ -12,9 +12,10 @@
 6. [Document Management](#document-management)
 7. [Market Directory](#market-directory)
 8. [Advanced Market Features](#advanced-market-features)
-9. [Understanding Risk Levels](#understanding-risk-levels)
-10. [Trade Workflow](#trade-workflow)
-11. [Document Types](#document-types)
+9. [Importing Market Participants](#importing-market-participants)
+10. [Understanding Risk Levels](#understanding-risk-levels)
+11. [Trade Workflow](#trade-workflow)
+12. [Document Types](#document-types)
 
 ---
 
@@ -33,6 +34,17 @@ The app uses a tab-based navigation system with 5 main sections:
 - **Counterparties** - Manage business relationships
 - **Documents** - Upload, view, and send documents
 - **Market** - Directory of verified market participants
+
+### Accessing the User Manual
+- Tap the **Help icon (?)** in the top right of the Dashboard
+- Access comprehensive documentation about all features
+- Search for specific topics and instructions
+
+### Returning to Role Selection
+If you need to change your role or return to the main selection screen:
+1. Go to the **Settings** tab
+2. Tap **"Change Role"** or **"Log Out"**
+3. You'll be returned to the role selection screen with the app logo
 
 ---
 
@@ -454,6 +466,30 @@ Filter to see only participants dealing in specific commodities:
 - **Find brokers** for specific commodities
 - **Identify platforms** for market access
 - **Check regulatory status** of market participants
+
+### Filtering by Business Type
+
+When viewing the Market Directory, you can filter companies by their business type:
+
+1. **Access Business Type Filter**:
+   - Located below the commodity filter chips
+   - Filter options: All, Buyers, Sellers, Both
+
+2. **Filter Options**:
+   - **All** - Shows all companies regardless of type
+   - **Buyer** - Shows only companies that purchase commodities
+   - **Seller** - Shows only companies that sell commodities
+   - **Both** - Shows companies that both buy and sell
+
+3. **Combined Filtering**:
+   - Combine commodity + business type filters for precise results
+   - Example: "Gold" + "Buyers" = All gold purchasing companies
+   - Example: "Edible Oils" + "Sellers" = All edible oils producers/sellers
+
+4. **Industry Sections**:
+   - Each commodity has dedicated Buyers and Sellers sections
+   - Navigate between sections to find the right type of partner
+   - Useful for targeted outreach and partner identification
 
 ---
 
@@ -1004,6 +1040,194 @@ Generate professional, branded PDF reports combining company data, comparisons, 
 5. **Verify Data**: Double-check critical information before sharing
 6. **Brand Professionally**: Use consistent branding for external reports
 7. **Control Distribution**: Limit sharing of sensitive competitive intelligence
+
+---
+
+## Importing Market Participants
+
+The import feature allows you to bulk upload market participants (buyers, sellers, producers) from spreadsheet files.
+
+### Supported File Formats
+- **CSV** (.csv)
+- **Excel** (.xlsx, .xls)
+
+### How to Import Market Participants
+
+#### Step 1: Access Import Feature
+1. Navigate to the **Market** tab
+2. Tap the **More icon (⋮)** in the top right corner
+3. Select **"Import Market Participants"** from the actions menu
+
+#### Step 2: Choose Your File
+1. The Import Modal opens
+2. Tap **"Choose File"** button
+3. Select your CSV or Excel file from your device
+4. The app will automatically parse the file and detect columns
+
+#### Step 3: Select Industry Category
+
+Before mapping columns, you must specify where these participants should be categorized:
+
+**Commodity Type** - Select the industry:
+- Gold
+- Fuel Oil
+- Steam Coal
+- Anthracite Coal
+- Urea
+- Edible Oils
+
+**Business Type** - Select the participant type:
+- **Buyer** - Places these companies in the "Buyers" section for the selected commodity
+- **Seller** - Places these companies in the "Sellers" section for the selected commodity
+- **Both** - Company acts as both buyer and seller
+
+**Example Categories:**
+- Gold Buyers → Commodity: Gold, Business Type: Buyer
+- Fuel Oil Sellers → Commodity: Fuel Oil, Business Type: Seller
+- Edible Oils Producers → Commodity: Edible Oils, Business Type: Seller
+
+#### Step 4: Map Your Columns
+
+The app will attempt to automatically match your file columns to required fields. Review and adjust the mappings:
+
+**Required Fields** (marked with "Required" badge):
+- **Company Name** - Name of the organization
+- **Country/Headquarters** - Location of company headquarters
+
+**Optional Fields** (can be skipped):
+- **Address** - Full street address
+- **Phone** - Contact phone number
+- **Email** - Contact email address
+- **Website** - Company website URL
+- **Contact Person** - Primary contact name
+- **Products/Commodities** - Products or commodities they deal with
+- **Company Type** - Trading house, broker, platform, etc.
+
+**How to Map:**
+1. Each target field shows a horizontal list of your file's column headers
+2. Tap the column header from your file that matches the target field
+3. Selected columns are highlighted in blue
+4. To skip a field, select "Skip"
+5. The app auto-suggests matches based on column names
+
+#### Step 5: Preview Your Data
+
+Before importing:
+1. Expand the **"Data Preview"** section (tap to expand/collapse)
+2. Review the first 5 rows of your data
+3. Verify the data looks correct
+4. Check that values are in the right columns
+5. The preview shows total rows that will be imported
+
+#### Step 6: Import
+
+1. Ensure all **Required** fields are mapped
+2. The import button shows: **"Import [X] rows"**
+3. Tap **"Import"** to complete the process
+4. Imported companies appear immediately in the Market Directory
+5. They are automatically filtered by your selected commodity and business type
+
+### Import Tips & Best Practices
+
+#### Preparing Your File
+
+**File Structure:**
+- First row should contain column headers
+- Each subsequent row represents one company
+- Remove empty rows from the file
+- Use consistent formatting
+
+**Recommended Columns:**
+```
+Company Name | Country | Address | Phone | Email | Website | Contact Person | Products
+```
+
+**Example Data:**
+```
+ABC Trading Ltd | Singapore | 123 Main St | +65-1234-5678 | info@abc.com | www.abc.com | John Smith | Gold, Silver
+XYZ Brokers | UAE | 456 Market Rd | +971-9876-5432 | contact@xyz.ae | www.xyz.ae | Sarah Lee | Fuel Oil
+```
+
+#### Data Quality Tips
+
+1. **Company Names**: Use full legal names or common trading names
+2. **Countries**: Use full country names ("United States" not "US")
+3. **Phone Numbers**: Include country codes (e.g., +1, +65, +971)
+4. **Emails**: Verify email addresses are valid
+5. **Websites**: Include full URLs (https://www.example.com)
+
+#### Handling Large Files
+
+- **Recommended**: Import in batches of 100-200 companies
+- **Maximum**: 1,000 rows per import
+- **Performance**: Smaller files map and import faster
+- **Organization**: Split large files by commodity or region
+
+#### Common Import Issues
+
+**Issue: "Required fields not mapped"**
+- **Solution**: Ensure Company Name and Country/Headquarters are both mapped to columns
+
+**Issue: "File failed to parse"**
+- **Solution**: 
+  - Check file format (CSV or Excel only)
+  - Ensure file is not corrupted
+  - Try re-exporting from your spreadsheet application
+  - Remove special characters from column headers
+
+**Issue: "Duplicate companies"**
+- **Solution**: The app will import duplicates; manually review and remove if needed
+
+**Issue: "Wrong category after import"**
+- **Solution**: Delete imported entries and re-import with correct Commodity Type and Business Type selected
+
+### After Importing
+
+1. **Verify Import**: Search for newly imported companies in Market Directory
+2. **Filter View**: Use commodity and business type filters to view your imports
+3. **Edit Details**: Tap any company to view/edit additional information
+4. **Add Verification**: Mark verified companies and add verification dates
+5. **Add Ratings**: Rate imported companies based on your experience
+
+### Industry Categorization Examples
+
+**Scenario 1: Importing Gold Buyers**
+- File: 50 companies that purchase gold
+- Commodity Type: **Gold**
+- Business Type: **Buyer**
+- Result: Companies appear in "Gold Buyers" section
+
+**Scenario 2: Importing Edible Oils Producers**
+- File: 69 edible oils producers/sellers
+- Commodity Type: **Edible Oils**
+- Business Type: **Seller** (or **Both** if they also buy)
+- Result: Companies appear in "Edible Oils Sellers" section
+
+**Scenario 3: Importing Multi-Commodity Traders**
+- File: Trading houses dealing in multiple commodities
+- Approach: Import multiple times, once per commodity
+- Example:
+  - Import 1: Commodity = Gold, Business Type = Both
+  - Import 2: Commodity = Fuel Oil, Business Type = Both
+  - Same companies appear in multiple commodity sections
+
+### Managing Imported Data
+
+**Editing Imported Companies:**
+- Tap any imported company in the Market Directory
+- Add additional details not included in the import
+- Update contact information
+- Add verification status
+
+**Removing Imported Companies:**
+- Currently, imported companies persist in the app
+- Use filters to hide companies you don't need
+- Future updates will include delete functionality
+
+**Re-Importing:**
+- You can import the same companies multiple times
+- Useful if you need to add them to multiple commodity categories
+- Be aware this creates duplicates in different categories
 
 ---
 
