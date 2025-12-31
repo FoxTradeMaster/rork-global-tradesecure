@@ -1599,8 +1599,8 @@ At any approval stage, authorized users can reject a trade:
 ## Support & Contact
 
 For technical support or questions about the Fox Trade Master™ app:
-- Email: support@foxtrade.com
-- Phone: +1 (555) 123-4567
+- Email: support@foxtrademaster.com
+- Phone: +1-804-506-9939
 - Hours: 24/7 for critical issues
 
 For regulatory or compliance questions:
