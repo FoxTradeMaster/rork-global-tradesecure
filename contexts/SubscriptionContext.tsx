@@ -49,7 +49,7 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
 };
 
 const ENTITLEMENT_ID = 'Fox Trade Master™ Global Trading App Pro';
-const REVENUECAT_API_KEY = 'test_GqTiMdqiPOKKbWazgQuZgiMTztZ';
+const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY || 'test_GqTiMdqiPOKKbWazgQuZgiMTztZ';
 
 export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
