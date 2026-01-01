@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
 import { useState } from 'react';
@@ -15,6 +15,23 @@ export default function DocumentsScreen() {
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
+  const [showCompanyInfoForm, setShowCompanyInfoForm] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState({
+    companyName: '',
+    registrationNumber: '',
+    country: '',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
+    representative: '',
+    title: '',
+    bankName: '',
+    swiftCode: '',
+    accountNumber: '',
+    signatoryName: '',
+    signatoryTitle: '',
+  });
   const [isSending, setIsSending] = useState(false);
   const [showTradeSelector, setShowTradeSelector] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -97,6 +114,7 @@ export default function DocumentsScreen() {
     setSelectedDocType(docType);
     setRecipientEmail('');
     setShowTradeSelector(false);
+    setShowCompanyInfoForm(true);
   };
 
   const requestCameraPermission = async () => {
@@ -254,7 +272,8 @@ export default function DocumentsScreen() {
           pricePerUnit: selectedTrade.pricePerUnit,
           incoterm: selectedTrade.incoterm,
           counterpartyName: selectedTrade.counterpartyName,
-        }
+        },
+        companyInfo
       );
 
       const result = await sendTradeDocument({
@@ -284,6 +303,7 @@ export default function DocumentsScreen() {
         setSelectedTrade(null);
         setSelectedDocType(null);
         setRecipientEmail('');
+        setShowCompanyInfoForm(false);
       } else {
         Alert.alert('Error', result.error || 'Failed to send document');
       }
@@ -527,7 +547,202 @@ export default function DocumentsScreen() {
           </View>
         )}
 
-        {selectedTrade && selectedDocType && (
+        {showCompanyInfoForm && selectedTrade && selectedDocType && (
+          <View style={styles.modalOverlay}>
+            <KeyboardAvoidingView 
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.keyboardAvoid}
+            >
+              <View style={styles.modal}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Company Information</Text>
+                  <TouchableOpacity onPress={() => {
+                    setShowCompanyInfoForm(false);
+                    setSelectedTrade(null);
+                    setSelectedDocType(null);
+                  }}>
+                    <X size={24} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.formDescription}>
+                  Fill in your company details to include in the {selectedDocType} document
+                </Text>
+
+                <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
+                  <Text style={styles.formSectionTitle}>Basic Information</Text>
+                  
+                  <Text style={styles.inputLabel}>Company Name *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Enter company name"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.companyName}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, companyName: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>Registration Number</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Company registration number"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.registrationNumber}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, registrationNumber: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>Country *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Country of registration"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.country}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, country: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>Registered Address *</Text>
+                  <TextInput
+                    style={[styles.formInput, styles.textArea]}
+                    placeholder="Full registered address"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.address}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, address: text }))}
+                    multiline
+                    numberOfLines={3}
+                  />
+
+                  <Text style={styles.formSectionTitle}>Contact Information</Text>
+
+                  <Text style={styles.inputLabel}>Phone *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="+1 234 567 8900"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.phone}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, phone: text }))}
+                    keyboardType="phone-pad"
+                  />
+
+                  <Text style={styles.inputLabel}>Email *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="contact@company.com"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.email}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, email: text }))}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+
+                  <Text style={styles.inputLabel}>Website</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="www.company.com"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.website}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, website: text }))}
+                    autoCapitalize="none"
+                  />
+
+                  <Text style={styles.formSectionTitle}>Authorized Representative</Text>
+
+                  <Text style={styles.inputLabel}>Representative Name *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Full name"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.representative}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, representative: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>Title/Position *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="e.g., CEO, Managing Director"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.title}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, title: text }))}
+                  />
+
+                  <Text style={styles.formSectionTitle}>Banking Information</Text>
+
+                  <Text style={styles.inputLabel}>Bank Name</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Name of your bank"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.bankName}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, bankName: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>SWIFT Code</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="SWIFT/BIC code"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.swiftCode}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, swiftCode: text }))}
+                    autoCapitalize="characters"
+                  />
+
+                  <Text style={styles.inputLabel}>Account Number</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Bank account number"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.accountNumber}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, accountNumber: text }))}
+                    secureTextEntry
+                  />
+
+                  <Text style={styles.formSectionTitle}>Document Signatory</Text>
+
+                  <Text style={styles.inputLabel}>Signatory Name *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="Person signing the document"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.signatoryName}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, signatoryName: text }))}
+                  />
+
+                  <Text style={styles.inputLabel}>Signatory Title *</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="e.g., Authorized Signatory, Director"
+                    placeholderTextColor="#6B7280"
+                    value={companyInfo.signatoryTitle}
+                    onChangeText={(text) => setCompanyInfo(prev => ({ ...prev, signatoryTitle: text }))}
+                  />
+
+                  <View style={{ height: 20 }} />
+                </ScrollView>
+
+                <TouchableOpacity
+                  style={[
+                    styles.continueButton,
+                    (!companyInfo.companyName || !companyInfo.country || !companyInfo.address || 
+                     !companyInfo.phone || !companyInfo.email || !companyInfo.representative || 
+                     !companyInfo.title || !companyInfo.signatoryName || !companyInfo.signatoryTitle) && 
+                    styles.continueButtonDisabled
+                  ]}
+                  onPress={() => {
+                    if (!companyInfo.companyName || !companyInfo.country || !companyInfo.address || 
+                        !companyInfo.phone || !companyInfo.email || !companyInfo.representative || 
+                        !companyInfo.title || !companyInfo.signatoryName || !companyInfo.signatoryTitle) {
+                      Alert.alert('Required Fields', 'Please fill in all required fields marked with *');
+                      return;
+                    }
+                    setShowCompanyInfoForm(false);
+                  }}
+                >
+                  <Text style={styles.continueButtonText}>Continue to Send</Text>
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        )}
+
+        {selectedTrade && selectedDocType && !showCompanyInfoForm && (
           <View style={styles.modalOverlay}>
             <View style={styles.modal}>
               <View style={styles.modalHeader}>
@@ -536,6 +751,7 @@ export default function DocumentsScreen() {
                   setSelectedTrade(null);
                   setSelectedDocType(null);
                   setRecipientEmail('');
+                  setShowCompanyInfoForm(false);
                 }}>
                   <X size={24} color="#9CA3AF" />
                 </TouchableOpacity>
@@ -1185,5 +1401,67 @@ const styles = StyleSheet.create({
   targetSubname: {
     fontSize: 12,
     color: '#9CA3AF',
+  },
+  keyboardAvoid: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  formDescription: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  formScroll: {
+    maxHeight: 400,
+    marginBottom: 20,
+  },
+  formSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginTop: 16,
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: '#9CA3AF',
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  formInput: {
+    backgroundColor: '#0A0E27',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  continueButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueButtonDisabled: {
+    opacity: 0.5,
+  },
+  continueButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
   },
 });
