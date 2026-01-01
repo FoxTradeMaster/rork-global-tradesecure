@@ -297,6 +297,33 @@ export default function DocumentsScreen() {
 
     setIsSending(true);
     try {
+      const mappedCompanyInfo = {
+        companyName: companyInfo.companyName,
+        registrationNumber: companyInfo.registrationNumber,
+        country: companyInfo.country,
+        companyAddress: companyInfo.address,
+        phone: companyInfo.phone,
+        email: companyInfo.email,
+        website: companyInfo.website,
+        representative: companyInfo.representative,
+        representativeTitle: companyInfo.title,
+        bankName: companyInfo.bankName,
+        bankAddress: companyInfo.bankName ? `${companyInfo.bankName} - ${companyInfo.country}` : undefined,
+        swiftCode: companyInfo.swiftCode,
+        accountNumber: companyInfo.accountNumber,
+        signatoryName: companyInfo.signatoryName,
+        signatoryTitle: companyInfo.signatoryTitle,
+        buyerRegistration: companyInfo.registrationNumber,
+        buyerAddress: companyInfo.address,
+        buyerPhone: companyInfo.phone,
+        buyerEmail: companyInfo.email,
+        buyerBank: companyInfo.bankName,
+        buyerBankAddress: companyInfo.bankName ? `${companyInfo.bankName} - ${companyInfo.country}` : undefined,
+        buyerSwift: companyInfo.swiftCode,
+        buyerSignatoryName: companyInfo.signatoryName,
+        buyerSignatoryTitle: companyInfo.signatoryTitle,
+      };
+
       const documentContent = generateDocumentContent(
         selectedDocType,
         {
@@ -307,7 +334,7 @@ export default function DocumentsScreen() {
           incoterm: selectedTrade.incoterm,
           counterpartyName: selectedTrade.counterpartyName,
         },
-        companyInfo
+        mappedCompanyInfo
       );
 
       const result = await sendTradeDocument({
