@@ -362,7 +362,7 @@ export default function DocumentsScreen() {
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity 
-              style={[styles.addButton, hasCompanyProfile && styles.profileSetBadge]}
+              style={[styles.profileButton, hasCompanyProfile && styles.profileSetBadge]}
               onPress={() => setShowProfileManager(true)}
             >
               <User size={20} color="#FFFFFF" />
@@ -1157,6 +1157,14 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#8B5CF6',
     alignItems: 'center',
     justifyContent: 'center',
   },
