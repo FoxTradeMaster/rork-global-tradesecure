@@ -354,7 +354,7 @@ export default function DocumentsScreen() {
       <StatusBar barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={styles.title}>Documents</Text>
             <View style={styles.headerBadge}>
               <Text style={styles.headerBadgeText}>{allDocuments.length}</Text>
@@ -1125,10 +1125,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+  },
+  headerLeft: {
+    flex: 1,
+    marginRight: 12,
   },
   title: {
     fontSize: 28,
