@@ -78,8 +78,12 @@ export default function DocumentsScreen() {
         URL.revokeObjectURL(url);
         Alert.alert('Success', `${docType} template downloaded successfully`);
       } else {
-        await Print.printAsync({
+        const { uri } = await Print.printToFileAsync({
           html: content,
+        });
+        
+        await Print.printAsync({
+          uri: uri,
         });
       }
     } catch (error) {
