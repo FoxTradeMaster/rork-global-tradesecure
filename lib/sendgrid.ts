@@ -74,7 +74,7 @@ function generateEmailContent(params: SendDocumentParams): string {
     NCNDA: 'Non-Circumvention and Non-Disclosure Agreement',
     SPA: 'Sales and Purchase Agreement',
     MSA: 'Master Sales Agreement',
-    MFPA: 'Master Fuel Purchase Agreement',
+    MFPA: 'Master Fee Protection Agreement',
   };
 
   return `
@@ -2383,7 +2383,7 @@ function generateMFPA(
 <body>
   <div class="document">
     <div class="header">
-      <div class="doc-title">Master Fuel Purchase Agreement</div>
+      <div class="doc-title">Master Fee Protection Agreement</div>
       <div class="doc-subtitle">(MFPA)</div>
     </div>
 
@@ -2422,8 +2422,8 @@ function generateMFPA(
 
     <div class="recitals-section">
       <div class="recitals-title">Recitals:</div>
-      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> Seller is engaged in the business of supplying <strong>${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'FUEL OIL'}</strong> and related petroleum products;</p>
-      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> Buyer desires to purchase such products from Seller on a continuing basis;</p>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> the Parties are engaged in or facilitating commodity trading transactions involving <strong>${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'COMMODITIES'}</strong>;</p>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> certain Parties may introduce buyers, sellers, suppliers, or other parties to facilitate these transactions and are entitled to protection of their commercial interests and fees;</p>
       <p style="margin-bottom: 0; line-height: 1.8; text-align: justify;"><strong>NOW, THEREFORE,</strong> in consideration of the mutual covenants and agreements contained herein, the Parties agree as follows:</p>
     </div>
 
@@ -2431,157 +2431,180 @@ function generateMFPA(
       <div class="section-title">Article 1: Definitions</div>
       
       <div class="subsection">
-        <p><strong>1.1 "Product"</strong> means ${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'FUEL OIL'} meeting the specifications set forth in Schedule A attached hereto.</p>
+        <p><strong>1.1 "Transaction"</strong> means any business transaction, contract, or agreement involving the sale, purchase, or transfer of ${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'COMMODITIES'} or related services facilitated directly or indirectly by any Party to this Agreement.</p>
       </div>
 
       <div class="subsection">
-        <p><strong>1.2 "Contract Year"</strong> means the twelve (12) month period commencing on ${date} and each subsequent twelve (12) month period thereafter.</p>
+        <p><strong>1.2 "Intermediary"</strong> means any Party to this Agreement who introduces, facilitates, or arranges contact between buyers, sellers, suppliers, financiers, or other parties involved in a Transaction.</p>
       </div>
 
       <div class="subsection">
-        <p><strong>1.3 "Purchase Order"</strong> means a written order issued by Buyer to Seller for the purchase of Product under this Agreement.</p>
+        <p><strong>1.3 "Protected Party"</strong> means any Intermediary entitled to fees, commissions, or other compensation under this Agreement.</p>
       </div>
 
       <div class="subsection">
-        <p><strong>1.4 "Delivery Point"</strong> means the location specified in each Purchase Order where Seller shall deliver the Product.</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Article 2: Term and Termination</div>
-      
-      <div class="subsection">
-        <p><strong>2.1 Term:</strong> This Agreement shall commence on ${date} and shall continue for a period of <strong>${additionalInfo?.termYears || 'three (3)'} years</strong>, unless earlier terminated as provided herein.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>2.2 Renewal:</strong> This Agreement shall automatically renew for successive one (1) year periods unless either Party provides written notice of non-renewal at least ninety (90) days prior to the expiration of the then-current term.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>2.3 Termination for Convenience:</strong> Either Party may terminate this Agreement upon sixty (60) days' prior written notice to the other Party, provided that all outstanding Purchase Orders shall be fulfilled.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>2.4 Termination for Cause:</strong> Either Party may terminate this Agreement immediately upon written notice if the other Party materially breaches this Agreement and fails to cure such breach within thirty (30) days of receiving written notice thereof.</p>
+        <p><strong>1.4 "Commission"</strong> means the fees, compensation, or remuneration payable to a Protected Party as specified in this Agreement or in a separate fee agreement.</p>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">Article 3: Purchase and Sale</div>
+      <div class="section-title">Article 2: Scope and Purpose</div>
       
       <div class="subsection">
-        <p><strong>3.1 Purchase Orders:</strong> Buyer shall submit Purchase Orders to Seller specifying:</p>
+        <p><strong>2.1 Fee Protection:</strong> This Agreement establishes the rights of each Party to receive fees and commissions for Transactions they facilitate or in which they participate as intermediaries.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>2.2 Coverage:</strong> This Agreement covers all Transactions involving:</p>
         <ul class="clause-list">
-          <li>Product type and quantity</li>
-          <li>Requested delivery date</li>
-          <li>Delivery location</li>
-          <li>Applicable price or pricing mechanism</li>
-          <li>Payment terms</li>
+          <li>Parties introduced by any Protected Party</li>
+          <li>Business opportunities disclosed or shared among the Parties</li>
+          <li>Contracts or agreements resulting from such introductions</li>
+          <li>All subsequent transactions with introduced parties</li>
         </ul>
       </div>
 
       <div class="subsection">
-        <p><strong>3.2 Acceptance:</strong> Seller shall accept or reject each Purchase Order within forty-eight (48) hours of receipt. Failure to respond shall constitute acceptance.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>3.3 Minimum Purchase Obligation:</strong> Buyer agrees to purchase a minimum of <strong>${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || 'MT'}</strong> of Product per Contract Year.</p>
+        <p><strong>2.3 Term:</strong> This Agreement shall commence on ${date} and shall remain in effect for <strong>${additionalInfo?.termYears || 'five (5)'} years</strong>, automatically renewing unless terminated by written notice ninety (90) days prior to expiration.</p>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">Article 4: Price and Payment</div>
+      <div class="section-title">Article 3: Fee Protection Obligations</div>
       
       <div class="subsection">
-        <p><strong>4.1 Pricing:</strong> The price for Product shall be determined as follows:</p>
+        <p><strong>3.1 Non-Circumvention:</strong> Each Party agrees not to:</p>
+        <ul class="clause-list">
+          <li>Circumvent, bypass, or avoid any Protected Party in Transactions</li>
+          <li>Directly contact or deal with parties introduced by another Party without full involvement and compensation of the introducing Party</li>
+          <li>Enter into any Transaction with introduced parties without proper commission payments</li>
+          <li>Disclose contact information of introduced parties to third parties</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>3.2 Commission Guarantee:</strong> All Parties agree that Protected Parties are entitled to receive their agreed commissions on:</p>
+        <ul class="clause-list">
+          <li>The initial Transaction with any introduced party</li>
+          <li>All subsequent Transactions with such introduced parties</li>
+          <li>Any extensions, renewals, or variations of such Transactions</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>3.3 Payment Priority:</strong> Commission payments to Protected Parties shall be treated as a priority obligation and paid before distribution of proceeds to other parties.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 4: Commission Structure and Payment</div>
+      
+      <div class="subsection">
+        <p><strong>4.1 Commission Rates:</strong> Unless otherwise agreed in writing, commissions shall be calculated as follows:</p>
         <div class="field">
-          <span class="field-label">Base Price:</span>
-          <span class="field-value">${tradeDetails?.pricePerUnit || '[Price]'} USD per ${tradeDetails?.unit || 'MT'}</span>
+          <span class="field-label">Standard Commission:</span>
+          <span class="field-value">${additionalInfo?.commissionRate || '[Percentage]% of transaction value'}</span>
         </div>
         <div class="field">
-          <span class="field-label">Price Adjustment:</span>
-          <span class="field-value">${additionalInfo?.priceAdjustment || 'Market-linked, adjusted quarterly based on international benchmark prices'}</span>
+          <span class="field-label">Basis of Calculation:</span>
+          <span class="field-value">${additionalInfo?.commissionBasis || 'Total contract value, FOB or CIF as applicable'}</span>
         </div>
       </div>
 
       <div class="subsection">
         <p><strong>4.2 Payment Terms:</strong></p>
         <div class="field">
+          <span class="field-label">Payment Timing:</span>
+          <span class="field-value">Commissions shall be paid within ${additionalInfo?.commissionPaymentDays || '5 (five) banking days'} of receipt of payment for the underlying Transaction</span>
+        </div>
+        <div class="field">
           <span class="field-label">Payment Method:</span>
-          <span class="field-value">${additionalInfo?.paymentMethod || 'Letter of Credit or Bank Transfer'}</span>
-        </div>
-        <div class="field">
-          <span class="field-label">Payment Due:</span>
-          <span class="field-value">${additionalInfo?.paymentTerms || 'Within 30 days of delivery'}</span>
+          <span class="field-value">${additionalInfo?.paymentMethod || 'Wire transfer to designated bank account'}</span>
         </div>
       </div>
 
       <div class="subsection">
-        <p><strong>4.3 Late Payment:</strong> Any amounts not paid when due shall bear interest at the rate of <strong>${additionalInfo?.interestRate || '1.5% per month'}</strong> or the maximum rate permitted by law, whichever is less.</p>
+        <p><strong>4.3 Currency:</strong> All commissions shall be paid in <strong>${additionalInfo?.currency || 'United States Dollars (USD)'}</strong> unless otherwise agreed.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>4.4 Late Payment:</strong> Late commission payments shall bear interest at <strong>${additionalInfo?.interestRate || '2% per month'}</strong> or the maximum legal rate, whichever is less.</p>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">Article 5: Delivery</div>
+      <div class="section-title">Article 5: Notification and Documentation</div>
       
       <div class="subsection">
-        <p><strong>5.1 Delivery Terms:</strong></p>
-        <div class="field">
-          <span class="field-label">INCOTERM:</span>
-          <span class="field-value">${tradeDetails?.incoterm || '[INCOTERM 2020]'}</span>
-        </div>
-        <div class="field">
-          <span class="field-label">Loading Port:</span>
-          <span class="field-value">${additionalInfo?.loadingPort || '[Port Name]'}</span>
-        </div>
-        <div class="field">
-          <span class="field-label">Discharge Port:</span>
-          <span class="field-value">${additionalInfo?.dischargePort || '[Port Name]'}</span>
-        </div>
-      </div>
-
-      <div class="subsection">
-        <p><strong>5.2 Delivery Schedule:</strong> Seller shall deliver Product within <strong>${additionalInfo?.deliveryDays || 'thirty (30) days'}</strong> of receipt of each Purchase Order, unless otherwise agreed in writing.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>5.3 Title and Risk of Loss:</strong> Title to and risk of loss of Product shall pass to Buyer upon delivery in accordance with the applicable INCOTERM.</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Article 6: Quality and Inspection</div>
-      
-      <div class="subsection">
-        <p><strong>6.1 Quality Standards:</strong> All Product shall conform to the specifications set forth in Schedule A and applicable industry standards.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>6.2 Inspection:</strong> Product quality and quantity shall be determined by independent inspection by <strong>${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}</strong> at loading port. Inspection results shall be final and binding.</p>
-      </div>
-
-      <div class="subsection">
-        <p><strong>6.3 Rejection:</strong> Buyer may reject any Product that does not conform to specifications. Seller shall replace rejected Product at Seller's expense within a reasonable time.</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Article 7: Force Majeure</div>
-      
-      <div class="subsection">
-        <p><strong>7.1</strong> Neither Party shall be liable for failure to perform its obligations under this Agreement if such failure results from events beyond its reasonable control, including but not limited to:</p>
+        <p><strong>5.1 Transaction Notice:</strong> Parties shall notify all Protected Parties in writing of:</p>
         <ul class="clause-list">
-          <li>Acts of God, natural disasters, or severe weather conditions</li>
-          <li>War, terrorism, civil unrest, or government action</li>
-          <li>Labor disputes or strikes</li>
-          <li>Fire, explosion, or equipment failure</li>
-          <li>Shortage of transportation, facilities, fuel, or raw materials</li>
+          <li>Any Transaction involving their introduced parties</li>
+          <li>Contract execution and terms</li>
+          <li>Payment schedules and amounts</li>
+          <li>Any changes to Transaction terms</li>
         </ul>
       </div>
 
       <div class="subsection">
-        <p><strong>7.2</strong> The affected Party shall promptly notify the other Party in writing of the force majeure event and its expected duration.</p>
+        <p><strong>5.2 Commission Statements:</strong> Within five (5) banking days of each Transaction payment, the paying party shall provide Protected Parties with:</p>
+        <ul class="clause-list">
+          <li>Detailed calculation of commissions due</li>
+          <li>Proof of payment receipt</li>
+          <li>Payment confirmation for commissions</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>5.3 Record Keeping:</strong> All Parties shall maintain accurate records of Transactions, payments, and commissions for a minimum of <strong>${additionalInfo?.recordRetention || 'seven (7) years'}</strong>.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 6: Protection of Commercial Interests</div>
+      
+      <div class="subsection">
+        <p><strong>6.1 Exclusive Rights:</strong> Each Protected Party shall have exclusive rights to receive commissions from Transactions involving their introduced parties for the duration of this Agreement and for <strong>${additionalInfo?.exclusivityYears || 'five (5) years'}</strong> thereafter.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>6.2 Introduction Records:</strong> A Party introducing any third party shall promptly notify all other Parties in writing, providing:</p>
+        <ul class="clause-list">
+          <li>Name and details of introduced party</li>
+          <li>Nature of business relationship</li>
+          <li>Applicable commission structure</li>
+          <li>Date of introduction</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>6.3 Third Party Acknowledgment:</strong> All introduced parties shall be required to acknowledge in writing the Protected Party's right to receive commissions.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 7: Breach and Remedies</div>
+      
+      <div class="subsection">
+        <p><strong>7.1 Breach:</strong> A breach of this Agreement occurs when any Party:</p>
+        <ul class="clause-list">
+          <li>Circumvents a Protected Party in any Transaction</li>
+          <li>Fails to pay commissions when due</li>
+          <li>Discloses contact information without consent</li>
+          <li>Violates any material provision of this Agreement</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>7.2 Liquidated Damages:</strong> In the event of circumvention, the breaching Party shall pay to the Protected Party:</p>
+        <ul class="clause-list">
+          <li>All unpaid commissions that would have been due</li>
+          <li>Liquidated damages equal to <strong>${additionalInfo?.liquidatedDamages || 'three (3) times'}</strong> the commission amount</li>
+          <li>All legal costs and expenses incurred</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>7.3 Injunctive Relief:</strong> Parties acknowledge that breach would cause irreparable harm. Protected Parties are entitled to seek immediate injunctive relief without posting bond.</p>
       </div>
     </div>
 
@@ -2678,7 +2701,7 @@ function generateMFPA(
     </div>
 
     <div class="signature-section">
-      <p style="text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 30px;">IN WITNESS WHEREOF, the Parties have executed this Master Fuel Purchase Agreement as of the date first written above.</p>
+      <p style="text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 30px;">IN WITNESS WHEREOF, the Parties have executed this Master Fee Protection Agreement as of the date first written above.</p>
 
       <div class="signature-block">
         <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50;">SELLER:</div>
