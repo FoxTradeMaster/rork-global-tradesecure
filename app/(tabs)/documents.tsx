@@ -5,10 +5,10 @@ import { useState, useEffect } from 'react';
 import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen, User, Edit3 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Trade, Document, DocumentType } from '@/types';
-import { sendTradeDocument, generateDocumentContent, generateBlankDocument } from '@/lib/sendgrid';
+import { sendTradeDocument, generateDocumentContent } from '@/lib/sendgrid';
+import { generateBlankDocx, downloadDocx } from '@/lib/docxGenerator';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import * as Print from 'expo-print';
 import { supabase } from '@/lib/supabase';
 
 export default function DocumentsScreen() {
@@ -112,31 +112,32 @@ export default function DocumentsScreen() {
 
   const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
     try {
-      const content = generateBlankDocument(docType);
+      console.log('[Documents] Generating blank', docType, 'template');
       
       if (Platform.OS === 'web') {
-        const blob = new Blob([content], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${docType}_Blank_Template.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        Alert.alert('Success', `${docType} template downloaded successfully`);
+        const blob = await generateBlankDocx(docType);
+        const documentNames: Record<string, string> = {
+          'CIS': 'Corporate_Information_Sheet',
+          'SCO': 'Soft_Corporate_Offer',
+          'ICPO': 'Irrevocable_Corporate_Purchase_Order',
+          'LOI': 'Letter_of_Intent',
+          'POF': 'Proof_of_Funds',
+          'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
+          'MFPA': 'Master_Fee_Protection_Agreement',
+        };
+        const filename = `${documentNames[docType]}_Blank_Template.docx`;
+        downloadDocx(blob, filename);
+        Alert.alert('Success', `${docType} template downloaded successfully as editable Word document`);
       } else {
-        const { uri } = await Print.printToFileAsync({
-          html: content,
-        });
-        
-        await Print.printAsync({
-          uri: uri,
-        });
+        Alert.alert(
+          'Web Only Feature',
+          'Blank template download is only available on web. Please use the web version to download editable Word documents.',
+          [{ text: 'OK' }]
+        );
       }
     } catch (error) {
-      console.error('Error printing template:', error);
-      Alert.alert('Error', 'Failed to print template');
+      console.error('Error generating template:', error);
+      Alert.alert('Error', 'Failed to generate template. Please try again.');
     }
   };
 
