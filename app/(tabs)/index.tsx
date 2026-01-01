@@ -79,6 +79,22 @@ export default function DashboardScreen() {
               <Text style={styles.metricLabel}>Total Portfolio Value</Text>
             </View>
 
+            <View style={[styles.metricCard, styles.commissionMetric]}>
+              <View style={[styles.metricIconContainer, { backgroundColor: '#8B5CF620' }]}>
+                <DollarSign size={20} color="#8B5CF6" />
+              </View>
+              <Text style={styles.metricValue}>${(metrics.totalCommissionEarned / 1000).toFixed(0)}K</Text>
+              <Text style={styles.metricLabel}>Commission Earned</Text>
+            </View>
+
+            <View style={[styles.metricCard, styles.commissionMetric]}>
+              <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                <Clock size={20} color="#F59E0B" />
+              </View>
+              <Text style={styles.metricValue}>${(metrics.potentialCommission / 1000).toFixed(0)}K</Text>
+              <Text style={styles.metricLabel}>Potential Commission</Text>
+            </View>
+
             <View style={styles.metricCard}>
               <View style={[styles.metricIconContainer, { backgroundColor: '#3B82F620' }]}>
                 <TrendingUp size={20} color="#3B82F6" />
@@ -282,6 +298,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B98120',
     borderWidth: 1,
     borderColor: '#10B981',
+  },
+  commissionMetric: {
+    width: '48%',
   },
   metricIconContainer: {
     width: 40,

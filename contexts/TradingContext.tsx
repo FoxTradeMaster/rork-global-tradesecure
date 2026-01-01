@@ -91,7 +91,10 @@ const MOCK_TRADES: Trade[] = [
       { id: 'td2', type: 'lc', name: 'Letter of Credit', uploadedAt: new Date(), uploadedBy: 'Bank', url: '', verified: true }
     ],
     riskLevel: 'green',
-    alerts: []
+    alerts: [],
+    commissionRate: 1.0,
+    commissionAmount: 625000,
+    commissionPaid: false
   },
   {
     id: 't2',
@@ -114,7 +117,10 @@ const MOCK_TRADES: Trade[] = [
     riskLevel: 'amber',
     alerts: [
       { id: 'a1', type: 'warning', message: 'LC documentation pending', timestamp: new Date(), resolved: false }
-    ]
+    ],
+    commissionRate: 1.5,
+    commissionAmount: 390000,
+    commissionPaid: false
   },
   {
     id: 't3',
@@ -133,7 +139,10 @@ const MOCK_TRADES: Trade[] = [
     createdBy: 'Michael Chen',
     documents: [],
     riskLevel: 'green',
-    alerts: []
+    alerts: [],
+    commissionRate: 0.5,
+    commissionAmount: 54375,
+    commissionPaid: false
   },
   {
     id: 't4',
@@ -147,12 +156,16 @@ const MOCK_TRADES: Trade[] = [
     currency: 'USD',
     incoterm: 'CIF Dubai',
     deliveryWindow: { start: new Date('2025-02-10'), end: new Date('2025-02-25') },
-    status: 'active',
+    status: 'settled',
     createdAt: new Date('2024-12-29'),
     createdBy: 'John Smith',
     documents: [],
     riskLevel: 'green',
-    alerts: []
+    alerts: [],
+    commissionRate: 2.0,
+    commissionAmount: 625000,
+    commissionPaid: true,
+    commissionPaidAt: new Date('2024-12-30')
   }
 ];
 
@@ -394,13 +407,28 @@ export function usePortfolioMetrics() {
     const criticalAlerts = trades.reduce((sum, t) => sum + t.alerts.filter(a => a.type === 'critical' && !a.resolved).length, 0);
     const approvedCounterparties = counterparties.filter(cp => cp.approved).length;
     
+    const totalCommissionEarned = trades
+      .filter(t => t.commissionPaid)
+      .reduce((sum, t) => sum + (t.commissionAmount || 0), 0);
+    
+    const pendingCommission = trades
+      .filter(t => ['delivered', 'settled'].includes(t.status) && !t.commissionPaid)
+      .reduce((sum, t) => sum + (t.commissionAmount || 0), 0);
+    
+    const potentialCommission = trades
+      .filter(t => ['active', 'in_transit', 'financing_pending'].includes(t.status))
+      .reduce((sum, t) => sum + (t.commissionAmount || 0), 0);
+    
     return {
       totalValue,
       activeTrades,
       pendingApprovals,
       criticalAlerts,
       approvedCounterparties,
-      totalCounterparties: counterparties.length
+      totalCounterparties: counterparties.length,
+      totalCommissionEarned,
+      pendingCommission,
+      potentialCommission
     };
   }, [trades, counterparties]);
 }

@@ -89,6 +89,10 @@ export interface Trade {
   documents: Document[];
   riskLevel: RiskLevel;
   alerts: Alert[];
+  commissionRate?: number;
+  commissionAmount?: number;
+  commissionPaid?: boolean;
+  commissionPaidAt?: Date;
 }
 
 export interface Alert {

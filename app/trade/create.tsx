@@ -27,6 +27,7 @@ export default function CreateTradeScreen() {
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [incoterm, setIncoterm] = useState('CIF');
+  const [commissionRate, setCommissionRate] = useState(1.0);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
 
@@ -55,6 +56,8 @@ export default function CreateTradeScreen() {
 
     const quantityNum = parseFloat(quantity);
     const priceNum = parseFloat(pricePerUnit);
+    const totalValue = quantityNum * priceNum;
+    const commissionAmount = totalValue * (commissionRate / 100);
 
     const newTrade: Trade = {
       id: `t${Date.now()}`,
@@ -64,7 +67,7 @@ export default function CreateTradeScreen() {
       quantity: quantityNum,
       unit: commodity === 'gold' ? 'kg' : 'MT',
       pricePerUnit: priceNum,
-      totalValue: quantityNum * priceNum,
+      totalValue,
       currency: 'USD',
       incoterm: `${incoterm} ${counterparty.country}`,
       deliveryWindow: {
@@ -76,7 +79,10 @@ export default function CreateTradeScreen() {
       createdBy: currentUser?.name || 'User',
       documents: [],
       riskLevel: counterparty.riskScore.level,
-      alerts: []
+      alerts: [],
+      commissionRate,
+      commissionAmount,
+      commissionPaid: false
     };
 
     await addTrade(newTrade);
@@ -192,14 +198,39 @@ export default function CreateTradeScreen() {
                   ))}
                 </ScrollView>
               </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Platform Commission Rate (%)</Text>
+                <View style={styles.commissionOptions}>
+                  {[0.5, 1.0, 1.5, 2.0].map(rate => (
+                    <TouchableOpacity
+                      key={rate}
+                      style={[styles.commissionChip, commissionRate === rate && styles.commissionChipActive]}
+                      onPress={() => setCommissionRate(rate)}
+                    >
+                      <Text style={[styles.commissionText, commissionRate === rate && styles.commissionTextActive]}>
+                        {rate}%
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             </View>
 
             {quantity && pricePerUnit && (
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryLabel}>Total Trade Value</Text>
-                <Text style={styles.summaryValue}>
-                  ${(parseFloat(quantity) * parseFloat(pricePerUnit)).toLocaleString()} USD
-                </Text>
+              <View style={styles.summarySection}>
+                <View style={styles.summaryCard}>
+                  <Text style={styles.summaryLabel}>Total Trade Value</Text>
+                  <Text style={styles.summaryValue}>
+                    ${(parseFloat(quantity) * parseFloat(pricePerUnit)).toLocaleString()} USD
+                  </Text>
+                </View>
+                <View style={styles.commissionCard}>
+                  <Text style={styles.commissionLabel}>Your Commission ({commissionRate}%)</Text>
+                  <Text style={styles.commissionValue}>
+                    ${((parseFloat(quantity) * parseFloat(pricePerUnit) * commissionRate) / 100).toLocaleString()} USD
+                  </Text>
+                </View>
               </View>
             )}
           </View>
@@ -371,6 +402,9 @@ const styles = StyleSheet.create({
   incotermTextActive: {
     color: '#FFFFFF',
   },
+  summarySection: {
+    gap: 12,
+  },
   summaryCard: {
     backgroundColor: '#10B98120',
     borderRadius: 16,
@@ -388,6 +422,49 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#10B981',
+  },
+  commissionCard: {
+    backgroundColor: '#8B5CF620',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+  },
+  commissionLabel: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginBottom: 8,
+  },
+  commissionValue: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#8B5CF6',
+  },
+  commissionOptions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  commissionChip: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  commissionChipActive: {
+    backgroundColor: '#8B5CF620',
+    borderColor: '#8B5CF6',
+  },
+  commissionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  commissionTextActive: {
+    color: '#8B5CF6',
   },
   footer: {
     flexDirection: 'row',

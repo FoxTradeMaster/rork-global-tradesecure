@@ -116,6 +116,43 @@ export default function TradeDetailScreen() {
               </View>
             </View>
 
+            {trade.commissionRate && trade.commissionAmount && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Commission</Text>
+                <View style={styles.commissionSection}>
+                  <View style={styles.commissionCard}>
+                    <View style={styles.commissionHeader}>
+                      <Text style={styles.commissionRate}>{trade.commissionRate}%</Text>
+                      <View style={[
+                        styles.commissionBadge,
+                        { backgroundColor: trade.commissionPaid ? '#10B98120' : '#F59E0B20' }
+                      ]}>
+                        <Text style={[
+                          styles.commissionBadgeText,
+                          { color: trade.commissionPaid ? '#10B981' : '#F59E0B' }
+                        ]}>
+                          {trade.commissionPaid ? 'PAID' : 'PENDING'}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.commissionAmount}>
+                      ${trade.commissionAmount.toLocaleString()} {trade.currency}
+                    </Text>
+                    {trade.commissionPaid && trade.commissionPaidAt && (
+                      <Text style={styles.commissionPaidDate}>
+                        Paid on {new Date(trade.commissionPaidAt).toLocaleDateString()}
+                      </Text>
+                    )}
+                    {!trade.commissionPaid && ['delivered', 'settled'].includes(trade.status) && (
+                      <Text style={styles.commissionNote}>
+                        Payment due upon trade settlement
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              </View>
+            )}
+
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Trade Details</Text>
               <View style={styles.detailsGrid}>
@@ -381,6 +418,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginTop: 12,
+  },
+  commissionSection: {
+    gap: 12,
+  },
+  commissionCard: {
+    backgroundColor: '#8B5CF620',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+  },
+  commissionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  commissionRate: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#8B5CF6',
+  },
+  commissionBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  commissionBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  commissionAmount: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#8B5CF6',
+    marginBottom: 8,
+  },
+  commissionPaidDate: {
+    fontSize: 14,
+    color: '#10B981',
+    fontWeight: '600',
+  },
+  commissionNote: {
+    fontSize: 14,
+    color: '#F59E0B',
+    fontStyle: 'italic' as const,
   },
   errorContainer: {
     flex: 1,
