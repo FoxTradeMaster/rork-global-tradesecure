@@ -1134,18 +1134,20 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 16,
     minWidth: 0,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    maxWidth: '100%',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700' as const,
     color: '#FFFFFF',
+    flexShrink: 1,
   },
   headerBadge: {
     backgroundColor: '#3B82F6',
@@ -1161,7 +1163,7 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
     flexShrink: 0,
   },
   addButton: {
