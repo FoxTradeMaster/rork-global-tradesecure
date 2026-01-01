@@ -183,9 +183,74 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.log('[TradingContext] Starting to load data...');
       
       try {
-        setCounterparties(MOCK_COUNTERPARTIES);
-        setTrades(MOCK_TRADES);
-        console.log('[TradingContext] Loaded mock data immediately');
+        const { data: counterpartiesData, error: counterpartiesError } = await supabase
+          .from('counterparties')
+          .select('*')
+          .order('onboarded_at', { ascending: false });
+
+        if (counterpartiesError) {
+          console.error('[TradingContext] Error loading counterparties:', counterpartiesError);
+          setCounterparties(MOCK_COUNTERPARTIES);
+        } else if (counterpartiesData && counterpartiesData.length > 0) {
+          const mappedCounterparties: Counterparty[] = counterpartiesData.map((cp: any) => ({
+            id: cp.id,
+            name: cp.name,
+            country: cp.country,
+            type: cp.type,
+            email: cp.email || '',
+            onboardedAt: new Date(cp.onboarded_at),
+            riskScore: cp.risk_score,
+            documents: cp.documents || [],
+            approved: cp.approved,
+            approvalConditions: cp.approval_conditions,
+            status: cp.status,
+          }));
+          setCounterparties(mappedCounterparties);
+          console.log('[TradingContext] Loaded', mappedCounterparties.length, 'counterparties from Supabase');
+        } else {
+          setCounterparties(MOCK_COUNTERPARTIES);
+          console.log('[TradingContext] No counterparties in DB, using mock data');
+        }
+
+        const { data: tradesData, error: tradesError } = await supabase
+          .from('trades')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (tradesError) {
+          console.error('[TradingContext] Error loading trades:', tradesError);
+          setTrades(MOCK_TRADES);
+        } else if (tradesData && tradesData.length > 0) {
+          const mappedTrades: Trade[] = tradesData.map((t: any) => ({
+            id: t.id,
+            commodity: t.commodity,
+            counterpartyId: t.counterparty_id,
+            counterpartyName: t.counterparty_name,
+            quantity: t.quantity,
+            unit: t.unit,
+            pricePerUnit: t.price_per_unit,
+            totalValue: t.total_value,
+            currency: t.currency,
+            incoterm: t.incoterm,
+            deliveryWindow: t.delivery_window,
+            status: t.status,
+            createdAt: new Date(t.created_at),
+            createdBy: t.created_by,
+            documents: t.documents || [],
+            riskLevel: t.risk_level,
+            alerts: t.alerts || [],
+            commissionRate: t.commission_rate || 0,
+            commissionAmount: t.commission_amount || 0,
+            commissionPaid: t.commission_paid || false,
+            commissionPaidAt: t.commission_paid_at ? new Date(t.commission_paid_at) : undefined,
+            paypalOrderId: t.paypal_order_id,
+          }));
+          setTrades(mappedTrades);
+          console.log('[TradingContext] Loaded', mappedTrades.length, 'trades from Supabase');
+        } else {
+          setTrades(MOCK_TRADES);
+          console.log('[TradingContext] No trades in DB, using mock data');
+        }
 
         try {
           const storedUser = await Promise.race([
@@ -201,7 +266,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           console.log('[TradingContext] Storage error/timeout:', storageError);
         }
 
-        console.log('[TradingContext] Finished loading user data');
+        console.log('[TradingContext] Finished loading all data');
       } catch (error) {
         console.error('[TradingContext] Error loading data:', error);
         setCounterparties(MOCK_COUNTERPARTIES);
