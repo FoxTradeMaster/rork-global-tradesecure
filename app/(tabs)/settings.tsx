@@ -9,15 +9,15 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
-  const { subscriptionStatus, isPremium, openCustomerCenter } = useSubscription();
+  const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
   const { currentUser, setUser } = useTrading();
   const metrics = usePortfolioMetrics();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
 
-  const handleManageSubscription = async () => {
+  const handleManageSubscription = () => {
     if (isPremium) {
-      await openCustomerCenter();
+      manageSubscription();
     } else {
       setShowPaywall(true);
     }

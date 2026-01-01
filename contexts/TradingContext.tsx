@@ -1,8 +1,9 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, Counterparty, Trade } from '@/types';
+import { User, Counterparty, Trade, WalletBalance, Transaction } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal';
 
 const MOCK_COUNTERPARTIES: Counterparty[] = [
   {
@@ -173,6 +174,8 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [walletBalance, setWalletBalance] = useState<WalletBalance>({ available: 0, pending: 0, total: 0 });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -368,6 +371,8 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     if (updates.alerts) dbUpdates.alerts = updates.alerts;
     if (updates.pricePerUnit) dbUpdates.price_per_unit = updates.pricePerUnit;
     if (updates.totalValue) dbUpdates.total_value = updates.totalValue;
+    if (updates.commissionPaid !== undefined) dbUpdates.commission_paid = updates.commissionPaid;
+    if (updates.paypalOrderId) dbUpdates.paypal_order_id = updates.paypalOrderId;
 
     const { error } = await supabase
       .from('trades')
@@ -382,18 +387,137 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     setTrades(updated);
   };
 
+  const payPlatformFee = async (tradeId: string, amount: number): Promise<{ approvalUrl: string; orderId: string }> => {
+    try {
+      const trade = trades.find(t => t.id === tradeId);
+      const order = await createPayPalOrder(
+        amount.toFixed(2),
+        'USD',
+        `Platform fee for trade ${trade?.commodity || tradeId}`
+      );
+
+      const approvalLink = order.links?.find((link: any) => link.rel === 'approve');
+      if (!approvalLink) {
+        throw new Error('No approval URL found');
+      }
+
+      await updateTrade(tradeId, { paypalOrderId: order.id });
+
+      return { approvalUrl: approvalLink.href, orderId: order.id };
+    } catch (error) {
+      console.error('[Trading] Error creating platform fee payment:', error);
+      throw error;
+    }
+  };
+
+  const confirmPlatformFeePayment = async (tradeId: string, orderId: string) => {
+    try {
+      const capture = await capturePayPalOrder(orderId);
+      
+      if (capture.status === 'COMPLETED') {
+        await updateTrade(tradeId, { 
+          commissionPaid: true, 
+          commissionPaidAt: new Date() 
+        });
+
+        const transaction: Transaction = {
+          id: `txn_${Date.now()}`,
+          type: 'platform_fee',
+          amount: parseFloat(capture.purchase_units?.[0]?.amount?.value || '0'),
+          currency: 'USD',
+          status: 'completed',
+          description: `Platform fee for trade ${tradeId}`,
+          timestamp: new Date(),
+          paypalOrderId: orderId,
+          tradeId: tradeId,
+        };
+
+        setTransactions(prev => [transaction, ...prev]);
+        console.log('[Trading] Platform fee payment completed');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[Trading] Error confirming payment:', error);
+      throw error;
+    }
+  };
+
+  const addDeposit = async (amount: number): Promise<{ approvalUrl: string; orderId: string }> => {
+    try {
+      const order = await createPayPalOrder(
+        amount.toFixed(2),
+        'USD',
+        'Wallet deposit'
+      );
+
+      const approvalLink = order.links?.find((link: any) => link.rel === 'approve');
+      if (!approvalLink) {
+        throw new Error('No approval URL found');
+      }
+
+      return { approvalUrl: approvalLink.href, orderId: order.id };
+    } catch (error) {
+      console.error('[Trading] Error creating deposit:', error);
+      throw error;
+    }
+  };
+
+  const confirmDeposit = async (orderId: string) => {
+    try {
+      const capture = await capturePayPalOrder(orderId);
+      
+      if (capture.status === 'COMPLETED') {
+        const amount = parseFloat(capture.purchase_units?.[0]?.amount?.value || '0');
+        
+        setWalletBalance(prev => ({
+          available: prev.available + amount,
+          pending: prev.pending,
+          total: prev.total + amount,
+        }));
+
+        const transaction: Transaction = {
+          id: `txn_${Date.now()}`,
+          type: 'deposit',
+          amount: amount,
+          currency: 'USD',
+          status: 'completed',
+          description: 'Wallet deposit via PayPal',
+          timestamp: new Date(),
+          paypalOrderId: orderId,
+        };
+
+        setTransactions(prev => [transaction, ...prev]);
+        console.log('[Trading] Deposit completed');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[Trading] Error confirming deposit:', error);
+      throw error;
+    }
+  };
+
   return {
     currentUser,
     setUser,
     counterparties,
     trades,
+    walletBalance,
+    transactions,
     isLoading,
     addCounterparty,
     addCounterparties,
     updateCounterparty,
     addTrade,
     addTrades,
-    updateTrade
+    updateTrade,
+    payPlatformFee,
+    confirmPlatformFeePayment,
+    addDeposit,
+    confirmDeposit,
   };
 });
 

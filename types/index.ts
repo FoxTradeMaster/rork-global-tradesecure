@@ -93,6 +93,7 @@ export interface Trade {
   commissionAmount?: number;
   commissionPaid?: boolean;
   commissionPaidAt?: Date;
+  paypalOrderId?: string;
 }
 
 export interface Alert {
@@ -208,4 +209,22 @@ export interface EmailOutreach {
   template: EmailTemplate;
   sentAt: Date;
   status: 'draft' | 'sent' | 'failed';
+}
+
+export interface WalletBalance {
+  available: number;
+  pending: number;
+  total: number;
+}
+
+export interface Transaction {
+  id: string;
+  type: 'deposit' | 'withdrawal' | 'commission' | 'platform_fee';
+  amount: number;
+  currency: string;
+  status: 'pending' | 'completed' | 'failed';
+  description: string;
+  timestamp: Date;
+  paypalOrderId?: string;
+  tradeId?: string;
 }
