@@ -197,14 +197,14 @@ export async function cancelPayPalSubscription(subscriptionId: string, reason: s
 
 export const SUBSCRIPTION_PLANS: PayPalSubscriptionPlan[] = [
   {
-    id: 'P-MONTHLY',
+    id: 'P-3W87840565478320LNFLCXEA',
     name: 'Premium Monthly',
     description: '0.5% platform fee + unlimited features',
     price: '99.00',
     interval: 'MONTH',
   },
   {
-    id: 'P-YEARLY',
+    id: 'P-9XE03721ER697370SNFLDL7Q',
     name: 'Premium Yearly',
     description: '0.5% platform fee + unlimited features',
     price: '999.00',

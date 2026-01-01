@@ -23,7 +23,7 @@ const PREMIUM_FEATURES = [
 export default function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
   const { plans, purchaseSubscription, isLoading } = useSubscription();
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>('P-MONTHLY');
+  const [selectedPlan, setSelectedPlan] = useState<string>('P-3W87840565478320LNFLCXEA');
 
   const monthlyPlan = plans.find(p => p.interval === 'MONTH');
   const yearlyPlan = plans.find(p => p.interval === 'YEAR');
