@@ -7,8 +7,7 @@ import { Trade, Document, DocumentType } from '@/types';
 import { sendTradeDocument, generateDocumentContent, generateBlankDocument } from '@/lib/sendgrid';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import * as Print from 'expo-print';
 import { supabase } from '@/lib/supabase';
 
 export default function DocumentsScreen() {
@@ -79,24 +78,13 @@ export default function DocumentsScreen() {
         URL.revokeObjectURL(url);
         Alert.alert('Success', `${docType} template downloaded successfully`);
       } else {
-        const fileName = `${docType}_Blank_Template.html`;
-        const file = new File(Paths.cache, fileName);
-        file.write(content);
-        
-        const canShare = await Sharing.isAvailableAsync();
-        if (canShare) {
-          await Sharing.shareAsync(file.uri, {
-            mimeType: 'text/html',
-            dialogTitle: `Share ${docType} Template`,
-            UTI: 'public.html',
-          });
-        } else {
-          Alert.alert('Success', `${docType} template saved to your device.`);
-        }
+        await Print.printAsync({
+          html: content,
+        });
       }
     } catch (error) {
-      console.error('Error downloading template:', error);
-      Alert.alert('Error', 'Failed to download template');
+      console.error('Error printing template:', error);
+      Alert.alert('Error', 'Failed to print template');
     }
   };
 
