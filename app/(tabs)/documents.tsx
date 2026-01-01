@@ -1133,12 +1133,14 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
     marginRight: 12,
+    minWidth: 0,
   },
   title: {
     fontSize: 28,
     fontWeight: '700' as const,
     color: '#FFFFFF',
     marginBottom: 4,
+    flexShrink: 0,
   },
   headerBadge: {
     backgroundColor: '#3B82F6',
@@ -1155,6 +1157,7 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     gap: 12,
+    flexShrink: 0,
   },
   addButton: {
     width: 44,
