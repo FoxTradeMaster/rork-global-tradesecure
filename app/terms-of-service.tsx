@@ -24,12 +24,12 @@ export default function TermsOfServiceScreen() {
 
             <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
             <Text style={styles.paragraph}>
-              By accessing and using this trading platform application (&quot;App&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the App.
+              By accessing and using this trading platform application (&quot;App&quot;) operated by Masters Energy Inc. USA, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the App.
             </Text>
 
             <Text style={styles.sectionTitle}>2. Description of Service</Text>
             <Text style={styles.paragraph}>
-              Our App provides a platform for managing commodity trades, counterparty relationships, trade documentation, and market intelligence. The service includes both free and premium subscription tiers with varying features and limitations.
+              Masters Energy Inc. USA operates this App as an intermediary and facilitator for commodity trading transactions. The platform enables users to manage commodity trades, counterparty relationships, trade documentation, and market intelligence. Masters Energy Inc. USA earns commission as a facilitator on deals closed through the platform. The service includes both free and premium subscription tiers with varying features, limitations, and commission rates.
             </Text>
 
             <Text style={styles.sectionTitle}>3. User Accounts and Registration</Text>
@@ -42,10 +42,15 @@ export default function TermsOfServiceScreen() {
 
             <Text style={styles.sectionTitle}>4. Subscription and Payment Terms</Text>
             <Text style={styles.paragraph}>
-              <Text style={styles.bold}>Free Plan:</Text> The free plan provides limited access to features, including a maximum of 3 counterparties and 5 active trades.
+              <Text style={styles.bold}>Intermediary Commission:</Text> Masters Energy Inc. USA acts as an intermediary/facilitator for all trades conducted through the platform and earns commission on completed deals. Commission rates vary based on your subscription tier:
+            </Text>
+            <Text style={styles.bulletPoint}>• Free Plan: 2% commission per deal + limited features (max 5 counterparties, 10 active trades)</Text>
+            <Text style={styles.bulletPoint}>• Premium Plan: 0.5% commission per deal + $99/month platform fee + unlimited features</Text>
+            <Text style={styles.paragraph}>
+              <Text style={styles.bold}>Premium Subscription:</Text> Premium plans are available on a monthly, annual, or lifetime basis. By subscribing to a premium plan, you agree to pay the specified subscription fees in addition to the reduced commission rate on facilitated deals.
             </Text>
             <Text style={styles.paragraph}>
-              <Text style={styles.bold}>Premium Subscription:</Text> Premium plans are available on a monthly, annual, or lifetime basis. By subscribing to a premium plan, you agree to pay the specified fees.
+              <Text style={styles.bold}>Commission Payment:</Text> Commission is calculated as a percentage of the total transaction value and becomes due upon successful completion and settlement of each trade. You authorize Masters Energy Inc. USA to collect commission fees from settled transactions.
             </Text>
             <Text style={styles.paragraph}>
               <Text style={styles.bold}>Billing:</Text> Subscription fees are billed in advance on a recurring basis (monthly or annually) through your chosen app store (Apple App Store or Google Play Store). All payments are processed securely through these platforms.
@@ -157,9 +162,14 @@ export default function TermsOfServiceScreen() {
               These Terms constitute the entire agreement between you and us regarding the use of the App and supersede all prior agreements and understandings, whether written or oral.
             </Text>
 
-            <Text style={styles.sectionTitle}>19. Contact Information</Text>
+            <Text style={styles.sectionTitle}>19. Platform Operator</Text>
             <Text style={styles.paragraph}>
-              If you have any questions about these Terms of Service, please contact us through the App&apos;s support channels.
+              This App is operated by Masters Energy Inc. USA, which acts as an intermediary and facilitator for commodity trading transactions conducted through the platform.
+            </Text>
+
+            <Text style={styles.sectionTitle}>20. Contact Information</Text>
+            <Text style={styles.paragraph}>
+              If you have any questions about these Terms of Service, please contact Masters Energy Inc. USA through the App&apos;s support channels.
             </Text>
 
             <View style={styles.footer}>

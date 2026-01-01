@@ -279,7 +279,8 @@ export default function SettingsScreen() {
 
           <View style={styles.footer}>
             <Text style={styles.version}>Version 1.0.0</Text>
-            <Text style={styles.copyright}>©2025 Property Power Partners LLC.</Text>
+            <Text style={styles.copyright}>©2025 Masters Energy Inc. USA</Text>
+            <Text style={styles.operatorNote}>Platform Intermediary & Facilitator</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -530,6 +531,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  operatorNote: {
+    fontSize: 11,
+    color: '#6B7280',
+    textAlign: 'center',
+    fontStyle: 'italic' as const,
   },
   roleCard: {
     backgroundColor: '#1F2937',

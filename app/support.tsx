@@ -51,9 +51,9 @@ export default function SupportScreen() {
         ]}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Fox Trade Master™ Support</Text>
+          <Text style={styles.title}>Masters Energy Inc. USA Support</Text>
           <Text style={styles.subtitle}>
-            We&apos;re here to help you succeed with your commodity trading operations
+            We&apos;re here to help you succeed with your commodity trading operations through our facilitation platform
           </Text>
         </View>
 
@@ -179,7 +179,7 @@ export default function SupportScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Fox Trade Master™ - Professional Commodity Trading Platform
+            Masters Energy Inc. USA - Commodity Trading Intermediary & Facilitator
           </Text>
           <Text style={styles.versionText}>Version 1.0.0</Text>
         </View>

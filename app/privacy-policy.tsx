@@ -23,7 +23,7 @@ export default function PrivacyPolicyScreen() {
             <Text style={styles.lastUpdated}>Last Updated: December 30, 2025</Text>
 
             <Text style={styles.paragraph}>
-              This Privacy Policy describes how we collect, use, store, and protect your personal information when you use our trading platform application (&quot;App&quot;). We are committed to protecting your privacy and handling your data in an open and transparent manner.
+              This Privacy Policy describes how Masters Energy Inc. USA (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, stores, and protects your personal information when you use our trading platform application (&quot;App&quot;). Masters Energy Inc. USA operates as an intermediary and facilitator for commodity trading transactions. We are committed to protecting your privacy and handling your data in an open and transparent manner.
             </Text>
 
             <Text style={styles.sectionTitle}>1. Information We Collect</Text>
@@ -211,10 +211,15 @@ export default function PrivacyPolicyScreen() {
 
             <Text style={styles.sectionTitle}>14. Contact Us</Text>
             <Text style={styles.paragraph}>
-              If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us through the App&apos;s support channels or at the contact information provided in the App.
+              If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact Masters Energy Inc. USA through the App&apos;s support channels or at the contact information provided in the App.
             </Text>
             <Text style={styles.paragraph}>
               For data protection inquiries, you can contact our Data Protection Officer (if applicable) at the designated email address provided in the App.
+            </Text>
+            <Text style={styles.paragraph}>
+              <Text style={styles.bold}>Company:</Text> Masters Energy Inc. USA{`
+`}
+              <Text style={styles.bold}>Role:</Text> Intermediary/Facilitator for commodity trading transactions
             </Text>
 
             <Text style={styles.sectionTitle}>15. Your Consent</Text>
@@ -315,5 +320,9 @@ const styles = StyleSheet.create({
     color: '#D1D5DB',
     lineHeight: 22,
     fontStyle: 'italic' as const,
+  },
+  bold: {
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
   },
 });

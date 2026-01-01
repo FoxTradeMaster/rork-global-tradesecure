@@ -118,7 +118,7 @@ export default function TradeDetailScreen() {
 
             {trade.commissionRate && trade.commissionAmount && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Commission</Text>
+                <Text style={styles.sectionTitle}>Facilitation Commission</Text>
                 <View style={styles.commissionSection}>
                   <View style={styles.commissionCard}>
                     <View style={styles.commissionHeader}>
@@ -148,6 +148,9 @@ export default function TradeDetailScreen() {
                         Payment due upon trade settlement
                       </Text>
                     )}
+                    <View style={styles.facilitatorBanner}>
+                      <Text style={styles.facilitatorText}>Facilitated by Masters Energy Inc. USA</Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -464,6 +467,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#F59E0B',
     fontStyle: 'italic' as const,
+  },
+  facilitatorBanner: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#8B5CF640',
+    alignItems: 'center',
+  },
+  facilitatorText: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontWeight: '600' as const,
   },
   errorContainer: {
     flex: 1,

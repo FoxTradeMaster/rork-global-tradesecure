@@ -200,7 +200,8 @@ export default function CreateTradeScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Platform Commission Rate (%)</Text>
+                <Text style={styles.inputLabel}>Facilitation Commission Rate (%)</Text>
+                <Text style={styles.helperText}>Masters Energy Inc. USA commission as intermediary</Text>
                 <View style={styles.commissionOptions}>
                   {[0.5, 1.0, 1.5, 2.0].map(rate => (
                     <TouchableOpacity
@@ -462,6 +463,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#9CA3AF',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 8,
+    fontStyle: 'italic' as const,
   },
   commissionTextActive: {
     color: '#8B5CF6',
