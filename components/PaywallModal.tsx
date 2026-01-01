@@ -11,7 +11,7 @@ interface PaywallModalProps {
 }
 
 const PREMIUM_FEATURES = [
-  { icon: Zap, title: 'Reduced Platform Commission', description: 'Only 0.5% commission vs 2% on free tier' },
+  { icon: Zap, title: 'Reduced Platform Fee', description: 'Only 0.5% platform fee vs 2% on free plan' },
   { icon: Database, title: 'Unlimited Trades & Parties', description: 'No limits on trades or counterparties' },
   { icon: TrendingUp, title: 'Advanced Analytics', description: 'Deep insights into your trading performance' },
   { icon: FileText, title: 'Custom Reports', description: 'Generate detailed custom reports' },
@@ -93,19 +93,20 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
               </Text>
             )}
             <Text style={styles.subtitle}>
-              Lower commission rates + unlimited access to facilitation platform
+              Lower platform fees + unlimited access to facilitation platform
             </Text>
 
             <View style={styles.commissionCompareCard}>
+              <Text style={styles.platformFeeTitle}>Masters Energy Inc. Platform Fees</Text>
               <View style={styles.commissionRow}>
-                <Text style={styles.commissionLabel}>Free Tier:</Text>
-                <Text style={styles.commissionFree}>2% per deal</Text>
+                <Text style={styles.commissionLabel}>Free Plan:</Text>
+                <Text style={styles.commissionFree}>2% platform fee per deal</Text>
               </View>
               <View style={styles.commissionRow}>
-                <Text style={styles.commissionLabel}>Premium:</Text>
-                <Text style={styles.commissionPremium}>0.5% per deal + $99/mo</Text>
+                <Text style={styles.commissionLabel}>Premium Plan:</Text>
+                <Text style={styles.commissionPremium}>0.5% platform fee + $99/mo</Text>
               </View>
-              <Text style={styles.commissionNote}>Save on every deal you facilitate!</Text>
+              <Text style={styles.commissionNote}>Lower platform fees on every transaction!</Text>
             </View>
 
             {isLoading ? (
@@ -466,6 +467,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: '#374151',
+  },
+  platformFeeTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   commissionRow: {
     flexDirection: 'row',

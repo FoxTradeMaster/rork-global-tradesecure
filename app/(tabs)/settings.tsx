@@ -92,23 +92,26 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Platform Information</Text>
+            <Text style={styles.sectionTitle}>Platform Fee Structure</Text>
             <View style={styles.roleCard}>
-              <Text style={styles.roleTitle}>Platform Role: Intermediary / Facilitator</Text>
+              <Text style={styles.roleTitle}>Masters Energy Inc. Fee</Text>
               <Text style={styles.roleDescription}>
-                Masters Energy Inc. acts as an intermediary/facilitator, earning commission on deals closed through this platform
+                As the platform operator and intermediary, Masters Energy Inc. charges the following fees for facilitating deals on this platform:
               </Text>
               <View style={styles.commissionRateContainer}>
-                <Text style={styles.commissionRateLabel}>Platform Commission Rate</Text>
+                <Text style={styles.commissionRateLabel}>Masters Energy Commission</Text>
                 <Text style={styles.commissionRateValue}>
                   {subscriptionStatus.features.commissionRate}%
                 </Text>
               </View>
               {isPremium && subscriptionStatus.features.platformFee > 0 && (
                 <Text style={styles.platformFeeText}>
-                  + ${subscriptionStatus.features.platformFee}/month platform access
+                  + ${subscriptionStatus.features.platformFee}/month subscription fee
                 </Text>
               )}
+              <Text style={styles.feeNote}>
+                This fee is charged by Masters Energy Inc. on all completed transactions
+              </Text>
             </View>
           </View>
 
@@ -601,5 +604,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700' as const,
     color: '#10B981',
+  },
+  feeNote: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic' as const,
   },
 });
