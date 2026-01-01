@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { X, Send, FileText, Users } from 'lucide-react-native';
+import { X, Send, FileText, Users, Mail } from 'lucide-react-native';
 import type { MarketParticipant, EmailTemplate } from '@/types';
 import { sendBulkEmails } from '@/lib/sendgrid';
 
@@ -49,6 +49,15 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
   const [senderName, setSenderName] = useState<string>('');
   const [senderEmail, setSenderEmail] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [recipientEmails, setRecipientEmails] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const initialEmails: { [key: string]: string } = {};
+    selectedCompanies.forEach(company => {
+      initialEmails[company.id] = '';
+    });
+    setRecipientEmails(initialEmails);
+  }, [selectedCompanies]);
 
   const handleTemplateSelect = (template: EmailTemplate) => {
     setSelectedTemplate(template);
@@ -67,10 +76,16 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
       return;
     }
 
+    const companiesWithEmails = selectedCompanies.filter(company => recipientEmails[company.id]?.trim());
+    if (companiesWithEmails.length === 0) {
+      Alert.alert('Missing Email Addresses', 'Please provide at least one email address for the recipients.');
+      return;
+    }
+
     setIsSending(true);
 
     try {
-      const emails = selectedCompanies.map(company => {
+      const emails = companiesWithEmails.map(company => {
         const subject = customSubject
           .replace('{company}', company.name)
           .replace('{commodity}', company.commodities[0] || 'commodities')
@@ -85,7 +100,7 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
           .replace('{delivery}', '[Please specify]');
 
         return {
-          to: company.website || 'contact@example.com',
+          to: recipientEmails[company.id],
           from: senderEmail,
           subject,
           body
@@ -96,7 +111,7 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
 
       Alert.alert(
         'Success',
-        `Email sent to ${selectedCompanies.length} ${selectedCompanies.length === 1 ? 'company' : 'companies'}.`,
+        `Email sent to ${companiesWithEmails.length} ${companiesWithEmails.length === 1 ? 'company' : 'companies'}.`,
         [{ text: 'OK', onPress: onClose }]
       );
     } catch (error) {
@@ -129,16 +144,30 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                 <Users size={18} color="#3B82F6" />
                 <Text style={styles.sectionTitle}>Recipients ({selectedCompanies.length})</Text>
               </View>
-              <View style={styles.recipientsList}>
-                {selectedCompanies.slice(0, 5).map(company => (
-                  <View key={company.id} style={styles.recipientChip}>
-                    <Text style={styles.recipientText}>{company.name}</Text>
+              {selectedCompanies.map(company => (
+                <View key={company.id} style={styles.recipientItem}>
+                  <View style={styles.recipientInfo}>
+                    <Text style={styles.recipientName}>{company.name}</Text>
+                    <Text style={styles.recipientLocation}>{company.headquarters}</Text>
                   </View>
-                ))}
-                {selectedCompanies.length > 5 && (
-                  <Text style={styles.moreText}>+{selectedCompanies.length - 5} more</Text>
-                )}
-              </View>
+                  <View style={styles.emailInputContainer}>
+                    <Mail size={16} color="#6B7280" style={styles.emailIcon} />
+                    <TextInput
+                      style={styles.emailInput}
+                      placeholder="Enter email address"
+                      placeholderTextColor="#6B7280"
+                      value={recipientEmails[company.id] || ''}
+                      onChangeText={(text) => setRecipientEmails(prev => ({
+                        ...prev,
+                        [company.id]: text
+                      }))}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+                </View>
+              ))}
             </View>
 
             <View style={styles.section}>
@@ -231,7 +260,9 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                 <>
                   <Send size={20} color="#FFFFFF" />
                   <Text style={styles.sendButtonText}>
-                    Send to {selectedCompanies.length} {selectedCompanies.length === 1 ? 'Company' : 'Companies'}
+                    Send {Object.values(recipientEmails).filter(email => email.trim()).length > 0 
+                      ? `to ${Object.values(recipientEmails).filter(email => email.trim()).length} ${Object.values(recipientEmails).filter(email => email.trim()).length === 1 ? 'Company' : 'Companies'}` 
+                      : 'Emails'}
                   </Text>
                 </>
               )}
@@ -288,27 +319,44 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  recipientsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  recipientChip: {
+  recipientItem: {
     backgroundColor: '#1F2937',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#374151',
   },
-  recipientText: {
+  recipientInfo: {
+    marginBottom: 12,
+  },
+  recipientName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  recipientLocation: {
     fontSize: 13,
     color: '#9CA3AF',
-    fontWeight: '500',
   },
-  moreText: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontStyle: 'italic',
-    marginTop: 8,
+  emailInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A0E27',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#374151',
+    paddingHorizontal: 12,
+  },
+  emailIcon: {
+    marginRight: 8,
+  },
+  emailInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#FFFFFF',
   },
   templatesScroll: {
     marginBottom: 8,
