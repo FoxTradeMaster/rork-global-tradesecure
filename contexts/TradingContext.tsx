@@ -22,8 +22,8 @@ const MOCK_COUNTERPARTIES: Counterparty[] = [
       level: 'green'
     },
     documents: [
-      { id: 'd1', type: 'corporate_docs', name: 'Trade License', uploadedAt: new Date(), uploadedBy: 'Admin', url: '', verified: true },
-      { id: 'd2', type: 'financial_statement', name: 'FY2024 Audit', uploadedAt: new Date(), uploadedBy: 'Admin', url: '', verified: true }
+      { id: 'd1', type: 'corporate_docs', name: 'Trade License', uploadedAt: new Date(), uploadedBy: 'Admin', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true },
+      { id: 'd2', type: 'financial_statement', name: 'FY2024 Audit', uploadedAt: new Date(), uploadedBy: 'Admin', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true }
     ],
     approved: true,
     status: 'approved'
@@ -44,7 +44,7 @@ const MOCK_COUNTERPARTIES: Counterparty[] = [
       level: 'amber'
     },
     documents: [
-      { id: 'd3', type: 'license', name: 'Trading License', uploadedAt: new Date(), uploadedBy: 'Compliance', url: '', verified: true }
+      { id: 'd3', type: 'license', name: 'Trading License', uploadedAt: new Date(), uploadedBy: 'Compliance', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true }
     ],
     approved: true,
     approvalConditions: ['Escrow required', 'Bank confirmation required'],
@@ -88,8 +88,8 @@ const MOCK_TRADES: Trade[] = [
     createdAt: new Date('2024-12-15'),
     createdBy: 'John Smith',
     documents: [
-      { id: 'td1', type: 'loi', name: 'Letter of Intent', uploadedAt: new Date(), uploadedBy: 'John Smith', url: '', verified: true },
-      { id: 'td2', type: 'lc', name: 'Letter of Credit', uploadedAt: new Date(), uploadedBy: 'Bank', url: '', verified: true }
+      { id: 'td1', type: 'loi', name: 'Letter of Intent', uploadedAt: new Date(), uploadedBy: 'John Smith', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true },
+      { id: 'td2', type: 'lc', name: 'Letter of Credit', uploadedAt: new Date(), uploadedBy: 'Bank', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true }
     ],
     riskLevel: 'green',
     alerts: [],
@@ -113,7 +113,7 @@ const MOCK_TRADES: Trade[] = [
     createdAt: new Date('2024-12-22'),
     createdBy: 'Sarah Johnson',
     documents: [
-      { id: 'td3', type: 'spa', name: 'Sales & Purchase Agreement', uploadedAt: new Date(), uploadedBy: 'Legal', url: '', verified: true }
+      { id: 'td3', type: 'spa', name: 'Sales & Purchase Agreement', uploadedAt: new Date(), uploadedBy: 'Legal', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', verified: true }
     ],
     riskLevel: 'amber',
     alerts: [
