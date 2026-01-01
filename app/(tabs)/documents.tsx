@@ -589,7 +589,7 @@ export default function DocumentsScreen() {
           </View>
         )}
 
-        {showCompanyInfoForm && selectedTrade && selectedDocType && (
+        {showCompanyInfoForm && (
           <View style={styles.modalOverlay}>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -608,7 +608,9 @@ export default function DocumentsScreen() {
                 </View>
 
                 <Text style={styles.formDescription}>
-                  Fill in your company details to include in the {selectedDocType} document
+                  {selectedDocType 
+                    ? `Fill in your company details to include in the ${selectedDocType} document`
+                    : 'Fill in your company details to create your profile'}
                 </Text>
 
                 <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
@@ -776,10 +778,16 @@ export default function DocumentsScreen() {
                     }
                     await saveCompanyProfile(companyInfo);
                     setShowCompanyInfoForm(false);
-                    Alert.alert('Success', 'Your company profile has been saved and will be used for all future documents.');
+                    if (selectedTrade && selectedDocType) {
+                      Alert.alert('Success', 'Your company profile has been saved and will be used for all future documents.');
+                    } else {
+                      Alert.alert('Success', 'Your company profile has been created successfully!');
+                    }
                   }}
                 >
-                  <Text style={styles.continueButtonText}>Continue to Send</Text>
+                  <Text style={styles.continueButtonText}>
+                    {selectedTrade && selectedDocType ? 'Continue to Send' : 'Save Profile'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </KeyboardAvoidingView>
