@@ -41,16 +41,21 @@ export default function DocumentsScreen() {
 
   const handleDownloadDocument = async (doc: any) => {
     try {
-      if (doc.url && doc.url.trim() !== '') {
-        await Linking.openURL(doc.url);
-      } else {
+      const isDummyUrl = !doc.url || 
+                         doc.url.trim() === '' || 
+                         doc.url.includes('dummy.pdf') || 
+                         doc.url.includes('w3.org/WAI/ER/tests');
+      
+      if (isDummyUrl) {
         Alert.alert(
-          'Document Not Available', 
-          'This is a placeholder document. Upload new documents or download templates below to generate actual documents.',
+          'Placeholder Document', 
+          'This is a sample document from the demo data. To work with real documents:\n\n• Upload your own documents using the + button\n• Download blank templates below to fill out\n• Send documents via email',
           [
             { text: 'OK', style: 'default' }
           ]
         );
+      } else {
+        await Linking.openURL(doc.url);
       }
     } catch (error) {
       console.error('Error downloading document:', error);
