@@ -35,9 +35,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     console.log('[AuthContext] Sending magic link to:', email);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: 'exp://192.168.1.1:8081',
-      },
     });
 
     if (error) {
