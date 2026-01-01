@@ -32,6 +32,7 @@ export type DocumentType =
   | 'pof' 
   | 'msa' 
   | 'spa' 
+  | 'mfpa' 
   | 'lc' 
   | 'bol' 
   | 'certificate_origin' 

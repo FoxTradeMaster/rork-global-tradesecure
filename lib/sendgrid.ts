@@ -8,7 +8,7 @@ export interface EmailAttachment {
 export interface SendDocumentParams {
   to: string;
   subject: string;
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'SPA' | 'MSA';
+  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'SPA' | 'MSA' | 'MFPA';
   tradeDetails: {
     commodity: string;
     quantity: number;
@@ -74,6 +74,7 @@ function generateEmailContent(params: SendDocumentParams): string {
     NCNDA: 'Non-Circumvention and Non-Disclosure Agreement',
     SPA: 'Sales and Purchase Agreement',
     MSA: 'Master Sales Agreement',
+    MFPA: 'Master Fuel Purchase Agreement',
   };
 
   return `
@@ -144,7 +145,7 @@ function generateEmailContent(params: SendDocumentParams): string {
 }
 
 export function generateDocumentContent(
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA',
+  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA',
   tradeDetails: SendDocumentParams['tradeDetails'] | null,
   additionalInfo?: Record<string, any>
 ): string {
@@ -167,6 +168,8 @@ export function generateDocumentContent(
       return generatePOF(tradeDetails, date, additionalInfo);
     case 'NCNDA':
       return generateNCNDA(tradeDetails, date, additionalInfo);
+    case 'MFPA':
+      return generateMFPA(tradeDetails, date, additionalInfo);
     default:
       return '';
   }
@@ -2219,7 +2222,505 @@ function generateNCNDA(
   `.trim();
 }
 
-export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA'): string {
+function generateMFPA(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { margin: 2.5cm; }
+    body {
+      font-family: 'Times New Roman', 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+      background: #fff;
+    }
+    .document { max-width: 850px; margin: 0 auto; background: white; }
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .doc-title {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .doc-subtitle { font-size: 10pt; color: #444; font-style: italic; }
+    .date-ref {
+      margin: 25px 0;
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-left: 5px solid #2c3e50;
+      font-size: 10.5pt;
+    }
+    .parties-section {
+      margin: 30px 0;
+      padding: 25px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    .party-block {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f0f4f8;
+      border-left: 4px solid #34495e;
+    }
+    .party-title {
+      font-weight: bold;
+      font-size: 11.5pt;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: #2c3e50;
+    }
+    .recitals-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #e8f5e9;
+      border-left: 5px solid #4caf50;
+      border-radius: 3px;
+    }
+    .recitals-title {
+      font-weight: bold;
+      font-size: 11.5pt;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+    .section { margin-bottom: 35px; page-break-inside: avoid; }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #34495e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .subsection {
+      margin: 15px 0;
+      padding-left: 20px;
+      line-height: 1.9;
+      text-align: justify;
+    }
+    .subsection-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .clause-list {
+      margin: 10px 0;
+      padding-left: 40px;
+      line-height: 2;
+    }
+    .clause-list li {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+    .field {
+      margin-bottom: 12px;
+      padding-left: 10px;
+      line-height: 1.8;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #2c3e50;
+      display: inline-block;
+      min-width: 220px;
+    }
+    .field-value { color: #000; }
+    .signature-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 3px double #34495e;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin: 40px 0;
+      padding: 25px;
+      background: #fafafa;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    .signature-line {
+      margin: 30px 0 15px 0;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      max-width: 400px;
+      font-weight: bold;
+    }
+    .signature-field {
+      margin: 10px 0;
+      line-height: 1.8;
+    }
+    .signature-field strong {
+      display: inline-block;
+      min-width: 120px;
+      color: #2c3e50;
+    }
+    .footer {
+      margin-top: 50px;
+      padding-top: 25px;
+      border-top: 1px solid #bbb;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">Master Fuel Purchase Agreement</div>
+      <div class="doc-subtitle">(MFPA)</div>
+    </div>
+
+    <div class="date-ref">
+      <strong>Agreement Number:</strong> MFPA-${Date.now()}<br>
+      <strong>Effective Date:</strong> ${date}
+    </div>
+
+    <p style="text-align: justify; line-height: 1.8; margin: 25px 0;">This Master Fuel Purchase Agreement ("Agreement") is entered into on <strong>${date}</strong> by and between:</p>
+
+    <div class="parties-section">
+      <div class="party-block">
+        <div class="party-title">Seller:</div>
+        <div style="padding-left: 15px; line-height: 1.8;">
+          <strong>Company Name:</strong> ${additionalInfo?.sellerName || '[Seller Company Name]'}<br>
+          <strong>Registration Number:</strong> ${additionalInfo?.sellerRegistration || '[Registration Number]'}<br>
+          <strong>Address:</strong> ${additionalInfo?.sellerAddress || '[Company Address]'}<br>
+          <strong>Represented by:</strong> ${additionalInfo?.sellerRepresentative || '[Name and Title]'}
+        </div>
+      </div>
+
+      <div style="text-align: center; font-weight: bold; margin: 20px 0; font-size: 11pt;">AND</div>
+
+      <div class="party-block">
+        <div class="party-title">Buyer:</div>
+        <div style="padding-left: 15px; line-height: 1.8;">
+          <strong>Company Name:</strong> ${tradeDetails?.counterpartyName || '[Buyer Company Name]'}<br>
+          <strong>Registration Number:</strong> ${additionalInfo?.buyerRegistration || '[Registration Number]'}<br>
+          <strong>Address:</strong> ${additionalInfo?.buyerAddress || '[Company Address]'}<br>
+          <strong>Represented by:</strong> ${additionalInfo?.buyerRepresentative || '[Name and Title]'}
+        </div>
+      </div>
+
+      <p style="margin-top: 20px; text-align: center; font-style: italic;">Collectively referred to as the "Parties" and individually as a "Party."</p>
+    </div>
+
+    <div class="recitals-section">
+      <div class="recitals-title">Recitals:</div>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> Seller is engaged in the business of supplying <strong>${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'FUEL OIL'}</strong> and related petroleum products;</p>
+      <p style="margin-bottom: 15px; line-height: 1.8; text-align: justify;"><strong>WHEREAS,</strong> Buyer desires to purchase such products from Seller on a continuing basis;</p>
+      <p style="margin-bottom: 0; line-height: 1.8; text-align: justify;"><strong>NOW, THEREFORE,</strong> in consideration of the mutual covenants and agreements contained herein, the Parties agree as follows:</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 1: Definitions</div>
+      
+      <div class="subsection">
+        <p><strong>1.1 "Product"</strong> means ${tradeDetails?.commodity ? tradeDetails.commodity.replace(/_/g, ' ').toUpperCase() : 'FUEL OIL'} meeting the specifications set forth in Schedule A attached hereto.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>1.2 "Contract Year"</strong> means the twelve (12) month period commencing on ${date} and each subsequent twelve (12) month period thereafter.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>1.3 "Purchase Order"</strong> means a written order issued by Buyer to Seller for the purchase of Product under this Agreement.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>1.4 "Delivery Point"</strong> means the location specified in each Purchase Order where Seller shall deliver the Product.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 2: Term and Termination</div>
+      
+      <div class="subsection">
+        <p><strong>2.1 Term:</strong> This Agreement shall commence on ${date} and shall continue for a period of <strong>${additionalInfo?.termYears || 'three (3)'} years</strong>, unless earlier terminated as provided herein.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>2.2 Renewal:</strong> This Agreement shall automatically renew for successive one (1) year periods unless either Party provides written notice of non-renewal at least ninety (90) days prior to the expiration of the then-current term.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>2.3 Termination for Convenience:</strong> Either Party may terminate this Agreement upon sixty (60) days' prior written notice to the other Party, provided that all outstanding Purchase Orders shall be fulfilled.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>2.4 Termination for Cause:</strong> Either Party may terminate this Agreement immediately upon written notice if the other Party materially breaches this Agreement and fails to cure such breach within thirty (30) days of receiving written notice thereof.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 3: Purchase and Sale</div>
+      
+      <div class="subsection">
+        <p><strong>3.1 Purchase Orders:</strong> Buyer shall submit Purchase Orders to Seller specifying:</p>
+        <ul class="clause-list">
+          <li>Product type and quantity</li>
+          <li>Requested delivery date</li>
+          <li>Delivery location</li>
+          <li>Applicable price or pricing mechanism</li>
+          <li>Payment terms</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>3.2 Acceptance:</strong> Seller shall accept or reject each Purchase Order within forty-eight (48) hours of receipt. Failure to respond shall constitute acceptance.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>3.3 Minimum Purchase Obligation:</strong> Buyer agrees to purchase a minimum of <strong>${tradeDetails?.quantity.toLocaleString() || '[Quantity]'} ${tradeDetails?.unit || 'MT'}</strong> of Product per Contract Year.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 4: Price and Payment</div>
+      
+      <div class="subsection">
+        <p><strong>4.1 Pricing:</strong> The price for Product shall be determined as follows:</p>
+        <div class="field">
+          <span class="field-label">Base Price:</span>
+          <span class="field-value">${tradeDetails?.pricePerUnit || '[Price]'} USD per ${tradeDetails?.unit || 'MT'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Price Adjustment:</span>
+          <span class="field-value">${additionalInfo?.priceAdjustment || 'Market-linked, adjusted quarterly based on international benchmark prices'}</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <p><strong>4.2 Payment Terms:</strong></p>
+        <div class="field">
+          <span class="field-label">Payment Method:</span>
+          <span class="field-value">${additionalInfo?.paymentMethod || 'Letter of Credit or Bank Transfer'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Payment Due:</span>
+          <span class="field-value">${additionalInfo?.paymentTerms || 'Within 30 days of delivery'}</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <p><strong>4.3 Late Payment:</strong> Any amounts not paid when due shall bear interest at the rate of <strong>${additionalInfo?.interestRate || '1.5% per month'}</strong> or the maximum rate permitted by law, whichever is less.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 5: Delivery</div>
+      
+      <div class="subsection">
+        <p><strong>5.1 Delivery Terms:</strong></p>
+        <div class="field">
+          <span class="field-label">INCOTERM:</span>
+          <span class="field-value">${tradeDetails?.incoterm || '[INCOTERM 2020]'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Loading Port:</span>
+          <span class="field-value">${additionalInfo?.loadingPort || '[Port Name]'}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Discharge Port:</span>
+          <span class="field-value">${additionalInfo?.dischargePort || '[Port Name]'}</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <p><strong>5.2 Delivery Schedule:</strong> Seller shall deliver Product within <strong>${additionalInfo?.deliveryDays || 'thirty (30) days'}</strong> of receipt of each Purchase Order, unless otherwise agreed in writing.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>5.3 Title and Risk of Loss:</strong> Title to and risk of loss of Product shall pass to Buyer upon delivery in accordance with the applicable INCOTERM.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 6: Quality and Inspection</div>
+      
+      <div class="subsection">
+        <p><strong>6.1 Quality Standards:</strong> All Product shall conform to the specifications set forth in Schedule A and applicable industry standards.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>6.2 Inspection:</strong> Product quality and quantity shall be determined by independent inspection by <strong>${additionalInfo?.inspector || 'SGS, Intertek, or Bureau Veritas'}</strong> at loading port. Inspection results shall be final and binding.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>6.3 Rejection:</strong> Buyer may reject any Product that does not conform to specifications. Seller shall replace rejected Product at Seller's expense within a reasonable time.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 7: Force Majeure</div>
+      
+      <div class="subsection">
+        <p><strong>7.1</strong> Neither Party shall be liable for failure to perform its obligations under this Agreement if such failure results from events beyond its reasonable control, including but not limited to:</p>
+        <ul class="clause-list">
+          <li>Acts of God, natural disasters, or severe weather conditions</li>
+          <li>War, terrorism, civil unrest, or government action</li>
+          <li>Labor disputes or strikes</li>
+          <li>Fire, explosion, or equipment failure</li>
+          <li>Shortage of transportation, facilities, fuel, or raw materials</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>7.2</strong> The affected Party shall promptly notify the other Party in writing of the force majeure event and its expected duration.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 8: Warranties and Representations</div>
+      
+      <div class="subsection">
+        <p><strong>8.1 Seller Warranties:</strong> Seller warrants that:</p>
+        <ul class="clause-list">
+          <li>It has full authority to enter into this Agreement</li>
+          <li>The Product shall conform to all specifications</li>
+          <li>The Product shall be free from liens and encumbrances</li>
+          <li>The Product complies with all applicable laws and regulations</li>
+          <li>It holds all necessary licenses and permits</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <p><strong>8.2 Buyer Warranties:</strong> Buyer warrants that:</p>
+        <ul class="clause-list">
+          <li>It has full authority to enter into this Agreement</li>
+          <li>It has the financial capability to fulfill its payment obligations</li>
+          <li>It will comply with all applicable laws regarding Product use</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 9: Limitation of Liability</div>
+      
+      <div class="subsection">
+        <p><strong>9.1</strong> Neither Party shall be liable to the other for any indirect, incidental, consequential, special, or punitive damages, including lost profits, arising out of or related to this Agreement.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>9.2</strong> Each Party's total liability under this Agreement shall not exceed the total amount paid or payable for Product delivered in the twelve (12) months preceding the claim.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 10: Confidentiality</div>
+      
+      <div class="subsection">
+        <p><strong>10.1</strong> Each Party agrees to maintain in confidence all proprietary and confidential information disclosed by the other Party and to use such information solely for purposes of this Agreement.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>10.2</strong> This obligation shall survive termination of this Agreement for a period of <strong>${additionalInfo?.confidentialityYears || 'five (5)'} years</strong>.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 11: Dispute Resolution</div>
+      
+      <div class="subsection">
+        <p><strong>11.1 Negotiation:</strong> Any disputes shall first be resolved through good faith negotiations between senior executives of both Parties.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>11.2 Arbitration:</strong> If negotiations fail within thirty (30) days, disputes shall be resolved by binding arbitration in accordance with <strong>${additionalInfo?.arbitrationRules || 'ICC Rules'}</strong>.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>11.3 Governing Law:</strong> This Agreement shall be governed by the laws of <strong>${additionalInfo?.governingLaw || '[Jurisdiction]'}</strong>.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Article 12: General Provisions</div>
+      
+      <div class="subsection">
+        <p><strong>12.1 Entire Agreement:</strong> This Agreement constitutes the entire agreement between the Parties and supersedes all prior agreements and understandings.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>12.2 Amendments:</strong> This Agreement may only be amended by written agreement signed by both Parties.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>12.3 Assignment:</strong> Neither Party may assign this Agreement without prior written consent of the other Party.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>12.4 Notices:</strong> All notices shall be in writing and delivered to the addresses set forth above.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>12.5 Severability:</strong> If any provision is found invalid, the remaining provisions shall continue in full force and effect.</p>
+      </div>
+
+      <div class="subsection">
+        <p><strong>12.6 Waiver:</strong> No waiver of any provision shall constitute a waiver of any other provision.</p>
+      </div>
+    </div>
+
+    <div class="signature-section">
+      <p style="text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 30px;">IN WITNESS WHEREOF, the Parties have executed this Master Fuel Purchase Agreement as of the date first written above.</p>
+
+      <div class="signature-block">
+        <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50;">SELLER:</div>
+        
+        <div class="signature-line">AUTHORIZED SIGNATURE</div>
+        
+        <div style="margin-top: 20px;">
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.sellerSignatoryName || '[Name]'}</div>
+          <div class="signature-field"><strong>Title:</strong> ${additionalInfo?.sellerSignatoryTitle || '[Title]'}</div>
+          <div class="signature-field"><strong>Company:</strong> ${additionalInfo?.sellerName || '[Seller Company Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+          <div class="signature-field"><strong>Company Seal:</strong> [SEAL]</div>
+        </div>
+      </div>
+
+      <div class="signature-block">
+        <div style="font-weight: bold; font-size: 11.5pt; margin-bottom: 20px; color: #2c3e50;">BUYER:</div>
+        
+        <div class="signature-line">AUTHORIZED SIGNATURE</div>
+        
+        <div style="margin-top: 20px;">
+          <div class="signature-field"><strong>Name:</strong> ${additionalInfo?.buyerSignatoryName || '[Name]'}</div>
+          <div class="signature-field"><strong>Title:</strong> ${additionalInfo?.buyerSignatoryTitle || '[Title]'}</div>
+          <div class="signature-field"><strong>Company:</strong> ${tradeDetails?.counterpartyName || '[Buyer Company Name]'}</div>
+          <div class="signature-field"><strong>Date:</strong> ${date}</div>
+          <div class="signature-field"><strong>Company Seal:</strong> [SEAL]</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>This document is confidential and intended solely for the use of the named parties.<br>
+      Unauthorized distribution, copying, or disclosure is strictly prohibited.<br>
+      © ${new Date().getFullYear()} Commodity Trading Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA'): string {
   return generateDocumentContent(documentType, null, {});
 }
 

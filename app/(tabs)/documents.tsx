@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabase';
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showTradeSelector, setShowTradeSelector] = useState(false);
@@ -56,7 +56,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA') => {
+  const handleDownloadBlankTemplate = (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
     try {
       const content = generateBlankDocument(docType);
       
@@ -80,7 +80,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA') => {
+  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
     setSelectedTrade(trade);
     setSelectedDocType(docType);
     setRecipientEmail('');
@@ -442,12 +442,13 @@ export default function DocumentsScreen() {
                   { type: 'ICPO', name: 'Irrevocable Corporate PO', desc: 'Binding purchase order' },
                   { type: 'POF', name: 'Proof of Funds', desc: 'Bank fund certification' },
                   { type: 'NCNDA', name: 'NCNDA', desc: 'Non-disclosure agreement' },
+                  { type: 'MFPA', name: 'Master Fuel Purchase Agreement', desc: 'Long-term fuel contract' },
                   { type: 'CIS', name: 'Corporate Info Sheet', desc: 'Company details' },
                 ].map(template => (
                   <TouchableOpacity
                     key={template.type}
                     style={styles.templateCard}
-                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA')}
+                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA')}
                     activeOpacity={0.7}
                   >
                     <View style={styles.templateIconContainer}>
@@ -496,11 +497,11 @@ export default function DocumentsScreen() {
                       <Text style={styles.tradeItemSubtitle}>{trade.counterpartyName}</Text>
                     </View>
                     <View style={styles.docActions}>
-                      {['CIS', 'SCO', 'ICPO', 'LOI', 'POF', 'NCNDA'].map(docType => (
+                      {['CIS', 'SCO', 'ICPO', 'LOI', 'POF', 'NCNDA', 'MFPA'].map(docType => (
                         <TouchableOpacity
                           key={docType}
                           style={styles.docActionButton}
-                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA')}
+                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA')}
                         >
                           <Send size={16} color="#3B82F6" />
                           <Text style={styles.docActionText}>{docType}</Text>
