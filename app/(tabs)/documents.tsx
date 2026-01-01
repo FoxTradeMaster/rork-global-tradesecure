@@ -355,9 +355,11 @@ export default function DocumentsScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.title}>Documents</Text>
-            <View style={styles.headerBadge}>
-              <Text style={styles.headerBadgeText}>{allDocuments.length}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.title} numberOfLines={1}>Documents</Text>
+              <View style={styles.headerBadge}>
+                <Text style={styles.headerBadgeText}>{allDocuments.length}</Text>
+              </View>
             </View>
           </View>
           <View style={styles.headerActions}>
@@ -1133,21 +1135,24 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
     marginRight: 12,
-    minWidth: 0,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   title: {
     fontSize: 28,
     fontWeight: '700' as const,
     color: '#FFFFFF',
-    marginBottom: 4,
-    flexShrink: 0,
+    flexShrink: 1,
   },
   headerBadge: {
     backgroundColor: '#3B82F6',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-    alignSelf: 'flex-start',
+    flexShrink: 0,
   },
   headerBadgeText: {
     fontSize: 14,
