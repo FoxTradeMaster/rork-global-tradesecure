@@ -356,7 +356,7 @@ export default function DocumentsScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.titleRow}>
-              <Text style={styles.title} numberOfLines={1}>Documents</Text>
+              <Text style={styles.title}>Documents</Text>
               <View style={styles.headerBadge}>
                 <Text style={styles.headerBadgeText}>{allDocuments.length}</Text>
               </View>
@@ -1134,7 +1134,8 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 8,
+    minWidth: 0,
   },
   titleRow: {
     flexDirection: 'row',
@@ -1145,7 +1146,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700' as const,
     color: '#FFFFFF',
-    flexShrink: 1,
   },
   headerBadge: {
     backgroundColor: '#3B82F6',
@@ -1161,29 +1161,29 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     flexShrink: 0,
   },
   addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#1F2937',
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#8B5CF6',
     alignItems: 'center',
     justifyContent: 'center',
   },
   uploadButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#3B82F6',
     alignItems: 'center',
     justifyContent: 'center',
