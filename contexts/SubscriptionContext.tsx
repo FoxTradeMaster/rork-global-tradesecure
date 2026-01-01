@@ -15,6 +15,8 @@ export interface SubscriptionFeatures {
   apiAccess: boolean;
   bulkImport: boolean;
   marketInsights: boolean;
+  commissionRate: number;
+  platformFee: number;
 }
 
 export interface SubscriptionStatus {
@@ -34,6 +36,8 @@ const FREE_FEATURES: SubscriptionFeatures = {
   apiAccess: false,
   bulkImport: false,
   marketInsights: false,
+  commissionRate: 2.0,
+  platformFee: 0,
 };
 
 const PREMIUM_FEATURES: SubscriptionFeatures = {
@@ -46,6 +50,8 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
   apiAccess: true,
   bulkImport: true,
   marketInsights: true,
+  commissionRate: 0.5,
+  platformFee: 99,
 };
 
 const ENTITLEMENT_ID = 'Fox Trade Master™ Global Trading App Pro';

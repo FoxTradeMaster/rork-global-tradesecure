@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import { useTrading } from '@/contexts/TradingContext';
+import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
 import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, openCustomerCenter } = useSubscription();
   const { currentUser, setUser } = useTrading();
+  const metrics = usePortfolioMetrics();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
 
@@ -87,6 +88,51 @@ export default function SettingsScreen() {
                 </Text>
               </View>
               {isPremium && <PremiumBadge compact />}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Platform Role</Text>
+            <View style={styles.roleCard}>
+              <Text style={styles.roleTitle}>Intermediary / Facilitator</Text>
+              <Text style={styles.roleDescription}>
+                You earn commission on deals facilitated through the platform
+              </Text>
+              <View style={styles.commissionRateContainer}>
+                <Text style={styles.commissionRateLabel}>Your Commission Rate</Text>
+                <Text style={styles.commissionRateValue}>
+                  {subscriptionStatus.features.commissionRate}%
+                </Text>
+              </View>
+              {isPremium && subscriptionStatus.features.platformFee > 0 && (
+                <Text style={styles.platformFeeText}>
+                  + ${subscriptionStatus.features.platformFee}/month platform access
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Commission Summary</Text>
+            <View style={styles.commissionSummaryCard}>
+              <View style={styles.commissionMetricRow}>
+                <Text style={styles.commissionMetricLabel}>Earned to Date</Text>
+                <Text style={styles.commissionMetricValue}>
+                  ${(metrics.totalCommissionEarned / 1000).toFixed(1)}K
+                </Text>
+              </View>
+              <View style={styles.commissionMetricRow}>
+                <Text style={styles.commissionMetricLabel}>Pending Payment</Text>
+                <Text style={[styles.commissionMetricValue, { color: '#F59E0B' }]}>
+                  ${(metrics.pendingCommission / 1000).toFixed(1)}K
+                </Text>
+              </View>
+              <View style={styles.commissionMetricRow}>
+                <Text style={styles.commissionMetricLabel}>Potential (Active)</Text>
+                <Text style={[styles.commissionMetricValue, { color: '#3B82F6' }]}>
+                  ${(metrics.potentialCommission / 1000).toFixed(1)}K
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -484,5 +530,69 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  roleCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+  },
+  roleTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  roleDescription: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  commissionRateContainer: {
+    backgroundColor: '#0A0E27',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  commissionRateLabel: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#9CA3AF',
+  },
+  commissionRateValue: {
+    fontSize: 28,
+    fontWeight: '700' as const,
+    color: '#10B981',
+  },
+  platformFeeText: {
+    fontSize: 13,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  commissionSummaryCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 16,
+    padding: 20,
+    gap: 16,
+  },
+  commissionMetricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  commissionMetricLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#9CA3AF',
+  },
+  commissionMetricValue: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: '#10B981',
   },
 });

@@ -11,8 +11,8 @@ interface PaywallModalProps {
 }
 
 const PREMIUM_FEATURES = [
-  { icon: Zap, title: 'Unlimited Trades', description: 'Create and manage unlimited active trades' },
-  { icon: Database, title: 'Unlimited Counterparties', description: 'Add as many counterparties as you need' },
+  { icon: Zap, title: 'Reduced Platform Commission', description: 'Only 0.5% commission vs 2% on free tier' },
+  { icon: Database, title: 'Unlimited Trades & Parties', description: 'No limits on trades or counterparties' },
   { icon: TrendingUp, title: 'Advanced Analytics', description: 'Deep insights into your trading performance' },
   { icon: FileText, title: 'Custom Reports', description: 'Generate detailed custom reports' },
   { icon: Shield, title: 'Priority Support', description: '24/7 priority customer support' },
@@ -93,8 +93,20 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
               </Text>
             )}
             <Text style={styles.subtitle}>
-              Unlock powerful features for professional commodity trading
+              Lower commission rates + unlimited access to facilitation platform
             </Text>
+
+            <View style={styles.commissionCompareCard}>
+              <View style={styles.commissionRow}>
+                <Text style={styles.commissionLabel}>Free Tier:</Text>
+                <Text style={styles.commissionFree}>2% per deal</Text>
+              </View>
+              <View style={styles.commissionRow}>
+                <Text style={styles.commissionLabel}>Premium:</Text>
+                <Text style={styles.commissionPremium}>0.5% per deal + $99/mo</Text>
+              </View>
+              <Text style={styles.commissionNote}>Save on every deal you facilitate!</Text>
+            </View>
 
             {isLoading ? (
               <View style={styles.loadingContainer}>
@@ -446,5 +458,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#3B82F6',
+  },
+  commissionCompareCard: {
+    backgroundColor: '#0A0E27',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  commissionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  commissionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  commissionFree: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#EF4444',
+  },
+  commissionPremium: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  commissionNote: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
