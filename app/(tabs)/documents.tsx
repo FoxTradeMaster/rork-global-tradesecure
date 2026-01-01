@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
-import { useState } from 'react';
-import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
+import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen, User, Edit3 } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Trade, Document, DocumentType } from '@/types';
 import { sendTradeDocument, generateDocumentContent, generateBlankDocument } from '@/lib/sendgrid';
 import * as ImagePicker from 'expo-image-picker';
@@ -32,12 +33,42 @@ export default function DocumentsScreen() {
     signatoryName: '',
     signatoryTitle: '',
   });
+  const [hasCompanyProfile, setHasCompanyProfile] = useState(false);
+  const [showProfileManager, setShowProfileManager] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showTradeSelector, setShowTradeSelector] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showUploadTargetSelector, setShowUploadTargetSelector] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTarget, setUploadTarget] = useState<{ type: 'trade' | 'counterparty'; id: string; name: string } | null>(null);
+
+  useEffect(() => {
+    loadCompanyProfile();
+  }, []);
+
+  const loadCompanyProfile = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('company_profile');
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setCompanyInfo(profile);
+        setHasCompanyProfile(true);
+        console.log('[Documents] Loaded company profile');
+      }
+    } catch (error) {
+      console.error('[Documents] Error loading company profile:', error);
+    }
+  };
+
+  const saveCompanyProfile = async (profile: typeof companyInfo) => {
+    try {
+      await AsyncStorage.setItem('company_profile', JSON.stringify(profile));
+      setHasCompanyProfile(true);
+      console.log('[Documents] Saved company profile');
+    } catch (error) {
+      console.error('[Documents] Error saving company profile:', error);
+    }
+  };
 
   const allDocuments = [
     ...trades.flatMap(trade => trade.documents.map(doc => ({ ...doc, source: 'trade', sourceId: trade.id, sourceName: trade.counterpartyName }))),
@@ -114,7 +145,10 @@ export default function DocumentsScreen() {
     setSelectedDocType(docType);
     setRecipientEmail('');
     setShowTradeSelector(false);
-    setShowCompanyInfoForm(true);
+    
+    if (!hasCompanyProfile || !companyInfo.companyName) {
+      setShowCompanyInfoForm(true);
+    }
   };
 
   const requestCameraPermission = async () => {
@@ -327,6 +361,12 @@ export default function DocumentsScreen() {
             </View>
           </View>
           <View style={styles.headerActions}>
+            <TouchableOpacity 
+              style={[styles.addButton, hasCompanyProfile && styles.profileSetBadge]}
+              onPress={() => setShowProfileManager(true)}
+            >
+              <User size={20} color="#FFFFFF" />
+            </TouchableOpacity>
             <TouchableOpacity 
               style={styles.addButton}
               onPress={() => setShowTradeSelector(true)}
@@ -725,14 +765,16 @@ export default function DocumentsScreen() {
                      !companyInfo.title || !companyInfo.signatoryName || !companyInfo.signatoryTitle) && 
                     styles.continueButtonDisabled
                   ]}
-                  onPress={() => {
+                  onPress={async () => {
                     if (!companyInfo.companyName || !companyInfo.country || !companyInfo.address || 
                         !companyInfo.phone || !companyInfo.email || !companyInfo.representative || 
                         !companyInfo.title || !companyInfo.signatoryName || !companyInfo.signatoryTitle) {
                       Alert.alert('Required Fields', 'Please fill in all required fields marked with *');
                       return;
                     }
+                    await saveCompanyProfile(companyInfo);
                     setShowCompanyInfoForm(false);
+                    Alert.alert('Success', 'Your company profile has been saved and will be used for all future documents.');
                   }}
                 >
                   <Text style={styles.continueButtonText}>Continue to Send</Text>
@@ -916,6 +958,155 @@ export default function DocumentsScreen() {
                 </View>
               )}
             </View>
+          </View>
+        )}
+
+        {showProfileManager && (
+          <View style={styles.modalOverlay}>
+            <KeyboardAvoidingView 
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.keyboardAvoid}
+            >
+              <View style={styles.modal}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Company Profile</Text>
+                  <TouchableOpacity onPress={() => setShowProfileManager(false)}>
+                    <X size={24} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+
+                {hasCompanyProfile ? (
+                  <View>
+                    <View style={styles.profileBanner}>
+                      <View style={styles.profileIconContainer}>
+                        <User size={32} color="#3B82F6" />
+                      </View>
+                      <View style={styles.profileBannerInfo}>
+                        <Text style={styles.profileCompanyName}>{companyInfo.companyName}</Text>
+                        <Text style={styles.profileCountry}>{companyInfo.country}</Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={styles.editProfileButton}
+                        onPress={() => {
+                          setShowProfileManager(false);
+                          setShowCompanyInfoForm(true);
+                        }}
+                      >
+                        <Edit3 size={18} color="#3B82F6" />
+                      </TouchableOpacity>
+                    </View>
+
+                    <ScrollView style={styles.profileDetailsScroll} showsVerticalScrollIndicator={false}>
+                      <View style={styles.profileSection}>
+                        <Text style={styles.profileSectionTitle}>Basic Information</Text>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Company Name</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.companyName}</Text>
+                        </View>
+                        {companyInfo.registrationNumber && (
+                          <View style={styles.profileField}>
+                            <Text style={styles.profileFieldLabel}>Registration Number</Text>
+                            <Text style={styles.profileFieldValue}>{companyInfo.registrationNumber}</Text>
+                          </View>
+                        )}
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Country</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.country}</Text>
+                        </View>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Address</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.address}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.profileSection}>
+                        <Text style={styles.profileSectionTitle}>Contact Information</Text>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Phone</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.phone}</Text>
+                        </View>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Email</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.email}</Text>
+                        </View>
+                        {companyInfo.website && (
+                          <View style={styles.profileField}>
+                            <Text style={styles.profileFieldLabel}>Website</Text>
+                            <Text style={styles.profileFieldValue}>{companyInfo.website}</Text>
+                          </View>
+                        )}
+                      </View>
+
+                      <View style={styles.profileSection}>
+                        <Text style={styles.profileSectionTitle}>Representative</Text>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Name</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.representative}</Text>
+                        </View>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Title</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.title}</Text>
+                        </View>
+                      </View>
+
+                      {(companyInfo.bankName || companyInfo.swiftCode) && (
+                        <View style={styles.profileSection}>
+                          <Text style={styles.profileSectionTitle}>Banking</Text>
+                          {companyInfo.bankName && (
+                            <View style={styles.profileField}>
+                              <Text style={styles.profileFieldLabel}>Bank Name</Text>
+                              <Text style={styles.profileFieldValue}>{companyInfo.bankName}</Text>
+                            </View>
+                          )}
+                          {companyInfo.swiftCode && (
+                            <View style={styles.profileField}>
+                              <Text style={styles.profileFieldLabel}>SWIFT Code</Text>
+                              <Text style={styles.profileFieldValue}>{companyInfo.swiftCode}</Text>
+                            </View>
+                          )}
+                        </View>
+                      )}
+
+                      <View style={styles.profileSection}>
+                        <Text style={styles.profileSectionTitle}>Document Signatory</Text>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Name</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.signatoryName}</Text>
+                        </View>
+                        <View style={styles.profileField}>
+                          <Text style={styles.profileFieldLabel}>Title</Text>
+                          <Text style={styles.profileFieldValue}>{companyInfo.signatoryTitle}</Text>
+                        </View>
+                      </View>
+                    </ScrollView>
+
+                    <View style={styles.profileInfoBox}>
+                      <Text style={styles.profileInfoText}>✓ This information will be automatically included in all documents you send</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.noProfileContainer}>
+                    <View style={styles.noProfileIcon}>
+                      <User size={48} color="#6B7280" />
+                    </View>
+                    <Text style={styles.noProfileTitle}>No Company Profile</Text>
+                    <Text style={styles.noProfileText}>
+                      Set up your company profile to automatically fill documents with your information when sending to counterparties.
+                    </Text>
+                    <TouchableOpacity 
+                      style={styles.createProfileButton}
+                      onPress={() => {
+                        setShowProfileManager(false);
+                        setShowCompanyInfoForm(true);
+                      }}
+                    >
+                      <Plus size={20} color="#FFFFFF" />
+                      <Text style={styles.createProfileButtonText}>Create Profile</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            </KeyboardAvoidingView>
           </View>
         )}
       </SafeAreaView>
@@ -1460,6 +1651,133 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   continueButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
+  },
+  profileSetBadge: {
+    borderWidth: 2,
+    borderColor: '#10B981',
+  },
+  profileBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A0E27',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    gap: 12,
+  },
+  profileIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#3B82F620',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileBannerInfo: {
+    flex: 1,
+  },
+  profileCompanyName: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  profileCountry: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  editProfileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileDetailsScroll: {
+    maxHeight: 400,
+    marginBottom: 16,
+  },
+  profileSection: {
+    marginBottom: 20,
+  },
+  profileSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  profileField: {
+    marginBottom: 12,
+  },
+  profileFieldLabel: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    color: '#6B7280',
+    marginBottom: 4,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+  },
+  profileFieldValue: {
+    fontSize: 14,
+    color: '#FFFFFF',
+  },
+  profileInfoBox: {
+    backgroundColor: '#10B98120',
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#10B981',
+  },
+  profileInfoText: {
+    fontSize: 12,
+    color: '#10B981',
+    lineHeight: 18,
+  },
+  noProfileContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  noProfileIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  noProfileTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  noProfileText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  createProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  createProfileButtonText: {
     fontSize: 16,
     fontWeight: '600' as const,
     color: '#FFFFFF',
