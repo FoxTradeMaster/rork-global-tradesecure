@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
@@ -11,6 +12,7 @@ import { useRouter } from 'expo-router';
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
   const { currentUser, setUser } = useTrading();
+  const { signOut } = useAuth();
   const metrics = usePortfolioMetrics();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
@@ -49,9 +51,14 @@ export default function SettingsScreen() {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
-            setUser(null as any);
-            router.replace('/role-select');
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace('/login');
+            } catch (error) {
+              console.error('[Settings] Logout error:', error);
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
           },
         },
       ]

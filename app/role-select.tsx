@@ -1,7 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { useTrading } from '@/contexts/TradingContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
 import { Briefcase, Shield, AlertTriangle, Scale, Truck, Settings } from 'lucide-react-native';
 
@@ -17,6 +19,25 @@ const roles: { role: UserRole; title: string; icon: any; color: string }[] = [
 export default function RoleSelectScreen() {
   const router = useRouter();
   const { setUser } = useTrading();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading) return;
+    
+    if (!isAuthenticated) {
+      console.log('[RoleSelect] Not authenticated, redirecting to login');
+      router.replace('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <View style={styles.loadingContainer}>
+        <StatusBar barStyle="light-content" />
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   const selectRole = async (role: UserRole) => {
     await setUser({
@@ -150,5 +171,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9CA3AF',
     flexShrink: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#0A0E27',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
