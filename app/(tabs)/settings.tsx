@@ -92,14 +92,14 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Platform Role</Text>
+            <Text style={styles.sectionTitle}>Platform Information</Text>
             <View style={styles.roleCard}>
-              <Text style={styles.roleTitle}>Intermediary / Facilitator</Text>
+              <Text style={styles.roleTitle}>Platform Role: Intermediary / Facilitator</Text>
               <Text style={styles.roleDescription}>
-                You earn commission on deals facilitated through the platform
+                Masters Energy Inc. acts as an intermediary/facilitator, earning commission on deals closed through this platform
               </Text>
               <View style={styles.commissionRateContainer}>
-                <Text style={styles.commissionRateLabel}>Your Commission Rate</Text>
+                <Text style={styles.commissionRateLabel}>Platform Commission Rate</Text>
                 <Text style={styles.commissionRateValue}>
                   {subscriptionStatus.features.commissionRate}%
                 </Text>
