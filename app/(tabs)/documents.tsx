@@ -442,7 +442,7 @@ export default function DocumentsScreen() {
                   { type: 'ICPO', name: 'Irrevocable Corporate PO', desc: 'Binding purchase order' },
                   { type: 'POF', name: 'Proof of Funds', desc: 'Bank fund certification' },
                   { type: 'NCNDA', name: 'NCNDA', desc: 'Non-disclosure agreement' },
-                  { type: 'MFPA', name: 'Master Fuel Purchase Agreement', desc: 'Long-term fuel contract' },
+                  { type: 'MFPA', name: 'Master Fee Protection Agreement', desc: 'Fee protection contract' },
                   { type: 'CIS', name: 'Corporate Info Sheet', desc: 'Company details' },
                 ].map(template => (
                   <TouchableOpacity
