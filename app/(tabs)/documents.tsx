@@ -2,11 +2,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
 import { useState } from 'react';
-import { FileText, File, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen } from 'lucide-react-native';
+import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen } from 'lucide-react-native';
 import { Trade, Document, DocumentType } from '@/types';
 import { sendTradeDocument, generateDocumentContent, generateBlankDocument } from '@/lib/sendgrid';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { supabase } from '@/lib/supabase';
 
 export default function DocumentsScreen() {
@@ -27,7 +29,7 @@ export default function DocumentsScreen() {
   ].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
   const getDocumentIcon = (type: string) => {
-    return type.includes('lc') || type.includes('contract') ? FileText : File;
+    return type.includes('lc') || type.includes('contract') ? FileText : FileIcon;
   };
 
   const getDocumentTypeColor = (type: string) => {
@@ -56,7 +58,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
+  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
     try {
       const content = generateBlankDocument(docType);
       
@@ -72,7 +74,20 @@ export default function DocumentsScreen() {
         URL.revokeObjectURL(url);
         Alert.alert('Success', `${docType} template downloaded successfully`);
       } else {
-        Alert.alert('Template Content', content.substring(0, 500) + '...\n\nFull document available on web version');
+        const fileName = `${docType}_Blank_Template.html`;
+        const file = new File(Paths.cache, fileName);
+        file.write(content);
+        
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+          await Sharing.shareAsync(file.uri, {
+            mimeType: 'text/html',
+            dialogTitle: `Share ${docType} Template`,
+            UTI: 'public.html',
+          });
+        } else {
+          Alert.alert('Success', `${docType} template saved to your device.`);
+        }
       }
     } catch (error) {
       console.error('Error downloading template:', error);
@@ -420,7 +435,7 @@ export default function DocumentsScreen() {
                       onPress={() => showUploadOptions('counterparty', cp.id, cp.name)}
                     >
                       <View style={styles.uploadTargetIcon}>
-                        <File size={20} color="#10B981" />
+                        <FileIcon size={20} color="#10B981" />
                       </View>
                       <Text style={styles.uploadTargetName} numberOfLines={1}>
                         {cp.name}
@@ -612,7 +627,7 @@ export default function DocumentsScreen() {
                         }}
                       >
                         <View style={styles.targetIconContainer}>
-                          <File size={20} color="#10B981" />
+                          <FileIcon size={20} color="#10B981" />
                         </View>
                         <View style={styles.targetInfo}>
                           <Text style={styles.targetName}>{cp.name}</Text>
