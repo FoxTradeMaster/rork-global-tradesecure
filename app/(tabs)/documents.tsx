@@ -1143,7 +1143,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700' as const,
     color: '#FFFFFF',
   },
