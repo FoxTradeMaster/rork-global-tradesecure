@@ -45,7 +45,7 @@ export default function LoginScreen() {
   if (emailSent) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="dark-content" />
         <View style={styles.content}>
           <View style={styles.successContainer}>
             <View style={styles.successIcon}>
@@ -73,7 +73,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <View style={styles.content}>
         <View style={styles.header}>
           <Image
@@ -91,12 +91,12 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <View style={styles.inputIconContainer}>
-              <Mail size={20} color="#9CA3AF" />
+              <Mail size={20} color="#64748B" />
             </View>
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="#94A3B8"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -134,7 +134,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   content: {
     flex: 1,
@@ -157,13 +157,13 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0F172A',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   form: {
     width: '100%',
@@ -171,24 +171,24 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: '#BAE6FD',
   },
   inputIconContainer: {
     marginRight: 12,
   },
   input: {
     flex: 1,
-    color: '#FFFFFF',
+    color: '#0F172A',
     fontSize: 16,
     paddingVertical: 16,
   },
   signInButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0EA5E9',
     borderRadius: 12,
     paddingVertical: 16,
     flexDirection: 'row',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   disclaimer: {
     textAlign: 'center',
-    color: '#6B7280',
+    color: '#64748B',
     fontSize: 14,
     marginTop: 16,
     lineHeight: 20,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#10B98120',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -226,23 +226,23 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 16,
   },
   successMessage: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#64748B',
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: 24,
   },
   emailText: {
-    color: '#3B82F6',
+    color: '#0EA5E9',
     fontWeight: '600',
   },
   instructions: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 32,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   resendButtonText: {
-    color: '#3B82F6',
+    color: '#0EA5E9',
     fontSize: 15,
     fontWeight: '600',
   },
