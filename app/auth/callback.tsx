@@ -15,6 +15,8 @@ export default function AuthCallbackScreen() {
 
   useEffect(() => {
     console.log('[AuthCallback] Processing auth callback');
+    console.log('[AuthCallback] Platform:', Platform.OS);
+    console.log('[AuthCallback] User agent:', Platform.OS === 'web' ? (typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A') : 'N/A');
     
     const handleCallback = async () => {
       if (hasProcessed.current) {
@@ -63,17 +65,24 @@ export default function AuthCallbackScreen() {
           
           if (tokenFromQuery && typeFromQuery) {
             const isMobileWeb = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            console.log('[AuthCallback] Is mobile web:', isMobileWeb);
             
             if (isMobileWeb) {
               const deepLink = `rork-app://auth/callback?token=${tokenFromQuery}&type=${typeFromQuery}`;
-              console.log('[AuthCallback] Mobile web detected, redirecting to app');
+              console.log('[AuthCallback] Mobile web detected, attempting to open app:', deepLink);
               
-              window.location.href = deepLink;
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setIsProcessing(false);
+              
+              try {
+                window.location.href = deepLink;
+              } catch (e) {
+                console.error('[AuthCallback] Failed to open deep link:', e);
+              }
               
               setTimeout(() => {
-                setIsProcessing(false);
-                setError('If the app did not open, please copy the link from your email and open it directly in the app');
-              }, 2000);
+                setError('Tap here to open the app, or copy the magic link from your email and paste it in the app browser');
+              }, 1500);
               return;
             }
             
@@ -263,9 +272,13 @@ export default function AuthCallbackScreen() {
         }
       } catch (error: any) {
         console.error('[AuthCallback] Error processing callback:', error);
+        console.error('[AuthCallback] Error stack:', error?.stack);
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setIsProcessing(false);
-        setError(error?.message || 'An unexpected error occurred');
+        setError(error?.message || 'An unexpected error occurred. Please try signing in again.');
+      } finally {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsProcessing(false);
       }
     };
 
