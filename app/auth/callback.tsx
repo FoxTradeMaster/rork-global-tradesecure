@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -10,11 +10,19 @@ export default function AuthCallbackScreen() {
   const params = useLocalSearchParams();
   const [error, setError] = useState<string | null>(null);
 
+  const hasProcessed = useRef(false);
+
   useEffect(() => {
     console.log('[AuthCallback] Processing auth callback');
     console.log('[AuthCallback] URL params:', params);
     
     const handleCallback = async () => {
+      if (hasProcessed.current) {
+        console.log('[AuthCallback] Already processed, skipping');
+        return;
+      }
+      hasProcessed.current = true;
+
       try {
         if (Platform.OS === 'web') {
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -64,12 +72,22 @@ export default function AuthCallbackScreen() {
             }
           }
         } else {
-          const url = await Linking.getInitialURL();
-          console.log('[AuthCallback] Initial URL:', url);
-
-          if (url) {
+          const processUrl = async (url: string) => {
+            console.log('[AuthCallback] Processing URL:', url);
             const { queryParams } = Linking.parse(url);
             console.log('[AuthCallback] Query params from URL:', queryParams);
+            
+            if (queryParams?.error) {
+              let message = 'Authentication failed';
+              if (queryParams.error_code === 'otp_expired') {
+                message = 'The magic link has expired. Please request a new one.';
+              } else if (queryParams.error_description) {
+                message = String(queryParams.error_description).replace(/\+/g, ' ');
+              }
+              console.error('[AuthCallback] Auth error:', message);
+              setError(message);
+              return;
+            }
             
             const tokenHash = queryParams?.token_hash || queryParams?.token;
             const type = queryParams?.type;
@@ -93,7 +111,26 @@ export default function AuthCallbackScreen() {
                 return;
               }
             }
+          };
+
+          const initialUrl = await Linking.getInitialURL();
+          console.log('[AuthCallback] Initial URL:', initialUrl);
+
+          if (initialUrl) {
+            await processUrl(initialUrl);
+            return;
           }
+
+          const subscription = Linking.addEventListener('url', async ({ url }) => {
+            console.log('[AuthCallback] Received URL event:', url);
+            await processUrl(url);
+          });
+
+          setTimeout(() => {
+            subscription.remove();
+          }, 10000);
+
+          return;
         }
         
         const { data: { session }, error } = await supabase.auth.getSession();
