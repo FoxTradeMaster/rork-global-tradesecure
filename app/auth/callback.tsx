@@ -1,20 +1,20 @@
 import { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import * as Linking from 'expo-linking';
 import { AlertCircle } from 'lucide-react-native';
 
 export default function AuthCallbackScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   const hasProcessed = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     console.log('[AuthCallback] Processing auth callback');
-    console.log('[AuthCallback] URL params:', params);
     
     const handleCallback = async () => {
       if (hasProcessed.current) {
@@ -22,6 +22,12 @@ export default function AuthCallbackScreen() {
         return;
       }
       hasProcessed.current = true;
+
+      timeoutRef.current = setTimeout(() => {
+        console.error('[AuthCallback] Timeout - auth took too long');
+        setIsProcessing(false);
+        setError('Authentication is taking too long. Please try again.');
+      }, 30000);
 
       try {
         if (Platform.OS === 'web') {
@@ -67,6 +73,7 @@ export default function AuthCallbackScreen() {
 
             if (data.session) {
               console.log('[AuthCallback] Session created, redirecting to home');
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
               router.replace('/');
               return;
             }
@@ -74,6 +81,10 @@ export default function AuthCallbackScreen() {
         } else {
           const processUrl = async (url: string) => {
             console.log('[AuthCallback] Processing URL:', url);
+            if (!url) {
+              console.error('[AuthCallback] Empty URL received');
+              return;
+            }
             const { queryParams } = Linking.parse(url);
             console.log('[AuthCallback] Query params from URL:', queryParams);
             
@@ -107,8 +118,12 @@ export default function AuthCallbackScreen() {
 
               if (data.session) {
                 console.log('[AuthCallback] Session created, redirecting to home');
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
                 router.replace('/');
                 return;
+              } else {
+                console.error('[AuthCallback] OTP verified but no session created');
+                setError('Authentication failed. Please try again.');
               }
             }
           };
@@ -116,20 +131,29 @@ export default function AuthCallbackScreen() {
           const initialUrl = await Linking.getInitialURL();
           console.log('[AuthCallback] Initial URL:', initialUrl);
 
-          if (initialUrl) {
+          if (initialUrl && initialUrl.includes('auth/callback')) {
             await processUrl(initialUrl);
-            return;
+          } else {
+            console.log('[AuthCallback] No initial URL or not callback URL, setting up listener');
+            
+            const subscription = Linking.addEventListener('url', async ({ url }) => {
+              console.log('[AuthCallback] Received URL event:', url);
+              if (url.includes('auth/callback')) {
+                await processUrl(url);
+                subscription.remove();
+              }
+            });
+
+            setTimeout(() => {
+              subscription.remove();
+              if (hasProcessed.current && !error) {
+                console.log('[AuthCallback] Listener timeout, checking session');
+              } else {
+                console.error('[AuthCallback] No auth callback received within timeout');
+                setError('Did not receive authentication response. Please try again.');
+              }
+            }, 15000);
           }
-
-          const subscription = Linking.addEventListener('url', async ({ url }) => {
-            console.log('[AuthCallback] Received URL event:', url);
-            await processUrl(url);
-          });
-
-          setTimeout(() => {
-            subscription.remove();
-          }, 10000);
-
           return;
         }
         
@@ -143,19 +167,31 @@ export default function AuthCallbackScreen() {
 
         if (session) {
           console.log('[AuthCallback] Session found, redirecting to home');
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           router.replace('/');
         } else {
-          console.log('[AuthCallback] No session found, redirecting to login');
+          console.log('[AuthCallback] No session found');
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setError('No session found. Please try signing in again.');
         }
       } catch (error: any) {
         console.error('[AuthCallback] Error processing callback:', error);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsProcessing(false);
         setError(error?.message || 'An unexpected error occurred');
       }
     };
 
+    const cleanup = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+
     handleCallback();
-  }, [router, params]);
+
+    return cleanup;
+  }, [router]);
 
   if (error) {
     return (
@@ -168,7 +204,10 @@ export default function AuthCallbackScreen() {
           <Text style={styles.errorMessage}>{error}</Text>
           <TouchableOpacity 
             style={styles.backButton}
-            onPress={() => router.replace('/login')}
+            onPress={() => {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              router.replace('/login');
+            }}
           >
             <Text style={styles.backButtonText}>Back to Sign In</Text>
           </TouchableOpacity>
@@ -181,6 +220,17 @@ export default function AuthCallbackScreen() {
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#0EA5E9" />
       <Text style={styles.text}>Signing you in...</Text>
+      {!isProcessing && (
+        <TouchableOpacity 
+          style={[styles.backButton, { marginTop: 32 }]}
+          onPress={() => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            router.replace('/login');
+          }}
+        >
+          <Text style={styles.backButtonText}>Back to Sign In</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
