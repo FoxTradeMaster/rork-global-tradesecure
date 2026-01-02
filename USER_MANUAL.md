@@ -21,11 +21,48 @@
 
 ## Getting Started
 
-### First Launch
+### Authentication & Login
+
+Fox Trade Master™ uses secure, password-free authentication via magic links.
+
+#### Signing In
 1. Open the Fox Trade Master™ app
-2. You'll be greeted with the role selection screen
-3. Choose your role based on your responsibilities in the organization
-4. Once selected, you'll be taken to the main dashboard
+2. You'll see the login screen with the app logo
+3. Enter your email address in the email field
+4. Tap **"Send Magic Link"**
+5. Check your email inbox for the magic link
+6. Click the link in the email (valid for 60 minutes)
+7. You'll be automatically signed in and redirected to the app
+
+#### Magic Link Benefits
+- **No Password Required** - No need to remember or manage passwords
+- **More Secure** - Each link is unique and expires after use
+- **Quick Access** - One click from your email to sign in
+- **Works Everywhere** - Sign in from any device with your email
+
+#### Troubleshooting Login
+
+**Email Not Received**:
+- Check your spam/junk folder
+- Verify you entered the correct email address
+- Wait a few minutes for email delivery
+- Tap "Use different email" to try again
+- Contact support if issues persist
+
+**Magic Link Expired**:
+- Links expire after 60 minutes for security
+- Return to login screen and request a new link
+- Check your email more quickly next time
+
+**Email Service Issues**:
+- If you see an email configuration message, the service may be undergoing maintenance
+- Contact support at support@foxtrademaster.com or +1-804-506-9939
+- Service is typically restored within a few hours
+
+### First Launch
+1. After signing in, you'll be greeted with the role selection screen
+2. Choose your role based on your responsibilities in the organization
+3. Once selected, you'll be taken to the main dashboard
 
 ### Navigation
 The app uses a tab-based navigation system with 5 main sections:
@@ -45,6 +82,14 @@ If you need to change your role or return to the main selection screen:
 1. Go to the **Settings** tab
 2. Tap **"Change Role"** or **"Log Out"**
 3. You'll be returned to the role selection screen with the app logo
+
+### Signing Out
+To sign out of your account:
+1. Go to the **Settings** tab
+2. Scroll to the bottom
+3. Tap **"Log Out"** or **"Sign Out"**
+4. You'll be returned to the login screen
+5. Your session is cleared for security
 
 ---
 
