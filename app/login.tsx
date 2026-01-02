@@ -27,7 +27,16 @@ export default function LoginScreen() {
       setEmailSent(true);
     } catch (error: any) {
       console.error('[Login] Error:', error);
-      Alert.alert('Error', error.message || 'Failed to send magic link. Please try again.');
+      
+      let errorMessage = 'Failed to send magic link. Please try again.';
+      
+      if (error.message && error.message.includes('Error sending magic link email')) {
+        errorMessage = 'Email service is being configured. This feature will be available shortly. Please contact support if this issue persists.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Unable to Send Email', errorMessage);
     } finally {
       setIsLoading(false);
     }
