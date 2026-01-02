@@ -31,6 +31,22 @@ export default function AuthCallbackScreen() {
 
       try {
         if (Platform.OS === 'web') {
+          const isMobileWeb = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          if (isMobileWeb) {
+            const fullUrl = window.location.href;
+            const deepLink = fullUrl.replace('https://rork.com/p/nuw502s5hmgxa8hwzf3sa/', 'rork-app://');
+            console.log('[AuthCallback] Mobile web detected, opening deep link:', deepLink);
+            
+            window.location.href = deepLink;
+            
+            setTimeout(() => {
+              setIsProcessing(false);
+              setError('Please open the app to complete sign in');
+            }, 3000);
+            return;
+          }
+          
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');

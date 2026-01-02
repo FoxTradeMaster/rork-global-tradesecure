@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [session, setSession] = useState<Session | null>(null);
@@ -35,9 +34,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signInWithEmail = async (email: string) => {
     console.log('[AuthContext] Sending magic link to:', email);
     
-    const redirectUrl = Platform.OS === 'web' 
-      ? 'https://rork.com/p/nuw502s5hmgxa8hwzf3sa/auth/callback'
-      : 'rork-app://auth/callback';
+    const redirectUrl = 'https://rork.com/p/nuw502s5hmgxa8hwzf3sa/auth/callback';
     
     console.log('[AuthContext] Using redirect URL:', redirectUrl);
     
