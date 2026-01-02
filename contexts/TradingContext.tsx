@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, Counterparty, Trade, WalletBalance, Transaction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal';
+import { useAuth } from './AuthContext';
 
 const MOCK_COUNTERPARTIES: Counterparty[] = [
   {
@@ -171,6 +172,7 @@ const MOCK_TRADES: Trade[] = [
 ];
 
 export const [TradingProvider, useTrading] = createContextHook(() => {
+  const { user: authUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -288,10 +290,16 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const addCounterparties = async (newCounterparties: Counterparty[]) => {
     console.log('[TradingContext] Adding', newCounterparties.length, 'counterparties');
     
+    if (!authUser?.id) {
+      console.error('[TradingContext] No authenticated user');
+      return;
+    }
+    
     for (const counterparty of newCounterparties) {
       const { error } = await supabase
         .from('counterparties')
         .insert({
+          user_id: authUser.id,
           name: counterparty.name,
           country: counterparty.country,
           type: counterparty.type,
@@ -313,9 +321,15 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addCounterparty = async (counterparty: Counterparty) => {
+    if (!authUser?.id) {
+      console.error('[TradingContext] No authenticated user');
+      return;
+    }
+
     const { data, error } = await supabase
       .from('counterparties')
       .insert({
+        user_id: authUser.id,
         name: counterparty.name,
         country: counterparty.country,
         type: counterparty.type,
@@ -366,10 +380,16 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const addTrades = async (newTrades: Trade[]) => {
     console.log('[TradingContext] Adding', newTrades.length, 'trades');
     
+    if (!authUser?.id) {
+      console.error('[TradingContext] No authenticated user');
+      return;
+    }
+    
     for (const trade of newTrades) {
       const { error } = await supabase
         .from('trades')
         .insert({
+          user_id: authUser.id,
           commodity: trade.commodity,
           counterparty_id: trade.counterpartyId,
           counterparty_name: trade.counterpartyName,
@@ -396,9 +416,15 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addTrade = async (trade: Trade) => {
+    if (!authUser?.id) {
+      console.error('[TradingContext] No authenticated user');
+      return;
+    }
+
     const { data, error } = await supabase
       .from('trades')
       .insert({
+        user_id: authUser.id,
         commodity: trade.commodity,
         counterparty_id: trade.counterpartyId,
         counterparty_name: trade.counterpartyName,
