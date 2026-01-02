@@ -76,7 +76,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
@@ -306,7 +306,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   section: {
     paddingHorizontal: 20,
@@ -331,24 +331,29 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
     textTransform: 'uppercase',
     marginBottom: 12,
     letterSpacing: 0.5,
   },
   profileCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   profileIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#3B82F620',
+    backgroundColor: '#E0F2FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -358,23 +363,28 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 4,
   },
   profileRole: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: '#64748B',
     fontWeight: '600',
   },
   subscriptionCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   subscriptionCardPremium: {
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#FEF3C7',
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderColor: '#F59E0B',
   },
   subscriptionHeader: {
     flexDirection: 'row',
@@ -396,12 +406,12 @@ const styles = StyleSheet.create({
   subscriptionTier: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 4,
   },
   subscriptionExpiry: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   featuresGrid: {
     flexDirection: 'row',
@@ -411,22 +421,22 @@ const styles = StyleSheet.create({
   },
   featureItem: {
     width: '48%',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#F0F9FF',
     padding: 12,
     borderRadius: 12,
   },
   featureLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginBottom: 4,
   },
   featureValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0284C7',
   },
   manageButton: {
-    backgroundColor: '#374151',
+    backgroundColor: '#0284C7',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
@@ -439,12 +449,12 @@ const styles = StyleSheet.create({
   freePlanTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 8,
   },
   freePlanDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginBottom: 20,
   },
   limitGrid: {
@@ -454,24 +464,29 @@ const styles = StyleSheet.create({
   },
   limitItem: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#F0F9FF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   limitValue: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#3B82F6',
+    color: '#0284C7',
     marginBottom: 4,
   },
   limitLabel: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: '#64748B',
     textAlign: 'center',
   },
   upgradeButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -488,10 +503,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
   menuItemLeft: {
     flexDirection: 'row',
@@ -502,21 +522,21 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#3B82F620',
+    backgroundColor: '#E0F2FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
   menuItemText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
@@ -534,41 +554,46 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
   },
   copyright: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
   },
   operatorNote: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     fontStyle: 'italic' as const,
   },
   roleCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: '#0284C7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   roleTitle: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 8,
   },
   roleDescription: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginBottom: 16,
     lineHeight: 20,
   },
   commissionRateContainer: {
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#F0F9FF',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -578,7 +603,7 @@ const styles = StyleSheet.create({
   commissionRateLabel: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   commissionRateValue: {
     fontSize: 28,
@@ -587,15 +612,20 @@ const styles = StyleSheet.create({
   },
   platformFeeText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     marginTop: 12,
   },
   commissionSummaryCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   commissionMetricRow: {
     flexDirection: 'row',
@@ -605,7 +635,7 @@ const styles = StyleSheet.create({
   commissionMetricLabel: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   commissionMetricValue: {
     fontSize: 20,
@@ -614,7 +644,7 @@ const styles = StyleSheet.create({
   },
   feeNote: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     marginTop: 12,
     fontStyle: 'italic' as const,

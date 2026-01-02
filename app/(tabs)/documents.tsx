@@ -397,7 +397,7 @@ export default function DocumentsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -1173,7 +1173,7 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -1200,11 +1200,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
+    color: '#0F172A',
     flexShrink: 1,
   },
   headerBadge: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1224,9 +1224,14 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   profileButton: {
     width: 38,
@@ -1240,9 +1245,14 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -1254,19 +1264,24 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statValue: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   statLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   scrollView: {
     flex: 1,
@@ -1276,10 +1291,15 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   documentCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   documentHeader: {
     flexDirection: 'row',

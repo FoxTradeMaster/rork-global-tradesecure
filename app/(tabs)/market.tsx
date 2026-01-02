@@ -217,7 +217,7 @@ export default function MarketDirectoryScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -537,7 +537,7 @@ export default function MarketDirectoryScreen() {
         onRequestClose={closeDetail}
       >
         <View style={styles.modalContainer}>
-          <StatusBar barStyle="light-content" />
+          <StatusBar barStyle="dark-content" />
           <SafeAreaView edges={['top']} style={styles.modalSafeArea}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Details</Text>
@@ -887,7 +887,7 @@ export default function MarketDirectoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -911,20 +911,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 2,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   statsRow: {
     flexDirection: 'row',
@@ -934,29 +939,39 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 4,
     alignItems: 'center',
     gap: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   statValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   statLabel: {
     fontSize: 9,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     marginHorizontal: 20,
     marginBottom: 8,
     paddingHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchIcon: {
     marginRight: 10,
@@ -964,7 +979,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 32,
-    color: '#FFFFFF',
+    color: '#0F172A',
     fontSize: 14,
   },
   searchIconButton: {
@@ -986,28 +1001,38 @@ const styles = StyleSheet.create({
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingVertical: 2,
     gap: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   filterChipActive: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
   },
   filterChipText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   filterChipTextActive: {
     color: '#FFFFFF',
   },
   commodityChip: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingVertical: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   commodityChipActive: {
     backgroundColor: '#10B98120',
@@ -1017,16 +1042,21 @@ const styles = StyleSheet.create({
   commodityChipText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   commodityChipTextActive: {
     color: '#10B981',
   },
   businessTypeChip: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingVertical: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   businessTypeChipActive: {
     backgroundColor: '#F59E0B20',
@@ -1036,7 +1066,7 @@ const styles = StyleSheet.create({
   businessTypeChipText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   businessTypeChipTextActive: {
     color: '#F59E0B',
@@ -1049,18 +1079,23 @@ const styles = StyleSheet.create({
   },
   resultsCount: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     marginBottom: 10,
   },
   participantCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   participantCardSelected: {
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: '#0284C7',
   },
   participantHeader: {
     flexDirection: 'row',
@@ -1091,7 +1126,7 @@ const styles = StyleSheet.create({
   participantName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#3B82F6',
+    color: '#0284C7',
     flex: 1,
   },
   chevronIcon: {

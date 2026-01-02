@@ -124,7 +124,7 @@ export default function CounterpartiesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -144,11 +144,11 @@ export default function CounterpartiesScreen() {
 
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <Search size={20} color="#6B7280" />
+            <Search size={20} color="#64748B" />
             <TextInput
               style={styles.searchInput}
               placeholder="Search counterparties..."
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="#64748B"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -180,7 +180,7 @@ export default function CounterpartiesScreen() {
                       <View style={styles.cardInfo}>
                         <Text style={styles.counterpartyName}>{cp.name}</Text>
                         <View style={styles.locationContainer}>
-                          <MapPin size={12} color="#6B7280" />
+                          <MapPin size={12} color="#64748B" />
                           <Text style={styles.countryText}>{cp.country}</Text>
                           <View style={[
                             styles.typeBadge,
@@ -278,7 +278,7 @@ export default function CounterpartiesScreen() {
 
             {filteredCounterparties.length === 0 && (
               <View style={styles.emptyState}>
-                <Users size={48} color="#374151" />
+                <Users size={48} color="#94A3B8" />
                 <Text style={styles.emptyStateText}>No counterparties found</Text>
                 <Text style={styles.emptyStateSubtext}>
                   {searchQuery ? 'Try adjusting your search' : 'Start by onboarding a counterparty'}
@@ -309,7 +309,7 @@ export default function CounterpartiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -330,11 +330,16 @@ const styles = StyleSheet.create({
   importButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   importButtonText: {
     fontSize: 13,
@@ -344,10 +349,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   headerBadge: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: 6,
@@ -364,16 +369,21 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 6,
     gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   scrollView: {
     flex: 1,
@@ -383,10 +393,15 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   counterpartyCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -413,7 +428,7 @@ const styles = StyleSheet.create({
   counterpartyName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 6,
   },
   locationContainer: {
@@ -423,7 +438,7 @@ const styles = StyleSheet.create({
   },
   countryText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#64748B',
   },
   typeBadge: {
     paddingHorizontal: 8,
@@ -436,7 +451,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   riskScoreContainer: {
-    backgroundColor: '#111827',
+    backgroundColor: '#F0F9FF',
     borderRadius: 10,
     padding: 10,
     marginBottom: 8,
@@ -450,7 +465,7 @@ const styles = StyleSheet.create({
   riskScoreLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   riskLevelBadge: {
     paddingHorizontal: 10,
@@ -463,7 +478,7 @@ const styles = StyleSheet.create({
   },
   riskBar: {
     height: 6,
-    backgroundColor: '#374151',
+    backgroundColor: '#E2E8F0',
     borderRadius: 3,
     marginBottom: 12,
     overflow: 'hidden',
@@ -482,12 +497,12 @@ const styles = StyleSheet.create({
   riskMetricValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 4,
   },
   riskMetricLabel: {
     fontSize: 10,
-    color: '#6B7280',
+    color: '#64748B',
   },
   conditionsContainer: {
     flexDirection: 'row',
@@ -510,16 +525,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#374151',
+    borderTopColor: '#E2E8F0',
   },
   documentsText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
     fontWeight: '600',
   },
   onboardedText: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
   },
   emptyState: {
     alignItems: 'center',
@@ -529,13 +544,13 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#94A3B8',
     textAlign: 'center',
   },
 });

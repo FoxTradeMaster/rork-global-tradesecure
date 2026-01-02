@@ -91,7 +91,7 @@ export default function TradesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <Text style={styles.title}>Trade Portfolio</Text>
@@ -100,7 +100,7 @@ export default function TradesScreen() {
               style={styles.importButton}
               onPress={() => setShowImportModal(true)}
             >
-              <Upload size={16} color="#FFFFFF" />
+              <Upload size={16} color="#0284C7" />
               <Text style={styles.importButtonText}>Import</Text>
             </TouchableOpacity>
             <TouchableOpacity 
@@ -114,11 +114,11 @@ export default function TradesScreen() {
 
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <Search size={20} color="#6B7280" />
+            <Search size={20} color="#64748B" />
             <TextInput
               style={styles.searchInput}
               placeholder="Search trades..."
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="#64748B"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -254,7 +254,7 @@ export default function TradesScreen() {
 
             {filteredTrades.length === 0 && (
               <View style={styles.emptyState}>
-                <TrendingUp size={48} color="#374151" />
+                <TrendingUp size={48} color="#94A3B8" />
                 <Text style={styles.emptyStateText}>No trades found</Text>
                 <Text style={styles.emptyStateSubtext}>
                   {searchQuery ? 'Try adjusting your search' : 'Create your first trade to get started'}
@@ -279,7 +279,7 @@ export default function TradesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   headerButtons: {
     flexDirection: 'row',
@@ -305,24 +305,34 @@ const styles = StyleSheet.create({
   importButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   importButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0284C7',
   },
   addButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   searchContainer: {
     paddingHorizontal: 20,
@@ -331,16 +341,21 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   filterScroll: {
     maxHeight: 50,
@@ -354,15 +369,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   filterChipActive: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
   },
   filterChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
     textTransform: 'capitalize',
   },
   filterChipTextActive: {
@@ -376,10 +396,15 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   tradeCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   tradeHeader: {
     flexDirection: 'row',
@@ -403,12 +428,12 @@ const styles = StyleSheet.create({
   tradeCommodity: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 2,
   },
   tradeCounterparty: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   riskBadge: {
     paddingHorizontal: 10,
@@ -429,18 +454,18 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     marginBottom: 4,
   },
   metricValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   metricDivider: {
     width: 1,
     height: 32,
-    backgroundColor: '#374151',
+    backgroundColor: '#E2E8F0',
   },
   tradeFooter: {
     flexDirection: 'row',
@@ -473,7 +498,7 @@ const styles = StyleSheet.create({
   },
   incoterm: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     marginLeft: 'auto',
   },
   emptyState: {
@@ -484,13 +509,13 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#64748B',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#94A3B8',
     textAlign: 'center',
   },
 });
