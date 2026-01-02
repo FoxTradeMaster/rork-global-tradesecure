@@ -21,11 +21,14 @@ export default function AuthCallbackScreen() {
           const { queryParams } = Linking.parse(url);
           console.log('[AuthCallback] Query params from URL:', queryParams);
           
-          if (queryParams?.token_hash && queryParams?.type) {
+          const tokenHash = queryParams?.token_hash || queryParams?.token;
+          const type = queryParams?.type;
+          
+          if (tokenHash && type) {
             console.log('[AuthCallback] Verifying OTP token');
             const { data, error } = await supabase.auth.verifyOtp({
-              token_hash: queryParams.token_hash as string,
-              type: queryParams.type as any,
+              token_hash: tokenHash as string,
+              type: type as any,
             });
 
             if (error) {
