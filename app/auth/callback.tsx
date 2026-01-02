@@ -34,17 +34,31 @@ export default function AuthCallbackScreen() {
           const isMobileWeb = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
           if (isMobileWeb) {
-            const fullUrl = window.location.href;
-            const deepLink = fullUrl.replace('https://rork.com/p/nuw502s5hmgxa8hwzf3sa/', 'rork-app://');
-            console.log('[AuthCallback] Mobile web detected, opening deep link:', deepLink);
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
             
-            window.location.href = deepLink;
-            
-            setTimeout(() => {
-              setIsProcessing(false);
-              setError('Please open the app to complete sign in');
-            }, 3000);
-            return;
+            if (accessToken && refreshToken) {
+              const deepLink = `rork-app://auth/callback#access_token=${accessToken}&refresh_token=${refreshToken}`;
+              console.log('[AuthCallback] Mobile web detected, redirecting to app');
+              
+              window.location.href = deepLink;
+              
+              setTimeout(() => {
+                setIsProcessing(false);
+                setError('If the app did not open, please copy the link from your email and open it directly in the app');
+              }, 2000);
+              return;
+            } else {
+              const errorParam = hashParams.get('error');
+              if (errorParam) {
+                const errorDescription = hashParams.get('error_description');
+                setError(errorDescription?.replace(/\+/g, ' ') || 'Authentication failed');
+                return;
+              }
+              setError('Invalid authentication link. Please try signing in again.');
+              return;
+            }
           }
           
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -101,6 +115,44 @@ export default function AuthCallbackScreen() {
               console.error('[AuthCallback] Empty URL received');
               return;
             }
+            
+            const hashIndex = url.indexOf('#');
+            let accessToken: string | null = null;
+            let refreshToken: string | null = null;
+            
+            if (hashIndex !== -1) {
+              const hashPart = url.substring(hashIndex + 1);
+              const hashParams = new URLSearchParams(hashPart);
+              accessToken = hashParams.get('access_token');
+              refreshToken = hashParams.get('refresh_token');
+              
+              console.log('[AuthCallback] Hash params:', { 
+                hasAccessToken: !!accessToken, 
+                hasRefreshToken: !!refreshToken 
+              });
+            }
+            
+            if (accessToken && refreshToken) {
+              console.log('[AuthCallback] Setting session from tokens');
+              const { data, error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+
+              if (error) {
+                console.error('[AuthCallback] Error setting session:', error);
+                setError(error.message || 'Failed to sign in');
+                return;
+              }
+
+              if (data.session) {
+                console.log('[AuthCallback] Session created, redirecting to home');
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                router.replace('/');
+                return;
+              }
+            }
+            
             const { queryParams } = Linking.parse(url);
             console.log('[AuthCallback] Query params from URL:', queryParams);
             
@@ -141,6 +193,9 @@ export default function AuthCallbackScreen() {
                 console.error('[AuthCallback] OTP verified but no session created');
                 setError('Authentication failed. Please try again.');
               }
+            } else if (!accessToken && !refreshToken) {
+              console.error('[AuthCallback] No tokens or OTP parameters found');
+              setError('Invalid authentication link. Please try signing in again.');
             }
           };
 
