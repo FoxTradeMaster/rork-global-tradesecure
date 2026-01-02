@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import * as Linking from 'expo-linking';
@@ -14,25 +14,22 @@ export default function AuthCallbackScreen() {
     
     const handleCallback = async () => {
       try {
-        const url = await Linking.getInitialURL();
-        console.log('[AuthCallback] Initial URL:', url);
-
-        if (url) {
-          const { queryParams } = Linking.parse(url);
-          console.log('[AuthCallback] Query params from URL:', queryParams);
+        if (Platform.OS === 'web') {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
           
-          const tokenHash = queryParams?.token_hash || queryParams?.token;
-          const type = queryParams?.type;
+          console.log('[AuthCallback] Web hash params:', { accessToken: !!accessToken, refreshToken: !!refreshToken });
           
-          if (tokenHash && type) {
-            console.log('[AuthCallback] Verifying OTP token');
-            const { data, error } = await supabase.auth.verifyOtp({
-              token_hash: tokenHash as string,
-              type: type as any,
+          if (accessToken && refreshToken) {
+            console.log('[AuthCallback] Setting session from tokens');
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
             });
 
             if (error) {
-              console.error('[AuthCallback] Error verifying OTP:', error);
+              console.error('[AuthCallback] Error setting session:', error);
               router.replace('/login');
               return;
             }
@@ -41,6 +38,37 @@ export default function AuthCallbackScreen() {
               console.log('[AuthCallback] Session created, redirecting to home');
               router.replace('/');
               return;
+            }
+          }
+        } else {
+          const url = await Linking.getInitialURL();
+          console.log('[AuthCallback] Initial URL:', url);
+
+          if (url) {
+            const { queryParams } = Linking.parse(url);
+            console.log('[AuthCallback] Query params from URL:', queryParams);
+            
+            const tokenHash = queryParams?.token_hash || queryParams?.token;
+            const type = queryParams?.type;
+            
+            if (tokenHash && type) {
+              console.log('[AuthCallback] Verifying OTP token');
+              const { data, error } = await supabase.auth.verifyOtp({
+                token_hash: tokenHash as string,
+                type: type as any,
+              });
+
+              if (error) {
+                console.error('[AuthCallback] Error verifying OTP:', error);
+                router.replace('/login');
+                return;
+              }
+
+              if (data.session) {
+                console.log('[AuthCallback] Session created, redirecting to home');
+                router.replace('/');
+                return;
+              }
             }
           }
         }
