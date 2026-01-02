@@ -31,49 +31,22 @@ export default function AuthCallbackScreen() {
 
       try {
         if (Platform.OS === 'web') {
-          const isMobileWeb = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          
-          if (isMobileWeb) {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = hashParams.get('access_token');
-            const refreshToken = hashParams.get('refresh_token');
-            
-            if (accessToken && refreshToken) {
-              const deepLink = `rork-app://auth/callback#access_token=${accessToken}&refresh_token=${refreshToken}`;
-              console.log('[AuthCallback] Mobile web detected, redirecting to app');
-              
-              window.location.href = deepLink;
-              
-              setTimeout(() => {
-                setIsProcessing(false);
-                setError('If the app did not open, please copy the link from your email and open it directly in the app');
-              }, 2000);
-              return;
-            } else {
-              const errorParam = hashParams.get('error');
-              if (errorParam) {
-                const errorDescription = hashParams.get('error_description');
-                setError(errorDescription?.replace(/\+/g, ' ') || 'Authentication failed');
-                return;
-              }
-              setError('Invalid authentication link. Please try signing in again.');
-              return;
-            }
-          }
-          
+          const queryParams = new URLSearchParams(window.location.search);
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          const refreshToken = hashParams.get('refresh_token');
-          const errorParam = hashParams.get('error');
-          const errorCode = hashParams.get('error_code');
-          const errorDescription = hashParams.get('error_description');
           
-          console.log('[AuthCallback] Web hash params:', { 
-            accessToken: !!accessToken, 
-            refreshToken: !!refreshToken,
+          const tokenFromQuery = queryParams.get('token');
+          const typeFromQuery = queryParams.get('type');
+          const errorParam = queryParams.get('error') || hashParams.get('error');
+          const errorCode = queryParams.get('error_code') || hashParams.get('error_code');
+          const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
+          
+          console.log('[AuthCallback] Web params:', { 
+            tokenFromQuery: !!tokenFromQuery,
+            typeFromQuery,
             error: errorParam,
             errorCode,
-            errorDescription
+            errorDescription,
+            url: window.location.href
           });
           
           if (errorParam) {
@@ -87,6 +60,49 @@ export default function AuthCallbackScreen() {
             setError(message);
             return;
           }
+          
+          if (tokenFromQuery && typeFromQuery) {
+            const isMobileWeb = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobileWeb) {
+              const deepLink = `rork-app://auth/callback?token=${tokenFromQuery}&type=${typeFromQuery}`;
+              console.log('[AuthCallback] Mobile web detected, redirecting to app');
+              
+              window.location.href = deepLink;
+              
+              setTimeout(() => {
+                setIsProcessing(false);
+                setError('If the app did not open, please copy the link from your email and open it directly in the app');
+              }, 2000);
+              return;
+            }
+            
+            console.log('[AuthCallback] Verifying OTP from magic link');
+            const { data, error } = await supabase.auth.verifyOtp({
+              token_hash: tokenFromQuery,
+              type: typeFromQuery as any,
+            });
+
+            if (error) {
+              console.error('[AuthCallback] Error verifying OTP:', error);
+              setError(error.message || 'Failed to verify magic link');
+              return;
+            }
+
+            if (data.session) {
+              console.log('[AuthCallback] Session created, redirecting to home');
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              router.replace('/');
+              return;
+            } else {
+              console.error('[AuthCallback] OTP verified but no session created');
+              setError('Authentication failed. Please try again.');
+              return;
+            }
+          }
+          
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
           
           if (accessToken && refreshToken) {
             console.log('[AuthCallback] Setting session from tokens');
