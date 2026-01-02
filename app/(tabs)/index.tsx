@@ -42,8 +42,8 @@ export default function DashboardScreen() {
   if (authLoading || !isAuthenticated || !currentUser) {
     return (
       <View style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" />
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <StatusBar barStyle="dark-content" />
+        <ActivityIndicator size="large" color="#0284C7" />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -53,7 +53,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
@@ -67,7 +67,7 @@ export default function DashboardScreen() {
                 style={styles.helpButton}
                 onPress={() => router.push('/user-manual')}
               >
-                <HelpCircle size={24} color="#9CA3AF" />
+                <HelpCircle size={24} color="#64748B" />
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.addButton}
@@ -238,7 +238,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
   },
   safeArea: {
     flex: 1,
@@ -256,18 +256,18 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginBottom: 4,
   },
   userName: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 2,
   },
   userRole: {
     fontSize: 12,
-    color: '#3B82F6',
+    color: '#0284C7',
     fontWeight: '600',
   },
   headerButtons: {
@@ -278,17 +278,27 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#0284C7',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -298,16 +308,21 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   metricCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     width: '48%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   primaryMetric: {
     width: '100%',
-    backgroundColor: '#10B98120',
-    borderWidth: 1,
-    borderColor: '#10B981',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 2,
+    borderColor: '#059669',
   },
   commissionMetric: {
     width: '48%',
@@ -324,12 +339,12 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 4,
   },
   metricLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   section: {
     paddingHorizontal: 20,
@@ -344,18 +359,23 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   sectionLink: {
     fontSize: 14,
-    color: '#3B82F6',
+    color: '#0284C7',
     fontWeight: '600',
   },
   pipelineContainer: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   pipelineItem: {
     flexDirection: 'row',
@@ -375,19 +395,24 @@ const styles = StyleSheet.create({
   },
   pipelineLabel: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: '#0F172A',
     textTransform: 'capitalize',
   },
   pipelineCount: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#64748B',
     fontWeight: '600',
   },
   tradeCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   tradeHeader: {
     flexDirection: 'row',
@@ -398,12 +423,12 @@ const styles = StyleSheet.create({
   tradeCommodity: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginBottom: 4,
   },
   tradeCounterparty: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   riskBadge: {
     paddingHorizontal: 12,
@@ -424,13 +449,13 @@ const styles = StyleSheet.create({
   },
   tradeDetailLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#64748B',
     marginBottom: 4,
   },
   tradeDetailValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   alertContainer: {
     flexDirection: 'row',
@@ -438,7 +463,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#374151',
+    borderTopColor: '#E2E8F0',
   },
   alertText: {
     fontSize: 12,
@@ -447,13 +472,13 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#0A0E27',
+    backgroundColor: '#E0F2FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
 });
