@@ -35,8 +35,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signInWithEmail = async (email: string) => {
     console.log('[AuthContext] Sending magic link to:', email);
     
-    const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || 'nuw502s5hmgxa8hwzf3sa';
-    const redirectUrl = `https://rork.com/p/${projectId}/auth/callback`;
+    let redirectUrl: string;
+    
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') {
+        redirectUrl = `${window.location.origin}/auth/callback`;
+      } else {
+        redirectUrl = 'https://rork.app/auth/callback';
+      }
+    } else {
+      redirectUrl = 'rork-app://auth/callback';
+    }
     
     console.log('[AuthContext] Using redirect URL:', redirectUrl, 'Platform:', Platform.OS);
     
