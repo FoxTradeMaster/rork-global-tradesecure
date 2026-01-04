@@ -35,33 +35,76 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signInWithEmail = async (email: string) => {
     console.log('[AuthContext] Sending magic link to:', email);
     
-    let redirectUrl: string;
-    
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') {
-        redirectUrl = `${window.location.origin}/auth/callback`;
-      } else {
-        redirectUrl = 'https://rork.app/auth/callback';
+    try {
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('[AuthContext] Missing Supabase credentials');
+        throw new Error('Authentication service is not configured. Please contact support.');
       }
-    } else {
-      redirectUrl = 'rork-app://auth/callback';
-    }
-    
-    console.log('[AuthContext] Using redirect URL:', redirectUrl, 'Platform:', Platform.OS);
-    
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl,
-      },
-    });
+      
+      if (!supabaseUrl.includes('supabase')) {
+        console.error('[AuthContext] Invalid Supabase URL:', supabaseUrl);
+        throw new Error('Authentication service configuration is invalid. Please contact support.');
+      }
+      
+      console.log('[AuthContext] Supabase URL:', supabaseUrl);
+      
+      let redirectUrl: string;
+      
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined') {
+          redirectUrl = `${window.location.origin}/auth/callback`;
+        } else {
+          redirectUrl = 'https://rork.app/auth/callback';
+        }
+      } else {
+        redirectUrl = 'rork-app://auth/callback';
+      }
+      
+      console.log('[AuthContext] Using redirect URL:', redirectUrl, 'Platform:', Platform.OS);
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
 
-    if (error) {
-      console.error('[AuthContext] Error sending magic link:', error);
+      if (error) {
+        console.error('[AuthContext] Supabase error:', error);
+        console.error('[AuthContext] Error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+        });
+        
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+          throw new Error('Unable to connect to authentication service. Please check your internet connection and try again.');
+        }
+        
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and confirm your account first.');
+        }
+        
+        throw new Error(error.message || 'Failed to send magic link. Please try again.');
+      }
+
+      console.log('[AuthContext] Magic link sent successfully:', data);
+    } catch (error: any) {
+      console.error('[AuthContext] Caught error:', error);
+      
+      if (error.message && (error.message.includes('connect') || error.message.includes('service'))) {
+        throw error;
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to reach authentication service. Please check your connection.');
+      }
+      
       throw error;
     }
-
-    console.log('[AuthContext] Magic link sent successfully');
   };
 
   const signOut = async () => {

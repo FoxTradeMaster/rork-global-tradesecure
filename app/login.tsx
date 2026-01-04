@@ -27,16 +27,25 @@ export default function LoginScreen() {
       setEmailSent(true);
     } catch (error: any) {
       console.error('[Login] Error:', error);
+      console.error('[Login] Error message:', error?.message);
+      console.error('[Login] Error stack:', error?.stack);
       
+      let errorTitle = 'Unable to Send Email';
       let errorMessage = 'Failed to send magic link. Please try again.';
       
-      if (error.message && error.message.includes('Error sending magic link email')) {
-        errorMessage = 'Email service is being configured. This feature will be available shortly. Please contact support if this issue persists.';
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error.message) {
+        if (error.message.includes('not configured') || error.message.includes('configuration')) {
+          errorTitle = 'Configuration Error';
+          errorMessage = error.message;
+        } else if (error.message.includes('connect') || error.message.includes('Network') || error.message.includes('connection')) {
+          errorTitle = 'Connection Error';
+          errorMessage = error.message;
+        } else {
+          errorMessage = error.message;
+        }
       }
       
-      Alert.alert('Unable to Send Email', errorMessage);
+      Alert.alert(errorTitle, errorMessage);
     } finally {
       setIsLoading(false);
     }
