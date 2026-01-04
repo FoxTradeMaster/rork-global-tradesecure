@@ -24,19 +24,16 @@ export default function DashboardScreen() {
   useEffect(() => {
     if (authLoading) return;
     
-    const timeout = setTimeout(() => {
-      if (!isAuthenticated) {
-        console.log('[Dashboard] Not authenticated, redirecting to login');
-        router.replace('/login');
-        return;
-      }
-      
-      if (!currentUser) {
-        console.log('[Dashboard] No user role selected, redirecting to role select');
-        router.replace('/role-select');
-      }
-    }, 500);
-    return () => clearTimeout(timeout);
+    if (!isAuthenticated) {
+      console.log('[Dashboard] Not authenticated, redirecting to login');
+      router.replace('/login');
+      return;
+    }
+    
+    if (!currentUser) {
+      console.log('[Dashboard] No user role selected, redirecting to role select');
+      router.replace('/role-select');
+    }
   }, [currentUser, router, isAuthenticated, authLoading]);
 
   if (authLoading || !isAuthenticated || !currentUser) {

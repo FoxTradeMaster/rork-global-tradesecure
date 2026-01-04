@@ -87,9 +87,24 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [isReady, setIsReady] = React.useState(false);
+
   useEffect(() => {
-    SplashScreen.hideAsync();
+    const prepare = async () => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } finally {
+        setIsReady(true);
+        SplashScreen.hideAsync();
+      }
+    };
+
+    prepare();
   }, []);
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
