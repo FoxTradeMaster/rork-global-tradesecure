@@ -57,6 +57,31 @@ function RootLayoutNav() {
           headerTintColor: '#FFFFFF',
         }} 
       />
+      <Stack.Screen 
+        name="support" 
+        options={{ 
+          presentation: "card",
+          headerShown: true,
+          title: "Support"
+        }} 
+      />
+      <Stack.Screen 
+        name="privacy-policy" 
+        options={{ 
+          presentation: "card",
+          headerShown: true,
+          title: "Privacy Policy"
+        }} 
+      />
+      <Stack.Screen 
+        name="terms-of-service" 
+        options={{ 
+          presentation: "card",
+          headerShown: true,
+          title: "Terms of Service"
+        }} 
+      />
+      <Stack.Screen name="+not-found" />
     </Stack>
   );
 }
