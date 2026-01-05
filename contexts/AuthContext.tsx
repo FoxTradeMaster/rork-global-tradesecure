@@ -51,7 +51,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       
       console.log('[AuthContext] Supabase URL:', supabaseUrl);
       
-      const redirectUrl = 'https://rork.app/nuw502s5hmgxa8hwzf3sa/auth/callback';
+      const redirectUrl = Platform.OS === 'web' 
+        ? `${typeof window !== 'undefined' ? window.location.origin : 'https://rork.app/nuw502s5hmgxa8hwzf3sa'}/auth/callback`
+        : 'rork-app://auth/callback';
       
       console.log('[AuthContext] Using redirect URL:', redirectUrl, 'Platform:', Platform.OS);
       
