@@ -55,7 +55,14 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       
       if (Platform.OS === 'web') {
         if (typeof window !== 'undefined') {
-          redirectUrl = `${window.location.origin}/auth/callback`;
+          const origin = window.location.origin;
+          
+          if (origin.includes('rork.app')) {
+            const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || 'nuw502s5hmgxa8hwzf3sa';
+            redirectUrl = `https://rork.app/p/${projectId}/auth/callback`;
+          } else {
+            redirectUrl = `${origin}/auth/callback`;
+          }
         } else {
           throw new Error('Cannot determine redirect URL. Please try again.');
         }
