@@ -81,11 +81,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
       if (error) {
         console.error('[AuthContext] Supabase error:', error);
-        console.error('[AuthContext] Error details:', {
-          message: error.message,
-          status: error.status,
-          name: error.name,
-        });
+        console.error('[AuthContext] Error message:', error.message);
+        console.error('[AuthContext] Error status:', error.status);
+        console.error('[AuthContext] Error name:', error.name);
+        console.error('[AuthContext] Full error:', JSON.stringify(error, null, 2));
         
         if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
           throw new Error('Unable to connect to authentication service. Please check your internet connection and try again.');
