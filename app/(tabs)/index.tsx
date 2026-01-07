@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading, usePortfolioMetrics, useTradesByStatus } from '@/contexts/TradingContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   TrendingUp, 
   AlertCircle, 
@@ -16,27 +15,22 @@ import {
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { currentUser, trades } = useTrading();
+  const { currentUser, setUser, trades } = useTrading();
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (authLoading) return;
-    
-    if (!isAuthenticated) {
-      console.log('[Dashboard] Not authenticated, redirecting to login');
-      router.replace('/login');
-      return;
-    }
-    
     if (!currentUser) {
-      console.log('[Dashboard] No user role selected, redirecting to role select');
-      router.replace('/role-select');
+      setUser({
+        id: 'user1',
+        name: 'Trade User',
+        role: 'trade_originator',
+        email: 'user@foxtrademaster.com'
+      });
     }
-  }, [currentUser, router, isAuthenticated, authLoading]);
+  }, [currentUser, setUser]);
 
-  if (authLoading || !isAuthenticated || !currentUser) {
+  if (!currentUser) {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar barStyle="dark-content" />

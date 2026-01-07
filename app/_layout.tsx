@@ -7,7 +7,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
-import { AuthProvider } from "@/contexts/AuthContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,9 +17,7 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="role-select" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+
       <Stack.Screen 
         name="counterparty/[id]" 
         options={{ 
@@ -108,17 +105,15 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <TradingProvider>
-            <MarketProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
-            </MarketProvider>
-          </TradingProvider>
-        </SubscriptionProvider>
-      </AuthProvider>
+      <SubscriptionProvider>
+        <TradingProvider>
+          <MarketProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
+          </MarketProvider>
+        </TradingProvider>
+      </SubscriptionProvider>
     </QueryClientProvider>
   );
 }

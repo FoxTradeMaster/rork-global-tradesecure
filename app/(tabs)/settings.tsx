@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { Crown, User, LogOut, Info, FileText, Shield, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react-native';
+import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -11,8 +10,7 @@ import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
-  const { currentUser, setUser } = useTrading();
-  const { signOut } = useAuth();
+  const { currentUser } = useTrading();
   const metrics = usePortfolioMetrics();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
@@ -25,45 +23,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleChangeRole = () => {
-    Alert.alert(
-      'Change Role',
-      'Switch to a different role?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Change Role',
-          onPress: () => {
-            setUser(null as any);
-            router.replace('/role-select');
-          },
-        },
-      ]
-    );
-  };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-              router.replace('/login');
-            } catch (error) {
-              console.error('[Settings] Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const formatDate = (date: Date | null) => {
     if (!date) return 'N/A';
@@ -223,20 +183,6 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account</Text>
-
-            <TouchableOpacity style={styles.menuItem} onPress={handleChangeRole}>
-              <View style={styles.menuItemLeft}>
-                <View style={styles.menuIcon}>
-                  <RefreshCw size={20} color="#3B82F6" />
-                </View>
-                <Text style={styles.menuItemText}>Change Role</Text>
-              </View>
-              <ChevronRight size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.section}>
             <Text style={styles.sectionTitle}>General</Text>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/user-manual')}>
@@ -277,13 +223,6 @@ export default function SettingsScreen() {
                 <Text style={styles.menuItemText}>Support</Text>
               </View>
               <ChevronRight size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.section}>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <LogOut size={20} color="#EF4444" />
-              <Text style={styles.logoutButtonText}>Logout</Text>
             </TouchableOpacity>
           </View>
 
