@@ -43,16 +43,25 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       });
 
       if (error) {
-        console.error('[AuthContext] Error sending OTP:', error);
+        console.error('[AuthContext] Error sending OTP:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          full: error,
+        });
         
         if (error.message.includes('fetch') || error.message.includes('network')) {
           throw new Error('Unable to connect. Please check your internet connection.');
         }
         
+        if (error.message.includes('SMTP') || error.message.includes('mail') || error.message.includes('email provider')) {
+          throw new Error('Email service not configured. Please contact support.');
+        }
+        
         throw new Error(error.message || 'Failed to send code. Please try again.');
       }
 
-      console.log('[AuthContext] OTP code sent successfully');
+      console.log('[AuthContext] OTP code sent successfully', data);
       return data;
     } catch (error: any) {
       console.error('[AuthContext] Caught error:', error);
