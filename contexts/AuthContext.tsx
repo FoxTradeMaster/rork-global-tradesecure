@@ -47,15 +47,16 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
           message: error.message,
           status: error.status,
           name: error.name,
-          full: error,
+          code: error.code,
         });
+        console.error('[AuthContext] Full error details:', error);
         
         if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
           throw new Error('Network error. Please check your internet connection and try again.');
         }
         
-        if (error.message.includes('SMTP') || error.message.includes('mail') || error.message.includes('email provider') || error.message.includes('Email rate limit exceeded')) {
-          throw new Error('Error sending magic link email. The email service is currently unavailable. Please contact support@foxtrademaster.com for assistance.');
+        if (error.message.includes('SMTP') || error.message.includes('mail') || error.message.includes('email provider') || error.message.includes('Email rate limit exceeded') || error.message.includes('Unable to send') || error.message.includes('email') || error.status === 500) {
+          throw new Error('Unable to send verification email. This may be a temporary issue with the email service. Please try again in a few minutes or contact support@foxtrademaster.com if the problem persists.');
         }
         
         if (error.message.includes('rate limit') || error.status === 429) {
@@ -76,7 +77,11 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       console.log('[AuthContext] OTP code sent successfully', data);
       return data;
     } catch (error: any) {
-      console.error('[AuthContext] Caught error:', error);
+      console.error('[AuthContext] Caught error:', {
+        message: error?.message || 'Unknown error',
+        name: error?.name,
+        stack: error?.stack,
+      });
       if (error.message) {
         throw error;
       }

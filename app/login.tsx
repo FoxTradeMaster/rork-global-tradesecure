@@ -58,8 +58,14 @@ export default function LoginScreen() {
         setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
       }, 1000);
     } catch (error: any) {
-      console.error('[Login] Error:', error);
-      setErrorMessage(error?.message || 'Unable to send code. Please try again.');
+      console.error('[Login] Error sending code:', {
+        message: error?.message || 'Unknown error',
+        name: error?.name,
+        email: email.trim().toLowerCase(),
+      });
+      
+      const errorMsg = error?.message || 'Unable to send verification code. Please check your email address and try again.';
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +84,11 @@ export default function LoginScreen() {
       setSuccessMessage('New code sent! Check your email.');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error: any) {
-      setErrorMessage(error?.message || 'Failed to resend code.');
+      console.error('[Login] Error resending code:', {
+        message: error?.message || 'Unknown error',
+        email: email.trim().toLowerCase(),
+      });
+      setErrorMessage(error?.message || 'Failed to resend verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -134,8 +144,14 @@ export default function LoginScreen() {
         setScreen('confirm-required');
       }
     } catch (error: any) {
-      console.error('[Login] Verification error:', error);
-      setErrorMessage(error?.message || 'Invalid code. Please try again.');
+      console.error('[Login] Verification error:', {
+        message: error?.message || 'Unknown error',
+        code: codeString,
+        email: email.trim().toLowerCase(),
+      });
+      
+      const errorMsg = error?.message || 'Invalid or expired verification code. Please request a new code.';
+      setErrorMessage(errorMsg);
       setCode(['', '', '', '', '', '']);
       codeInputRefs.current[0]?.focus();
     } finally {
