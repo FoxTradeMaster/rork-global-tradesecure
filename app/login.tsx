@@ -1,16 +1,37 @@
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, ArrowRight } from 'lucide-react-native';
+import { Mail, ArrowRight, ArrowLeft } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+
+type Screen = 'email' | 'code' | 'confirm-required';
 
 export default function LoginScreen() {
+  const [screen, setScreen] = useState<Screen>('email');
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const { signInWithEmail } = useAuth();
+  const [resendTimer, setResendTimer] = useState(0);
+  const { sendOtpCode, verifyOtpCode, isAuthenticated } = useAuth();
+  const router = useRouter();
+  
+  const codeInputRefs = useRef<(TextInput | null)[]>([]);
 
-  const handleSignIn = async () => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
+  const handleSendCode = async () => {
     if (!email.trim()) {
       Alert.alert('Email Required', 'Please enter your email address');
       return;
@@ -23,56 +44,186 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      await signInWithEmail(email.trim().toLowerCase());
-      setEmailSent(true);
+      await sendOtpCode(email.trim().toLowerCase());
+      setScreen('code');
+      setResendTimer(60);
+      setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
     } catch (error: any) {
       console.error('[Login] Error:', error);
-      console.error('[Login] Error message:', error?.message);
-      console.error('[Login] Error stack:', error?.stack);
-      
-      let errorTitle = 'Unable to Send Email';
-      let errorMessage = 'Failed to send magic link. Please try again.';
-      
-      if (error.message) {
-        if (error.message.includes('not configured') || error.message.includes('configuration')) {
-          errorTitle = 'Configuration Error';
-          errorMessage = error.message;
-        } else if (error.message.includes('connect') || error.message.includes('Network') || error.message.includes('connection')) {
-          errorTitle = 'Connection Error';
-          errorMessage = error.message;
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      Alert.alert(errorTitle, errorMessage);
+      Alert.alert('Unable to Send Code', error?.message || 'Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (emailSent) {
+  const handleResendCode = async () => {
+    if (resendTimer > 0) return;
+    
+    setIsLoading(true);
+    try {
+      await sendOtpCode(email.trim().toLowerCase());
+      setCode(['', '', '', '', '', '']);
+      setResendTimer(60);
+      Alert.alert('Code Sent', 'A new code has been sent to your email.');
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Failed to resend code.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCodeChange = (text: string, index: number) => {
+    if (text.length > 1) {
+      const codes = text.split('').slice(0, 6);
+      const newCode = [...code];
+      codes.forEach((char, i) => {
+        if (index + i < 6) {
+          newCode[index + i] = char;
+        }
+      });
+      setCode(newCode);
+      
+      const nextIndex = Math.min(index + codes.length, 5);
+      codeInputRefs.current[nextIndex]?.focus();
+      
+      if (newCode.every(c => c !== '')) {
+        handleVerifyCode(newCode.join(''));
+      }
+      return;
+    }
+
+    const newCode = [...code];
+    newCode[index] = text;
+    setCode(newCode);
+
+    if (text && index < 5) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+
+    if (newCode.every(c => c !== '')) {
+      handleVerifyCode(newCode.join(''));
+    }
+  };
+
+  const handleKeyPress = (key: string, index: number) => {
+    if (key === 'Backspace' && !code[index] && index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerifyCode = async (codeString: string) => {
+    setIsLoading(true);
+    try {
+      const result = await verifyOtpCode(email.trim().toLowerCase(), codeString);
+      
+      if (result.needsConfirmation) {
+        setScreen('confirm-required');
+      }
+    } catch (error: any) {
+      console.error('[Login] Verification error:', error);
+      Alert.alert('Invalid Code', error?.message || 'Please check your code and try again.');
+      setCode(['', '', '', '', '', '']);
+      codeInputRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (screen === 'confirm-required') {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.content}>
           <View style={styles.successContainer}>
-            <View style={styles.successIcon}>
-              <Mail size={48} color="#10B981" />
+            <View style={styles.warningIcon}>
+              <Mail size={48} color="#F59E0B" />
             </View>
-            <Text style={styles.successTitle}>Check your email</Text>
+            <Text style={styles.successTitle}>Confirm your email</Text>
             <Text style={styles.successMessage}>
-              We&apos;ve sent a magic link to{'\n'}
-              <Text style={styles.emailText}>{email}</Text>
+              To finish setting up your account, please confirm your email address.
             </Text>
             <Text style={styles.instructions}>
-              Click the link in your email to sign in. The link will expire in 60 minutes.
+              We sent a confirmation email to{' '}
+              <Text style={styles.emailText}>{email}</Text>.
+              Click the link in that email to activate your account.
             </Text>
             <TouchableOpacity 
-              style={styles.resendButton}
-              onPress={() => setEmailSent(false)}
+              style={styles.primaryButton}
+              onPress={() => {
+                setScreen('email');
+                setEmail('');
+                setCode(['', '', '', '', '', '']);
+              }}
             >
-              <Text style={styles.resendButtonText}>Use different email</Text>
+              <Text style={styles.primaryButtonText}>Back to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (screen === 'code') {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.content}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => {
+              setScreen('email');
+              setCode(['', '', '', '', '', '']);
+            }}
+          >
+            <ArrowLeft size={24} color="#0F172A" />
+          </TouchableOpacity>
+
+          <View style={styles.header}>
+            <Image
+              source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/n6j4k8rpzw1ut8oqfu5do' }}
+              style={styles.logo}
+              contentFit="contain"
+            />
+            <Text style={styles.title}>Enter verification code</Text>
+            <Text style={styles.subtitle}>
+              We sent a 6-digit code to{' '}
+              <Text style={styles.emailText}>{email}</Text>
+            </Text>
+          </View>
+
+          <View style={styles.form}>
+            <View style={styles.codeContainer}>
+              {code.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={ref => { codeInputRefs.current[index] = ref; }}
+                  style={[styles.codeInput, digit && styles.codeInputFilled]}
+                  value={digit}
+                  onChangeText={text => handleCodeChange(text, index)}
+                  onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  selectTextOnFocus
+                  editable={!isLoading}
+                />
+              ))}
+            </View>
+
+            {isLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#0EA5E9" />
+                <Text style={styles.loadingText}>Verifying...</Text>
+              </View>
+            )}
+
+            <TouchableOpacity 
+              style={[styles.resendButton, resendTimer > 0 && styles.resendButtonDisabled]}
+              onPress={handleResendCode}
+              disabled={resendTimer > 0 || isLoading}
+            >
+              <Text style={[styles.resendButtonText, resendTimer > 0 && styles.resendButtonTextDisabled]}>
+                {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend code'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -117,7 +268,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity 
             style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
-            onPress={handleSignIn}
+            onPress={handleSendCode}
             disabled={isLoading}
             activeOpacity={0.8}
           >
@@ -125,14 +276,14 @@ export default function LoginScreen() {
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
-                <Text style={styles.signInButtonText}>Send Magic Link</Text>
+                <Text style={styles.signInButtonText}>Send Code</Text>
                 <ArrowRight size={20} color="#FFFFFF" />
               </>
             )}
           </TouchableOpacity>
 
           <Text style={styles.disclaimer}>
-            We&apos;ll email you a magic link for a password-free sign in
+            We&apos;ll email you a 6-digit code to sign in
           </Text>
         </View>
       </View>
@@ -220,6 +371,54 @@ const styles = StyleSheet.create({
     marginTop: 16,
     lineHeight: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 24,
+    zIndex: 1,
+    padding: 8,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0F172A',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  codeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 32,
+  },
+  codeInput: {
+    width: 48,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#BAE6FD',
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#0F172A',
+  },
+  codeInputFilled: {
+    borderColor: '#0EA5E9',
+    backgroundColor: '#F0F9FF',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#0EA5E9',
+    fontWeight: '500',
+  },
   successContainer: {
     alignItems: 'center',
   },
@@ -228,6 +427,15 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  warningIcon: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#FEF3C7',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -260,10 +468,31 @@ const styles = StyleSheet.create({
   resendButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
+    alignSelf: 'center',
+  },
+  resendButtonDisabled: {
+    opacity: 0.5,
   },
   resendButtonText: {
     color: '#0EA5E9',
     fontSize: 15,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  resendButtonTextDisabled: {
+    color: '#94A3B8',
+  },
+  primaryButton: {
+    backgroundColor: '#0EA5E9',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    marginTop: 24,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

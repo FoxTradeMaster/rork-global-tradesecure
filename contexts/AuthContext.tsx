@@ -1,6 +1,5 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,83 +31,72 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithEmail = async (email: string) => {
-    console.log('[AuthContext] Sending magic link to:', email);
+  const sendOtpCode = async (email: string) => {
+    console.log('[AuthContext] Sending OTP code to:', email);
     
     try {
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || !supabaseKey) {
-        console.error('[AuthContext] Missing Supabase credentials');
-        throw new Error('Authentication service is not configured. Please contact support.');
-      }
-      
-      if (!supabaseUrl.includes('supabase')) {
-        console.error('[AuthContext] Invalid Supabase URL:', supabaseUrl);
-        throw new Error('Authentication service configuration is invalid. Please contact support.');
-      }
-      
-      console.log('[AuthContext] Supabase URL:', supabaseUrl);
-      
-      let redirectUrl: string;
-      
-      if (Platform.OS === 'web') {
-        if (typeof window !== 'undefined') {
-          const origin = window.location.origin;
-          
-          if (origin.includes('rork.app')) {
-            const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || 'nuw502s5hmgxa8hwzf3sa';
-            redirectUrl = `https://rork.app/p/${projectId}/auth/callback`;
-          } else {
-            redirectUrl = `${origin}/auth/callback`;
-          }
-        } else {
-          throw new Error('Cannot determine redirect URL. Please try again.');
-        }
-      } else {
-        redirectUrl = 'rork-app://auth/callback';
-      }
-      
-      console.log('[AuthContext] Using redirect URL:', redirectUrl, 'Platform:', Platform.OS);
-      
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectUrl,
+          shouldCreateUser: true,
         },
       });
 
       if (error) {
-        console.error('[AuthContext] Supabase error:', error);
-        console.error('[AuthContext] Error message:', error.message);
-        console.error('[AuthContext] Error status:', error.status);
-        console.error('[AuthContext] Error name:', error.name);
-        console.error('[AuthContext] Full error:', JSON.stringify(error, null, 2));
+        console.error('[AuthContext] Error sending OTP:', error);
         
-        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
-          throw new Error('Unable to connect to authentication service. Please check your internet connection and try again.');
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          throw new Error('Unable to connect. Please check your internet connection.');
         }
         
-        if (error.message.includes('Email not confirmed')) {
-          throw new Error('Please check your email and confirm your account first.');
-        }
-        
-        throw new Error(error.message || 'Failed to send magic link. Please try again.');
+        throw new Error(error.message || 'Failed to send code. Please try again.');
       }
 
-      console.log('[AuthContext] Magic link sent successfully:', data);
+      console.log('[AuthContext] OTP code sent successfully');
+      return data;
     } catch (error: any) {
       console.error('[AuthContext] Caught error:', error);
+      throw error;
+    }
+  };
+
+  const verifyOtpCode = async (email: string, token: string) => {
+    console.log('[AuthContext] Verifying OTP code for:', email);
+    
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+
+      if (error) {
+        console.error('[AuthContext] Error verifying OTP:', error);
+        
+        if (error.message.includes('Token has expired')) {
+          throw new Error('Code has expired. Please request a new one.');
+        }
+        
+        if (error.message.includes('Invalid') || error.message.includes('invalid')) {
+          throw new Error('Invalid code. Please check and try again.');
+        }
+        
+        throw new Error(error.message || 'Verification failed. Please try again.');
+      }
+
+      console.log('[AuthContext] OTP verified successfully');
       
-      if (error.message && (error.message.includes('connect') || error.message.includes('service'))) {
-        throw error;
+      const user = data?.user;
+      const isConfirmed = !!(user?.email_confirmed_at || user?.confirmed_at);
+      
+      if (!isConfirmed) {
+        console.log('[AuthContext] Email not confirmed yet');
+        return { needsConfirmation: true, user };
       }
       
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Network error: Unable to reach authentication service. Please check your connection.');
-      }
-      
+      return { needsConfirmation: false, user };
+    } catch (error: any) {
+      console.error('[AuthContext] Caught error:', error);
       throw error;
     }
   };
@@ -127,7 +115,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     session,
     user,
     isLoading,
-    signInWithEmail,
+    sendOtpCode,
+    verifyOtpCode,
     signOut,
     isAuthenticated: !!session,
   };
