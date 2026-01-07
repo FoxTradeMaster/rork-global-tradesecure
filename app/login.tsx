@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, TextInput, ActivityIndicator, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, ArrowRight, ArrowLeft } from 'lucide-react-native';
+import { Mail, ArrowRight, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 type Screen = 'email' | 'code' | 'confirm-required';
@@ -13,6 +13,8 @@ export default function LoginScreen() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const { sendOtpCode, verifyOtpCode, isAuthenticated } = useAuth();
   const router = useRouter();
   
@@ -32,25 +34,32 @@ export default function LoginScreen() {
   }, [resendTimer]);
 
   const handleSendCode = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    
     if (!email.trim()) {
-      Alert.alert('Email Required', 'Please enter your email address');
+      setErrorMessage('Please enter your email address');
       return;
     }
 
-    if (!email.includes('@')) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
+    if (!email.includes('@') || !email.includes('.')) {
+      setErrorMessage('Please enter a valid email address (e.g., user@example.com)');
       return;
     }
 
     setIsLoading(true);
     try {
       await sendOtpCode(email.trim().toLowerCase());
-      setScreen('code');
-      setResendTimer(60);
-      setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
+      setSuccessMessage('Code sent successfully! Check your email.');
+      setTimeout(() => {
+        setScreen('code');
+        setResendTimer(60);
+        setSuccessMessage('');
+        setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
+      }, 1000);
     } catch (error: any) {
       console.error('[Login] Error:', error);
-      Alert.alert('Unable to Send Code', error?.message || 'Please try again.');
+      setErrorMessage(error?.message || 'Unable to send code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -59,14 +68,17 @@ export default function LoginScreen() {
   const handleResendCode = async () => {
     if (resendTimer > 0) return;
     
+    setErrorMessage('');
+    setSuccessMessage('');
     setIsLoading(true);
     try {
       await sendOtpCode(email.trim().toLowerCase());
       setCode(['', '', '', '', '', '']);
       setResendTimer(60);
-      Alert.alert('Code Sent', 'A new code has been sent to your email.');
+      setSuccessMessage('New code sent! Check your email.');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Failed to resend code.');
+      setErrorMessage(error?.message || 'Failed to resend code.');
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +124,8 @@ export default function LoginScreen() {
   };
 
   const handleVerifyCode = async (codeString: string) => {
+    setErrorMessage('');
+    setSuccessMessage('');
     setIsLoading(true);
     try {
       const result = await verifyOtpCode(email.trim().toLowerCase(), codeString);
@@ -121,7 +135,7 @@ export default function LoginScreen() {
       }
     } catch (error: any) {
       console.error('[Login] Verification error:', error);
-      Alert.alert('Invalid Code', error?.message || 'Please check your code and try again.');
+      setErrorMessage(error?.message || 'Invalid code. Please try again.');
       setCode(['', '', '', '', '', '']);
       codeInputRefs.current[0]?.focus();
     } finally {
@@ -134,7 +148,7 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.content}>
-          <View style={styles.successContainer}>
+          <View style={styles.confirmContainer}>
             <View style={styles.warningIcon}>
               <Mail size={48} color="#F59E0B" />
             </View>
@@ -167,12 +181,14 @@ export default function LoginScreen() {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" />
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <TouchableOpacity 
             style={styles.backButton}
             onPress={() => {
               setScreen('email');
               setCode(['', '', '', '', '', '']);
+              setErrorMessage('');
+              setSuccessMessage('');
             }}
           >
             <ArrowLeft size={24} color="#0F172A" />
@@ -192,6 +208,20 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.form}>
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <AlertCircle size={20} color="#EF4444" />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+            
+            {successMessage ? (
+              <View style={styles.successBanner}>
+                <CheckCircle2 size={20} color="#10B981" />
+                <Text style={styles.successText}>{successMessage}</Text>
+              </View>
+            ) : null}
+
             <View style={styles.codeContainer}>
               {code.map((digit, index) => (
                 <TextInput
@@ -226,7 +256,7 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -234,7 +264,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Image
             source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/n6j4k8rpzw1ut8oqfu5do' }}
@@ -249,6 +279,20 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
+          {errorMessage ? (
+            <View style={styles.errorContainer}>
+              <AlertCircle size={20} color="#EF4444" />
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+          
+          {successMessage ? (
+            <View style={styles.successBanner}>
+              <CheckCircle2 size={20} color="#10B981" />
+              <Text style={styles.successText}>{successMessage}</Text>
+            </View>
+          ) : null}
+
           <View style={styles.inputContainer}>
             <View style={styles.inputIconContainer}>
               <Mail size={20} color="#64748B" />
@@ -258,7 +302,10 @@ export default function LoginScreen() {
               placeholder="Enter your email"
               placeholderTextColor="#94A3B8"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                setErrorMessage('');
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -286,7 +333,7 @@ export default function LoginScreen() {
             We&apos;ll email you a 6-digit code to sign in
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -295,6 +342,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E0F2FE',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   content: {
     flex: 1,
@@ -419,7 +472,7 @@ const styles = StyleSheet.create({
     color: '#0EA5E9',
     fontWeight: '500',
   },
-  successContainer: {
+  confirmContainer: {
     alignItems: 'center',
   },
   successIcon: {
@@ -494,5 +547,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    gap: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#EF4444',
+  },
+  errorText: {
+    flex: 1,
+    color: '#991B1B',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  successBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D1FAE5',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    gap: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#10B981',
+  },
+  successText: {
+    flex: 1,
+    color: '#065F46',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
   },
 });

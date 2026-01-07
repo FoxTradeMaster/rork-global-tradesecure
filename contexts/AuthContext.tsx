@@ -50,22 +50,37 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
           full: error,
         });
         
-        if (error.message.includes('fetch') || error.message.includes('network')) {
-          throw new Error('Unable to connect. Please check your internet connection.');
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+          throw new Error('Network error. Please check your internet connection and try again.');
         }
         
-        if (error.message.includes('SMTP') || error.message.includes('mail') || error.message.includes('email provider')) {
-          throw new Error('Email service not configured. Please contact support.');
+        if (error.message.includes('SMTP') || error.message.includes('mail') || error.message.includes('email provider') || error.message.includes('Email rate limit exceeded')) {
+          throw new Error('Error sending magic link email. The email service is currently unavailable. Please contact support@foxtrademaster.com for assistance.');
         }
         
-        throw new Error(error.message || 'Failed to send code. Please try again.');
+        if (error.message.includes('rate limit') || error.status === 429) {
+          throw new Error('Too many attempts. Please wait a few minutes before trying again.');
+        }
+        
+        if (error.message.includes('Invalid email') || error.message.includes('valid email')) {
+          throw new Error('Please enter a valid email address.');
+        }
+        
+        if (error.status === 500 || error.status === 503) {
+          throw new Error('Server error. Our team has been notified. Please try again in a few minutes.');
+        }
+        
+        throw new Error(error.message || 'Unable to send code. Please try again or contact support@foxtrademaster.com.');
       }
 
       console.log('[AuthContext] OTP code sent successfully', data);
       return data;
     } catch (error: any) {
       console.error('[AuthContext] Caught error:', error);
-      throw error;
+      if (error.message) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred. Please try again or contact support@foxtrademaster.com.');
     }
   };
 
@@ -82,15 +97,23 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       if (error) {
         console.error('[AuthContext] Error verifying OTP:', error);
         
-        if (error.message.includes('Token has expired')) {
-          throw new Error('Code has expired. Please request a new one.');
+        if (error.message.includes('Token has expired') || error.message.includes('expired')) {
+          throw new Error('Verification code has expired. Please request a new code.');
         }
         
-        if (error.message.includes('Invalid') || error.message.includes('invalid')) {
-          throw new Error('Invalid code. Please check and try again.');
+        if (error.message.includes('Invalid') || error.message.includes('invalid') || error.message.includes('not found')) {
+          throw new Error('Invalid verification code. Please check your code and try again.');
         }
         
-        throw new Error(error.message || 'Verification failed. Please try again.');
+        if (error.message.includes('Too many') || error.message.includes('rate limit')) {
+          throw new Error('Too many verification attempts. Please wait a few minutes.');
+        }
+        
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          throw new Error('Network error. Please check your connection and try again.');
+        }
+        
+        throw new Error(error.message || 'Verification failed. Please try again or request a new code.');
       }
 
       console.log('[AuthContext] OTP verified successfully');
@@ -106,7 +129,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       return { needsConfirmation: false, user };
     } catch (error: any) {
       console.error('[AuthContext] Caught error:', error);
-      throw error;
+      if (error.message) {
+        throw error;
+      }
+      throw new Error('Verification failed. Please try again.');
     }
   };
 
