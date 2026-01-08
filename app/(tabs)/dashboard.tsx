@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading, usePortfolioMetrics, useTradesByStatus } from '@/contexts/TradingContext';
 import { 
@@ -15,29 +14,12 @@ import {
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { currentUser, setUser, trades } = useTrading();
+  const { currentUser, trades } = useTrading();
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus();
 
-  useEffect(() => {
-    if (!currentUser) {
-      setUser({
-        id: 'user1',
-        name: 'Trade User',
-        role: 'trade_originator',
-        email: 'user@foxtrademaster.com'
-      });
-    }
-  }, [currentUser, setUser]);
-
   if (!currentUser) {
-    return (
-      <View style={styles.loadingContainer}>
-        <StatusBar barStyle="dark-content" />
-        <ActivityIndicator size="large" color="#0284C7" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
+    return null;
   }
 
   const recentTrades = trades.slice(0, 3);
@@ -460,16 +442,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#F59E0B',
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#E0F2FE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#64748B',
   },
 });
