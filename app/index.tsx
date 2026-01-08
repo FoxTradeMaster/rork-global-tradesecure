@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
           style={{ width: 120, height: 120 }}
           resizeMode="contain"
         />
-        <Text style={[styles.title, { marginTop: 24 }]}>Fox Trade Master™</Text>
+        <Text style={[styles.title, { marginTop: 24 }]} numberOfLines={1}>Fox Trade Master™</Text>
       </View>
     );
   }
@@ -101,7 +101,7 @@ export default function WelcomeScreen() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.title}>Fox Trade Master™</Text>
+            <Text style={styles.title} numberOfLines={1}>Fox Trade Master™</Text>
             <Text style={styles.subtitle}>Global Trading App</Text>
             <Text style={styles.tagline}>Select your role to continue</Text>
           </View>
