@@ -59,37 +59,54 @@ Fox Trade Master™ uses secure, password-free authentication via magic links.
 - Contact support at support@foxtrademaster.com or +1-804-506-9939
 - Service is typically restored within a few hours
 
-### First Launch
-1. After signing in, you'll be greeted with the role selection screen
-2. Choose your role based on your responsibilities in the organization
-3. Once selected, you'll be taken to the main dashboard
+### First Launch & Role Selection
+
+When you first open Fox Trade Master™, you'll be greeted with the welcome screen featuring:
+- **Fox Trade Master™ Logo** - Circular logo displayed prominently at the top
+- **App Title** - "Fox Trade Master™" and "Global Trading App" subtitle
+- **Role Selection Cards** - Choose your role to access the appropriate features
+
+#### Selecting Your Role
+1. Review the available roles displayed as cards
+2. Each role card shows:
+   - **Icon** - Visual representation of the role
+   - **Title** - Role name (e.g., Trade Originator, Compliance Officer)
+   - **Description** - Brief explanation of responsibilities
+3. Tap the role card that matches your position
+4. You'll be taken directly to the main dashboard
 
 ### Navigation
-The app uses a tab-based navigation system with 5 main sections:
+The app uses a tab-based navigation system with 6 main sections:
 - **Dashboard** - Overview of your portfolio and recent activity
 - **Trades** - Manage all trading activities
 - **Counterparties** - Manage business relationships
 - **Documents** - Upload, view, and send documents
 - **Market** - Directory of verified market participants
+- **Settings** - Manage account, subscription, and app preferences
 
 ### Accessing the User Manual
 - Tap the **Help icon (?)** in the top right of the Dashboard
+- Or go to **Settings** tab and select **"User Manual"**
 - Access comprehensive documentation about all features
 - Search for specific topics and instructions
 
-### Returning to Role Selection
-If you need to change your role or return to the main selection screen:
-1. Go to the **Settings** tab
-2. Tap **"Change Role"** or **"Log Out"**
-3. You'll be returned to the role selection screen with the app logo
+### Changing Your Role
 
-### Signing Out
-To sign out of your account:
-1. Go to the **Settings** tab
-2. Scroll to the bottom
-3. Tap **"Log Out"** or **"Sign Out"**
-4. You'll be returned to the login screen
-5. Your session is cleared for security
+If you need to switch to a different role or return to the role selection screen:
+
+1. **Navigate to Settings**:
+   - Tap the **Settings** tab in the bottom navigation
+
+2. **Access Change Role**:
+   - Scroll to the "General" section
+   - Tap **"Change Role"** (red button with logout icon)
+
+3. **Return to Role Selection**:
+   - You'll be immediately returned to the welcome screen
+   - The Fox Trade Master™ logo and role cards will be displayed
+   - Select a new role to continue
+
+**Note**: Changing your role does not log you out or clear your data. It simply allows you to access the app with a different role's permissions and view.
 
 ---
 
