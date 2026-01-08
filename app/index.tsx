@@ -45,7 +45,7 @@ const ROLES = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { setUser, currentUser } = useTrading();
+  const { setUser } = useTrading();
 
   const handleRoleSelect = async (roleId: string) => {
     const user: User = {
@@ -56,13 +56,8 @@ export default function WelcomeScreen() {
     };
     
     await setUser(user);
-    router.replace('/(tabs)/dashboard');
+    router.push('/(tabs)/dashboard');
   };
-
-  if (currentUser) {
-    router.replace('/(tabs)/dashboard');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
