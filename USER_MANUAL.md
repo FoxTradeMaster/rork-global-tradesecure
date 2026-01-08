@@ -24,41 +24,68 @@
 
 ### Authentication & Login
 
-Fox Trade Master™ uses secure, password-free authentication via magic links.
+Fox Trade Master™ uses secure email and password authentication integrated with Supabase.
 
-#### Signing In
+#### Signing In (Existing Users)
 1. Open the Fox Trade Master™ app
-2. You'll see the login screen with the app logo
-3. Enter your email address in the email field
-4. Tap **"Send Magic Link"**
-5. Check your email inbox for the magic link
-6. Click the link in the email (valid for 60 minutes)
-7. You'll be automatically signed in and redirected to the app
+2. You'll see the welcome screen with role selection cards
+3. Tap any role card that matches your position
+4. The authentication modal will appear over the welcome screen
+5. The modal defaults to "Sign In" mode
+6. Enter your **email address**
+7. Enter your **password**
+8. Tap **"Sign In"**
+9. You'll be automatically authenticated and taken to the dashboard
 
-#### Magic Link Benefits
-- **No Password Required** - No need to remember or manage passwords
-- **More Secure** - Each link is unique and expires after use
-- **Quick Access** - One click from your email to sign in
-- **Works Everywhere** - Sign in from any device with your email
+#### Creating an Account (New Users)
+1. Open the Fox Trade Master™ app
+2. Tap any role card from the welcome screen
+3. In the authentication modal, tap **"Sign Up"** at the bottom
+4. The modal switches to "Create Account" mode
+5. Enter your **full name**
+6. Enter your **email address**
+7. Create a **password**
+8. Tap **"Sign Up"**
+9. Your account is created with the selected role
+10. You'll be automatically signed in and taken to the dashboard
+
+#### Authentication Features
+- **Secure Authentication** - Passwords are encrypted and securely stored
+- **Role-Based Access** - Your selected role determines available features
+- **Persistent Sessions** - Stay signed in until you explicitly sign out
+- **Quick Toggle** - Switch between Sign In and Sign Up modes easily
+- **Modal Interface** - Authentication modal hovers over the welcome screen without covering the logo
+
+#### Switching Between Sign In and Sign Up
+- At the bottom of the authentication modal, you'll see:
+  - "Don't have an account? **Sign Up**" (when in Sign In mode)
+  - "Already have an account? **Sign In**" (when in Sign Up mode)
+- Tap the blue link to switch modes
+- Your role selection is preserved when switching modes
 
 #### Troubleshooting Login
 
-**Email Not Received**:
-- Check your spam/junk folder
+**Authentication Failed**:
+- Verify your email address is correct
+- Check that your password is entered correctly
+- Ensure you have an active internet connection
+- If you forgot your password, contact support to reset it
+
+**Email Already Exists** (during Sign Up):
+- This email is already registered in the system
+- Use **Sign In** mode instead with your existing password
+- Or contact support if you need to recover your account
+
+**Account Not Found** (during Sign In):
 - Verify you entered the correct email address
-- Wait a few minutes for email delivery
-- Tap "Use different email" to try again
-- Contact support if issues persist
+- You may need to create an account using **Sign Up** mode
+- Contact support if you believe you should have an account
 
-**Magic Link Expired**:
-- Links expire after 60 minutes for security
-- Return to login screen and request a new link
-- Check your email more quickly next time
-
-**Email Service Issues**:
-- If you see an email configuration message, the service may be undergoing maintenance
-- Contact support at support@foxtrademaster.com or +1-804-506-9939
-- Service is typically restored within a few hours
+**Network Issues**:
+- Check your internet connection
+- Try closing and reopening the app
+- Ensure you're not behind a restrictive firewall
+- Contact support at support@foxtrademaster.com or +1-804-506-9939 if issues persist
 
 ### First Launch & Role Selection
 
