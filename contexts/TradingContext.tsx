@@ -278,6 +278,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     await AsyncStorage.setItem('current_user', JSON.stringify(user));
   };
 
+  const clearUser = async () => {
+    setCurrentUser(null);
+    await AsyncStorage.removeItem('current_user');
+  };
+
   const addCounterparties = async (newCounterparties: Counterparty[]) => {
     console.log('[TradingContext] Adding', newCounterparties.length, 'counterparties');
     
@@ -565,6 +570,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   return {
     currentUser,
     setUser,
+    clearUser,
     counterparties,
     trades,
     walletBalance,

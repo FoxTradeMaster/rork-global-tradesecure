@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
-import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle } from 'lucide-react-native';
+import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
-  const { currentUser } = useTrading();
+  const { currentUser, clearUser } = useTrading();
   const metrics = usePortfolioMetrics();
   const [showPaywall, setShowPaywall] = useState(false);
   const router = useRouter();
@@ -21,6 +21,11 @@ export default function SettingsScreen() {
     } else {
       setShowPaywall(true);
     }
+  };
+
+  const handleChangeRole = async () => {
+    await clearUser();
+    router.replace('/');
   };
 
 
@@ -223,6 +228,16 @@ export default function SettingsScreen() {
                 <Text style={styles.menuItemText}>Support</Text>
               </View>
               <ChevronRight size={20} color="#6B7280" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={handleChangeRole}>
+              <View style={styles.menuItemLeft}>
+                <View style={[styles.menuIcon, { backgroundColor: '#FEE2E2' }]}>
+                  <LogOut size={20} color="#EF4444" />
+                </View>
+                <Text style={[styles.menuItemText, { color: '#EF4444' }]}>Change Role</Text>
+              </View>
+              <ChevronRight size={20} color="#EF4444" />
             </TouchableOpacity>
           </View>
 
