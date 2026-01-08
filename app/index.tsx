@@ -59,7 +59,7 @@ export default function WelcomeScreen() {
     return (
       <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
         <Image
-          source={require('@/assets/images/icon.png')}
+          source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/3ch9p1r8393aavxxii6ii' }}
           style={{ width: 120, height: 120 }}
           resizeMode="contain"
         />
@@ -96,7 +96,7 @@ export default function WelcomeScreen() {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <Image
-                source={require('@/assets/images/icon.png')}
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/3ch9p1r8393aavxxii6ii' }}
                 style={styles.logo}
                 resizeMode="contain"
               />

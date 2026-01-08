@@ -253,17 +253,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         }
 
         try {
-          const storedUser = await Promise.race([
-            AsyncStorage.getItem('current_user'),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 100))
-          ]);
-          
-          if (storedUser) {
-            setCurrentUser(JSON.parse(storedUser));
-            console.log('[TradingContext] Loaded user from storage');
-          }
+          await AsyncStorage.removeItem('current_user');
+          console.log('[TradingContext] Cleared stored user data');
         } catch (storageError) {
-          console.log('[TradingContext] Storage error/timeout:', storageError);
+          console.log('[TradingContext] Storage error:', storageError);
         }
 
         console.log('[TradingContext] Finished loading all data');
