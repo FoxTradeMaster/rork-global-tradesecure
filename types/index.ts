@@ -3,6 +3,7 @@ export type UserRole =
   | 'compliance_officer' 
   | 'risk_manager' 
   | 'legal_reviewer' 
+  | 'senior_management' 
   | 'operations_manager' 
   | 'admin';
 

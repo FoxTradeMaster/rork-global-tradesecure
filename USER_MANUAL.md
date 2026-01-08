@@ -6,16 +6,17 @@
 ## Table of Contents
 1. [Getting Started](#getting-started)
 2. [Role Selection](#role-selection)
-3. [Dashboard Overview](#dashboard-overview)
-4. [Managing Trades](#managing-trades)
-5. [Managing Counterparties](#managing-counterparties)
-6. [Document Management](#document-management)
-7. [Market Directory](#market-directory)
-8. [Advanced Market Features](#advanced-market-features)
-9. [Importing Market Participants](#importing-market-participants)
-10. [Understanding Risk Levels](#understanding-risk-levels)
-11. [Trade Workflow](#trade-workflow)
-12. [Document Types](#document-types)
+3. [User Roles & Responsibilities](#user-roles--responsibilities)
+4. [Dashboard Overview](#dashboard-overview)
+5. [Managing Trades](#managing-trades)
+6. [Managing Counterparties](#managing-counterparties)
+7. [Document Management](#document-management)
+8. [Market Directory](#market-directory)
+9. [Advanced Market Features](#advanced-market-features)
+10. [Importing Market Participants](#importing-market-participants)
+11. [Understanding Risk Levels](#understanding-risk-levels)
+12. [Trade Workflow](#trade-workflow)
+13. [Document Types](#document-types)
 
 ---
 
@@ -107,6 +108,276 @@ If you need to switch to a different role or return to the role selection screen
    - Select a new role to continue
 
 **Note**: Changing your role does not log you out or clear your data. It simply allows you to access the app with a different role's permissions and view.
+
+---
+
+## User Roles & Responsibilities
+
+Fox Trade Master™ provides role-based access control to ensure each team member has the appropriate tools and information for their responsibilities. Each role has a customized experience with specific features, metrics, and access levels.
+
+### Available Roles
+
+#### 1. Trade Originator
+**Primary Responsibility**: Create and manage trades
+
+**Dashboard Metrics**:
+- Total Portfolio Value
+- Commission Earned
+- Potential Commission
+- Active Trades
+
+**Access & Features**:
+- ✅ **Full access** to all tabs: Dashboard, Trades, Counterparties, Documents, Market, Wallet, Settings
+- ✅ **Create new trades** via the "+" button
+- ✅ **Import trades** from CSV/Excel files
+- ✅ **Import counterparties** from external sources
+- ✅ **Access market directory** to find new trading partners
+- ✅ **Manage wallet** and view commissions
+- ✅ View all trade statuses and documents
+
+**Key Workflows**:
+1. Create and submit new trades
+2. Monitor trade progress through all stages
+3. Track commission earnings
+4. Build counterparty relationships
+5. Access verified market participants
+
+#### 2. Compliance Officer
+**Primary Responsibility**: Ensure regulatory compliance
+
+**Dashboard Metrics**:
+- Compliance Reviews Needed (primary metric)
+- Critical Alerts
+- Approved Counterparties
+- Unresolved Issues
+
+**Access & Features**:
+- ✅ **Access**: Dashboard, Trades, Counterparties, Documents, Settings
+- ✅ **Focused view** on trades requiring compliance checks
+- ✅ **Review counterparty** documentation and risk scores
+- ✅ **Monitor alerts** and resolve compliance issues
+- ✅ **Approve/reject** counterparties based on compliance standards
+- ❌ Cannot create new trades
+- ❌ No access to Market directory or Wallet
+
+**Key Workflows**:
+1. Review trades in "compliance_check" status
+2. Verify counterparty compliance documentation
+3. Monitor and resolve critical alerts
+4. Approve counterparties meeting compliance standards
+5. Track unresolved compliance issues
+
+**Trade Status Filters**:
+- All
+- Compliance Check
+- Counterparty Review
+- Risk Approval
+- Legal Review
+
+#### 3. Risk Manager
+**Primary Responsibility**: Assess counterparty risk
+
+**Dashboard Metrics**:
+- Risk Approvals Needed (primary metric)
+- High Risk Trades (Red)
+- Medium Risk Trades (Amber)
+- Low Risk Trades (Green)
+
+**Access & Features**:
+- ✅ **Access**: Dashboard, Trades, Counterparties, Settings
+- ✅ **Risk-focused dashboard** showing trade risk distribution
+- ✅ **Review trades** requiring risk approval
+- ✅ **Assess counterparty** risk scores
+- ✅ **Monitor risk levels** across all active trades
+- ❌ Cannot create new trades
+- ❌ No access to Documents, Market directory, or Wallet
+
+**Key Workflows**:
+1. Review trades in "risk_approval" status
+2. Evaluate counterparty risk scores
+3. Assess trade risk levels (green/amber/red)
+4. Monitor high-risk trade exposure
+5. Approve or flag trades based on risk assessment
+
+**Trade Status Filters**:
+- All
+- Risk Approval
+- Counterparty Review
+- Active
+- Financing Pending
+
+**Risk Score Components**:
+- Legal/Licensing (0-100)
+- Financial Strength (0-100)
+- Compliance/Sanctions (0-100)
+- Operations/Logistics (0-100)
+- Commodity-Specific (0-100)
+- Overall Score & Level (Green/Amber/Red)
+
+#### 4. Legal Reviewer
+**Primary Responsibility**: Review contracts and agreements
+
+**Dashboard Metrics**:
+- Legal Reviews Needed (primary metric)
+- Pending Documents
+- Verified Contracts
+- Active Trades
+
+**Access & Features**:
+- ✅ **Access**: Dashboard, Trades, Documents, Settings
+- ✅ **Legal-focused view** of trades requiring review
+- ✅ **Document management** - upload, verify, and manage contracts
+- ✅ **Review trade documents** (LOI, SPA, MSA, LC, etc.)
+- ✅ **Verify document** authenticity and completeness
+- ❌ Cannot create new trades
+- ❌ No access to Counterparties, Market, or Wallet
+
+**Key Workflows**:
+1. Review trades in "legal_review" status
+2. Verify contract documents
+3. Check document completeness and validity
+4. Flag missing or unverified documents
+5. Approve trades with complete legal documentation
+
+**Trade Status Filters**:
+- All
+- Legal Review
+- Compliance Check
+- Counterparty Review
+
+**Document Types Reviewed**:
+- Letter of Intent (LOI)
+- Sales & Purchase Agreement (SPA)
+- Master Framework Purchase Agreement (MFPA)
+- Letter of Credit (LC)
+- Bill of Lading (BOL)
+- Certificate of Origin
+- Quality Certificates
+
+#### 5. Senior Management
+**Primary Responsibility**: Oversee operations and strategy
+
+**Dashboard Metrics**:
+- Total Portfolio Value (primary metric)
+- Total Commission Earned
+- Active Trades
+- Pending Approvals
+- Critical Alerts
+- Approved Counterparties
+
+**Access & Features**:
+- ✅ **Full access** to: Dashboard, Trades, Counterparties, Market, Wallet, Settings
+- ✅ **Executive dashboard** with comprehensive metrics
+- ✅ **Create new trades** and strategic partnerships
+- ✅ **View financial performance** and commission tracking
+- ✅ **Monitor critical alerts** and pending approvals
+- ✅ **Access market directory** for business development
+- ✅ **Strategic overview** of all operations
+- ❌ No direct access to Documents tab (delegates to Legal team)
+
+**Key Workflows**:
+1. Monitor overall portfolio performance
+2. Review high-value trades and strategic decisions
+3. Track commission earnings and profitability
+4. Oversee critical alerts and risk exposure
+5. Approve strategic counterparty relationships
+6. Business development through market directory
+
+**Trade Status Filters**:
+- All
+- Active
+- In Transit
+- Delivered
+- Settled
+
+### Role-Based Dashboard Customization
+
+Each role sees a customized dashboard designed for their specific needs:
+
+**Trade Originator & Senior Management**:
+- Focus on financial metrics (portfolio value, commissions)
+- "+" button visible for creating new trades
+- Comprehensive trade pipeline view
+- Access to wallet and payment features
+
+**Compliance Officer**:
+- Focus on compliance metrics and alerts
+- Highlighted pending compliance reviews
+- Unresolved issues tracker
+- Counterparty approval status
+
+**Risk Manager**:
+- Focus on risk distribution (green/amber/red)
+- Risk approval queue
+- Trade risk level breakdown
+- High-risk trade monitoring
+
+**Legal Reviewer**:
+- Focus on document status
+- Legal review queue
+- Pending documents tracker
+- Contract verification status
+
+### Role-Based Navigation
+
+The tab bar dynamically adjusts based on your role, showing only relevant sections:
+
+| Tab | Trade Originator | Compliance Officer | Risk Manager | Legal Reviewer | Senior Management |
+|-----|-----------------|-------------------|--------------|----------------|------------------|
+| Dashboard | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Trades | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Counterparties | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Documents | ✅ | ✅ | ❌ | ✅ | ❌ |
+| Market | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Wallet | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Settings | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### Switching Between Roles
+
+To experience the app from a different role perspective:
+
+1. Go to **Settings** tab
+2. Tap **"Change Role"** in the General section
+3. Select a new role from the welcome screen
+4. Your dashboard and available features will update immediately
+
+**Use Cases for Role Switching**:
+- **Training**: Understand how other team members use the system
+- **Testing**: Verify workflows from different perspectives
+- **Coverage**: Temporarily handle responsibilities when colleagues are unavailable
+- **Multi-role positions**: If you serve multiple functions in your organization
+
+### Best Practices by Role
+
+**Trade Originators**:
+- Create detailed trade entries with complete information
+- Upload all required documents before submission
+- Monitor trade status and respond to review requests
+- Track commission potential and payment timing
+
+**Compliance Officers**:
+- Review new counterparties within 24-48 hours
+- Maintain up-to-date compliance documentation
+- Resolve alerts promptly to avoid trade delays
+- Document all compliance decisions and conditions
+
+**Risk Managers**:
+- Assess counterparty risk scores thoroughly
+- Set appropriate risk levels based on standardized criteria
+- Monitor portfolio risk concentration
+- Flag trades exceeding risk thresholds
+
+**Legal Reviewers**:
+- Verify all contracts before trade execution
+- Ensure document completeness and accuracy
+- Maintain version control of legal documents
+- Flag any non-standard terms or conditions
+
+**Senior Management**:
+- Review weekly portfolio performance metrics
+- Monitor critical alerts and high-risk trades
+- Approve strategic counterparty relationships
+- Track commission earnings and profitability trends
 
 ---
 

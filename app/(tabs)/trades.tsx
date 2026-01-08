@@ -20,19 +20,57 @@ const TRADE_IMPORT_FIELDS = [
 
 export default function TradesScreen() {
   const router = useRouter();
-  const { trades, addTrades } = useTrading();
+  const { trades, addTrades, currentUser } = useTrading();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showImportModal, setShowImportModal] = useState(false);
 
-  const filteredTrades = trades.filter(trade => {
+  const getRoleSpecificFilters = () => {
+    if (!currentUser) return ['all'];
+
+    switch (currentUser.role) {
+      case 'compliance_officer':
+        return ['all', 'compliance_check', 'counterparty_review', 'risk_approval', 'legal_review'];
+      case 'risk_manager':
+        return ['all', 'risk_approval', 'counterparty_review', 'active', 'financing_pending'];
+      case 'legal_reviewer':
+        return ['all', 'legal_review', 'compliance_check', 'counterparty_review'];
+      case 'senior_management':
+        return ['all', 'active', 'in_transit', 'delivered', 'settled'];
+      case 'trade_originator':
+      default:
+        return ['all', 'active', 'financing_pending', 'legal_review', 'in_transit', 'delivered'];
+    }
+  };
+
+  const getRoleSpecificTrades = () => {
+    if (!currentUser) return trades;
+
+    switch (currentUser.role) {
+      case 'compliance_officer':
+        return trades;
+      case 'risk_manager':
+        return trades;
+      case 'legal_reviewer':
+        return trades;
+      case 'senior_management':
+        return trades;
+      case 'trade_originator':
+      default:
+        return trades;
+    }
+  };
+
+  const roleFilteredTrades = getRoleSpecificTrades();
+
+  const filteredTrades = roleFilteredTrades.filter(trade => {
     const matchesSearch = trade.counterpartyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          trade.commodity.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || trade.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
-  const statusFilters = ['all', 'active', 'financing_pending', 'legal_review', 'in_transit'];
+  const statusFilters = getRoleSpecificFilters();
 
   const handleImport = useCallback((data: ParsedRow[]) => {
     console.log('[Trades] Importing', data.length, 'rows');
@@ -96,19 +134,23 @@ export default function TradesScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Trade Portfolio</Text>
           <View style={styles.headerButtons}>
-            <TouchableOpacity 
-              style={styles.importButton}
-              onPress={() => setShowImportModal(true)}
-            >
-              <Upload size={16} color="#0284C7" />
-              <Text style={styles.importButtonText}>Import</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.addButton}
-              onPress={() => router.push('/trade/create')}
-            >
-              <Plus size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            {(currentUser?.role === 'trade_originator' || currentUser?.role === 'senior_management') && (
+              <>
+                <TouchableOpacity 
+                  style={styles.importButton}
+                  onPress={() => setShowImportModal(true)}
+                >
+                  <Upload size={16} color="#0284C7" />
+                  <Text style={styles.importButtonText}>Import</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.addButton}
+                  onPress={() => router.push('/trade/create')}
+                >
+                  <Plus size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
 

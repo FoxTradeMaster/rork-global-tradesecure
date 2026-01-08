@@ -1,9 +1,32 @@
-// template
 import { Tabs } from "expo-router";
-import { LayoutDashboard, Users, FileText, TrendingUp, Building, Settings } from "lucide-react-native";
+import { LayoutDashboard, Users, FileText, TrendingUp, Building, Settings, Wallet } from "lucide-react-native";
 import React from "react";
+import { useTrading } from '@/contexts/TradingContext';
 
 export default function TabLayout() {
+  const { currentUser } = useTrading();
+
+  const getRoleTabs = () => {
+    if (!currentUser) return ['dashboard', 'settings'];
+
+    switch (currentUser.role) {
+      case 'trade_originator':
+        return ['dashboard', 'trades', 'counterparties', 'documents', 'market', 'wallet', 'settings'];
+      case 'compliance_officer':
+        return ['dashboard', 'trades', 'counterparties', 'documents', 'settings'];
+      case 'risk_manager':
+        return ['dashboard', 'trades', 'counterparties', 'settings'];
+      case 'legal_reviewer':
+        return ['dashboard', 'trades', 'documents', 'settings'];
+      case 'senior_management':
+        return ['dashboard', 'trades', 'counterparties', 'market', 'wallet', 'settings'];
+      default:
+        return ['dashboard', 'trades', 'settings'];
+    }
+  };
+
+  const visibleTabs = getRoleTabs();
+
   return (
     <Tabs
       screenOptions={{
@@ -26,6 +49,7 @@ export default function TabLayout() {
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color }) => <LayoutDashboard size={24} color={color} />,
+          href: visibleTabs.includes('dashboard') ? '/dashboard' : null,
         }}
       />
       <Tabs.Screen
@@ -33,6 +57,7 @@ export default function TabLayout() {
         options={{
           title: "Trades",
           tabBarIcon: ({ color }) => <TrendingUp size={24} color={color} />,
+          href: visibleTabs.includes('trades') ? '/trades' : null,
         }}
       />
       <Tabs.Screen
@@ -40,6 +65,7 @@ export default function TabLayout() {
         options={{
           title: "Counterparties",
           tabBarIcon: ({ color }) => <Users size={24} color={color} />,
+          href: visibleTabs.includes('counterparties') ? '/counterparties' : null,
         }}
       />
       <Tabs.Screen
@@ -47,6 +73,7 @@ export default function TabLayout() {
         options={{
           title: "Documents",
           tabBarIcon: ({ color }) => <FileText size={24} color={color} />,
+          href: visibleTabs.includes('documents') ? '/documents' : null,
         }}
       />
       <Tabs.Screen
@@ -54,6 +81,15 @@ export default function TabLayout() {
         options={{
           title: "Market",
           tabBarIcon: ({ color }) => <Building size={24} color={color} />,
+          href: visibleTabs.includes('market') ? '/market' : null,
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          title: "Wallet",
+          tabBarIcon: ({ color }) => <Wallet size={24} color={color} />,
+          href: visibleTabs.includes('wallet') ? '/wallet' : null,
         }}
       />
       <Tabs.Screen
@@ -61,6 +97,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
+          href: visibleTabs.includes('settings') ? '/settings' : null,
         }}
       />
     </Tabs>

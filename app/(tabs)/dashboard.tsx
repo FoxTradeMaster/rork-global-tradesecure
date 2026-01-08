@@ -22,7 +22,24 @@ export default function DashboardScreen() {
     return null;
   }
 
-  const recentTrades = trades.slice(0, 3);
+  const getRoleSpecificTrades = () => {
+    switch (currentUser.role) {
+      case 'compliance_officer':
+        return trades.filter(t => t.status === 'compliance_check' || t.alerts.some(a => !a.resolved));
+      case 'risk_manager':
+        return trades.filter(t => t.status === 'risk_approval' || t.riskLevel !== 'green');
+      case 'legal_reviewer':
+        return trades.filter(t => t.status === 'legal_review' || t.documents.some(d => !d.verified));
+      case 'senior_management':
+        return trades.filter(t => ['active', 'in_transit', 'delivered'].includes(t.status));
+      case 'trade_originator':
+      default:
+        return trades;
+    }
+  };
+
+  const roleSpecificTrades = getRoleSpecificTrades();
+  const recentTrades = roleSpecificTrades.slice(0, 3);
 
   return (
     <View style={styles.container}>
@@ -42,78 +59,228 @@ export default function DashboardScreen() {
               >
                 <HelpCircle size={24} color="#64748B" />
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.addButton}
-                onPress={() => router.push('/trade/create')}
-              >
-                <Plus size={24} color="#FFFFFF" />
-              </TouchableOpacity>
+              {(currentUser.role === 'trade_originator' || currentUser.role === 'senior_management') && (
+                <TouchableOpacity 
+                  style={styles.addButton}
+                  onPress={() => router.push('/trade/create')}
+                >
+                  <Plus size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
           <View style={styles.metricsGrid}>
-            <View style={[styles.metricCard, styles.primaryMetric]}>
-              <View style={styles.metricIconContainer}>
-                <DollarSign size={24} color="#10B981" />
-              </View>
-              <Text style={styles.metricValue}>
-                ${(metrics.totalValue / 1000000).toFixed(1)}M
-              </Text>
-              <Text style={styles.metricLabel}>Total Portfolio Value</Text>
-            </View>
+            {currentUser.role === 'trade_originator' && (
+              <>
+                <View style={[styles.metricCard, styles.primaryMetric]}>
+                  <View style={styles.metricIconContainer}>
+                    <DollarSign size={24} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    ${(metrics.totalValue / 1000000).toFixed(1)}M
+                  </Text>
+                  <Text style={styles.metricLabel}>Total Portfolio Value</Text>
+                </View>
+                <View style={[styles.metricCard, styles.commissionMetric]}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#8B5CF620' }]}>
+                    <DollarSign size={20} color="#8B5CF6" />
+                  </View>
+                  <Text style={styles.metricValue}>${(metrics.totalCommissionEarned / 1000).toFixed(0)}K</Text>
+                  <Text style={styles.metricLabel}>Commission Earned</Text>
+                </View>
+                <View style={[styles.metricCard, styles.commissionMetric]}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                    <Clock size={20} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>${(metrics.potentialCommission / 1000).toFixed(0)}K</Text>
+                  <Text style={styles.metricLabel}>Potential Commission</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#3B82F620' }]}>
+                    <TrendingUp size={20} color="#3B82F6" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.activeTrades}</Text>
+                  <Text style={styles.metricLabel}>Active Trades</Text>
+                </View>
+              </>
+            )}
 
-            <View style={[styles.metricCard, styles.commissionMetric]}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#8B5CF620' }]}>
-                <DollarSign size={20} color="#8B5CF6" />
-              </View>
-              <Text style={styles.metricValue}>${(metrics.totalCommissionEarned / 1000).toFixed(0)}K</Text>
-              <Text style={styles.metricLabel}>Commission Earned</Text>
-            </View>
+            {currentUser.role === 'compliance_officer' && (
+              <>
+                <View style={[styles.metricCard, styles.primaryMetric]}>
+                  <View style={styles.metricIconContainer}>
+                    <AlertCircle size={24} color="#EF4444" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.status === 'compliance_check').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Compliance Reviews Needed</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#EF444420' }]}>
+                    <AlertCircle size={20} color="#EF4444" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.criticalAlerts}</Text>
+                  <Text style={styles.metricLabel}>Critical Alerts</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#10B98120' }]}>
+                    <Users size={20} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.approvedCounterparties}</Text>
+                  <Text style={styles.metricLabel}>Approved Counterparties</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                    <Clock size={20} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.alerts.some(a => !a.resolved)).length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Unresolved Issues</Text>
+                </View>
+              </>
+            )}
 
-            <View style={[styles.metricCard, styles.commissionMetric]}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
-                <Clock size={20} color="#F59E0B" />
-              </View>
-              <Text style={styles.metricValue}>${(metrics.potentialCommission / 1000).toFixed(0)}K</Text>
-              <Text style={styles.metricLabel}>Potential Commission</Text>
-            </View>
+            {currentUser.role === 'risk_manager' && (
+              <>
+                <View style={[styles.metricCard, styles.primaryMetric]}>
+                  <View style={styles.metricIconContainer}>
+                    <AlertCircle size={24} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.status === 'risk_approval').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Risk Approvals Needed</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#EF444420' }]}>
+                    <AlertCircle size={20} color="#EF4444" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.riskLevel === 'red').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>High Risk Trades</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                    <AlertCircle size={20} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.riskLevel === 'amber').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Medium Risk Trades</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#10B98120' }]}>
+                    <TrendingUp size={20} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.riskLevel === 'green').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Low Risk Trades</Text>
+                </View>
+              </>
+            )}
 
-            <View style={styles.metricCard}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#3B82F620' }]}>
-                <TrendingUp size={20} color="#3B82F6" />
-              </View>
-              <Text style={styles.metricValue}>{metrics.activeTrades}</Text>
-              <Text style={styles.metricLabel}>Active Trades</Text>
-            </View>
+            {currentUser.role === 'legal_reviewer' && (
+              <>
+                <View style={[styles.metricCard, styles.primaryMetric]}>
+                  <View style={styles.metricIconContainer}>
+                    <AlertCircle size={24} color="#8B5CF6" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.status === 'legal_review').length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Legal Reviews Needed</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                    <Clock size={20} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.documents.length === 0 || t.documents.some(d => !d.verified)).length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Pending Documents</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#10B98120' }]}>
+                    <TrendingUp size={20} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    {trades.filter(t => t.documents.every(d => d.verified)).length}
+                  </Text>
+                  <Text style={styles.metricLabel}>Verified Contracts</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#3B82F620' }]}>
+                    <TrendingUp size={20} color="#3B82F6" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.activeTrades}</Text>
+                  <Text style={styles.metricLabel}>Active Trades</Text>
+                </View>
+              </>
+            )}
 
-            <View style={styles.metricCard}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
-                <Clock size={20} color="#F59E0B" />
-              </View>
-              <Text style={styles.metricValue}>{metrics.pendingApprovals}</Text>
-              <Text style={styles.metricLabel}>Pending Approvals</Text>
-            </View>
-
-            <View style={styles.metricCard}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#EF444420' }]}>
-                <AlertCircle size={20} color="#EF4444" />
-              </View>
-              <Text style={styles.metricValue}>{metrics.criticalAlerts}</Text>
-              <Text style={styles.metricLabel}>Critical Alerts</Text>
-            </View>
-
-            <View style={styles.metricCard}>
-              <View style={[styles.metricIconContainer, { backgroundColor: '#8B5CF620' }]}>
-                <Users size={20} color="#8B5CF6" />
-              </View>
-              <Text style={styles.metricValue}>{metrics.approvedCounterparties}</Text>
-              <Text style={styles.metricLabel}>Approved Counterparties</Text>
-            </View>
+            {currentUser.role === 'senior_management' && (
+              <>
+                <View style={[styles.metricCard, styles.primaryMetric]}>
+                  <View style={styles.metricIconContainer}>
+                    <DollarSign size={24} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>
+                    ${(metrics.totalValue / 1000000).toFixed(1)}M
+                  </Text>
+                  <Text style={styles.metricLabel}>Total Portfolio Value</Text>
+                </View>
+                <View style={[styles.metricCard, styles.commissionMetric]}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#8B5CF620' }]}>
+                    <DollarSign size={20} color="#8B5CF6" />
+                  </View>
+                  <Text style={styles.metricValue}>${(metrics.totalCommissionEarned / 1000).toFixed(0)}K</Text>
+                  <Text style={styles.metricLabel}>Total Commission</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#3B82F620' }]}>
+                    <TrendingUp size={20} color="#3B82F6" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.activeTrades}</Text>
+                  <Text style={styles.metricLabel}>Active Trades</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#F59E0B20' }]}>
+                    <Clock size={20} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.pendingApprovals}</Text>
+                  <Text style={styles.metricLabel}>Pending Approvals</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#EF444420' }]}>
+                    <AlertCircle size={20} color="#EF4444" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.criticalAlerts}</Text>
+                  <Text style={styles.metricLabel}>Critical Alerts</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <View style={[styles.metricIconContainer, { backgroundColor: '#10B98120' }]}>
+                    <Users size={20} color="#10B981" />
+                  </View>
+                  <Text style={styles.metricValue}>{metrics.approvedCounterparties}</Text>
+                  <Text style={styles.metricLabel}>Counterparties</Text>
+                </View>
+              </>
+            )}
           </View>
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Trade Pipeline</Text>
+              <Text style={styles.sectionTitle}>
+                {currentUser.role === 'compliance_officer' ? 'Compliance Pipeline' :
+                 currentUser.role === 'risk_manager' ? 'Risk Assessment Pipeline' :
+                 currentUser.role === 'legal_reviewer' ? 'Legal Review Pipeline' :
+                 'Trade Pipeline'}
+              </Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/trades')}>
                 <Text style={styles.sectionLink}>View All</Text>
               </TouchableOpacity>
@@ -141,7 +308,12 @@ export default function DashboardScreen() {
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Trades</Text>
+              <Text style={styles.sectionTitle}>
+                {currentUser.role === 'compliance_officer' ? 'Trades Requiring Compliance' :
+                 currentUser.role === 'risk_manager' ? 'Trades Requiring Risk Review' :
+                 currentUser.role === 'legal_reviewer' ? 'Trades Requiring Legal Review' :
+                 'Recent Trades'}
+              </Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/trades')}>
                 <Text style={styles.sectionLink}>View All</Text>
               </TouchableOpacity>
