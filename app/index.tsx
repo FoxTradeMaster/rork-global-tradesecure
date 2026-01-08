@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Briefcase, Shield, AlertTriangle, Scale, TrendingUp } from 'lucide-react-native';
 import { useTrading } from '@/contexts/TradingContext';
 import { User } from '@/types';
+import { useEffect } from 'react';
 
 const ROLES = [
   {
@@ -45,7 +46,31 @@ const ROLES = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { setUser } = useTrading();
+  const { setUser, currentUser, isLoading } = useTrading();
+
+  useEffect(() => {
+    if (!isLoading && currentUser) {
+      console.log('[WelcomeScreen] User already exists, navigating to dashboard');
+      router.replace('/(tabs)/dashboard');
+    }
+  }, [isLoading, currentUser, router]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Image
+          source={require('@/assets/images/icon.png')}
+          style={{ width: 120, height: 120 }}
+          resizeMode="contain"
+        />
+        <Text style={[styles.title, { marginTop: 24 }]}>Fox Trade Master™</Text>
+      </View>
+    );
+  }
+
+  if (currentUser) {
+    return null;
+  }
 
   const handleRoleSelect = async (roleId: string) => {
     const user: User = {
