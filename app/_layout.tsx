@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
+import { trpc, trpcClient } from "@/lib/trpc";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -105,16 +106,18 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SubscriptionProvider>
-        <TradingProvider>
-          <MarketProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <RootLayoutNav />
-            </GestureHandlerRootView>
-          </MarketProvider>
-        </TradingProvider>
-      </SubscriptionProvider>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <SubscriptionProvider>
+          <TradingProvider>
+            <MarketProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <RootLayoutNav />
+              </GestureHandlerRootView>
+            </MarketProvider>
+          </TradingProvider>
+        </SubscriptionProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
