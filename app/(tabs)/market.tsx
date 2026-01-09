@@ -239,8 +239,8 @@ export default function MarketDirectoryScreen() {
           </View>
           <Text style={styles.subtitle}>
             {selectedCompanies.length > 0 
-              ? `${selectedCompanies.length} selected • Tap companies to select`
-              : 'Legitimate counterparties and licensed brokers'
+              ? `${selectedCompanies.length} selected • Long press more to select`
+              : 'Long press companies to select for email outreach'
             }
           </Text>
         </View>
