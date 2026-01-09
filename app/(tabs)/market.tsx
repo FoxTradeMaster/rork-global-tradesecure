@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
 import { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
@@ -752,10 +752,23 @@ export default function MarketDirectoryScreen() {
                         <Globe size={18} color="#6B7280" />
                         <Text style={styles.detailLabel}>Website</Text>
                       </View>
-                      <View style={styles.websiteLink}>
+                      <TouchableOpacity 
+                        style={styles.websiteLink}
+                        onPress={() => {
+                          const url = selectedParticipant.website;
+                          if (url) {
+                            const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
+                            Linking.openURL(formattedUrl).catch(err => {
+                              console.error('Failed to open URL:', err);
+                              Alert.alert('Error', 'Could not open website');
+                            });
+                          }
+                        }}
+                        activeOpacity={0.7}
+                      >
                         <Text style={styles.websiteText}>{selectedParticipant.website}</Text>
                         <ExternalLink size={16} color="#3B82F6" />
-                      </View>
+                      </TouchableOpacity>
                     </View>
                   )}
 
