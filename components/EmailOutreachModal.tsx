@@ -151,7 +151,9 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                     <Text style={styles.recipientLocation}>{company.headquarters}</Text>
                   </View>
                   <View style={styles.emailInputContainer}>
-                    <Mail size={16} color="#6B7280" style={styles.emailIcon} />
+                    <View style={styles.emailIcon}>
+                      <Mail size={16} color="#6B7280" />
+                    </View>
                     <TextInput
                       style={styles.emailInput}
                       placeholder="Enter email address"
