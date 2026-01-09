@@ -860,30 +860,54 @@ When viewing the Market Directory, you can filter companies by their business ty
 The Email Outreach Tool allows you to compose and send professional emails to multiple companies directly from the platform.
 
 #### How to Use Email Outreach
+
+**Step 1: Select Companies**
 1. Navigate to the **Market** tab
-2. Tap the **Email icon** in the top right corner
-3. The Email Outreach modal opens
+2. **Long press** on any company card to select it for email outreach
+3. Continue long pressing additional companies to select multiple recipients
+4. Selected companies show a blue checkmark and highlighted border
+5. The header displays the number of selected companies
+
+**Step 2: Open Email Outreach Modal**
+1. Tap the **3 dots (⋮)** icon in the top right corner
+2. Select **"Email Outreach"** from the menu
+3. The Email Outreach modal opens showing all selected companies
+
+**Step 3: Add Recipient Email Addresses**
+1. In the "Recipients" section, you'll see all selected companies
+2. For each company, **enter their email address** in the input field provided
+3. You can send to all selected companies or just those you add email addresses for
+4. Email addresses are required - companies without email addresses will be skipped
 
 #### Composing Your Email
-1. **Select Companies**: Choose one or multiple companies from your search results
-   - Use checkboxes to select multiple recipients
-   - Selected companies appear in the recipient list
+1. **Add Your Information**:
+   - Enter your name in the "Your Name" field
+   - Enter your email address in the "Your Email" field
 
 2. **Choose Template**: Select from pre-built templates:
-   - **RFQ (Request for Quote)** - Inquire about pricing and availability
+   - **Request for Quote** - Inquire about pricing and availability
    - **Partnership Inquiry** - Express interest in business partnership
-   - **Market Information** - Request general market information
-   - **Custom** - Write your own email from scratch
+   - **General Inquiry** - Request general market information
+   - **Follow Up** - Follow up on previous conversations
 
 3. **Customize Content**:
-   - Subject line
-   - Email body with template variables
-   - Your contact information
-   - Company signature
+   - Edit the subject line (uses template variables)
+   - Customize the email body with template variables
+   - Add your personal message
+   
+4. **Template Variables**: The following variables are automatically replaced:
+   - `{recipient}` - Company name
+   - `{company}` - Company name
+   - `{commodity}` - Primary commodity they trade
+   - `{sender}` - Your name
+   - `{quantity}` - Placeholder for quantity details
+   - `{delivery}` - Placeholder for delivery terms
 
-4. **Review Recipients**: Verify all selected companies before sending
+5. **Review Recipients**: Verify all companies have email addresses entered
 
-5. **Send**: Tap "Send Email" to dispatch to all selected companies
+6. **Send**: Tap "Send to X Companies" to dispatch emails
+   - Only companies with email addresses entered will receive the email
+   - A confirmation message shows how many emails were sent
 
 #### Email Templates
 
@@ -919,12 +943,18 @@ Best regards,
 [Your details]
 ```
 
+#### Important Notes
+- **Email addresses must be entered manually** for each recipient in the modal
+- Companies without email addresses will be skipped when sending
+- The "Send" button shows how many companies will receive the email
+- Your name and email are required before sending
+
 #### Email Features
 - Send to multiple companies simultaneously
 - Professional templates for different scenarios
-- Automatic company name insertion
-- Track sent emails (in your email client)
-- Include your company branding and signature
+- Automatic variable replacement (company names, commodities, etc.)
+- Template variables for personalization
+- Bulk email capability through SendGrid integration
 
 ---
 
