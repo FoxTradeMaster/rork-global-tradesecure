@@ -104,6 +104,7 @@ export default function WelcomeScreen() {
           email,
           password,
           options: {
+            emailRedirectTo: undefined,
             data: {
               name,
               role: selectedRole,
@@ -114,15 +115,37 @@ export default function WelcomeScreen() {
         if (error) throw error;
 
         if (data.user) {
-          const user: User = {
-            id: data.user.id,
-            name: name,
-            role: selectedRole as any,
-            email: email,
-          };
-          await setUser(user);
-          setShowAuthModal(false);
-          router.push('/(tabs)/dashboard');
+          if (data.user.identities && data.user.identities.length === 0) {
+            Alert.alert('Account Already Exists', 'An account with this email already exists. Please sign in instead.');
+            setAuthMode('login');
+            return;
+          }
+
+          if (data.session) {
+            const user: User = {
+              id: data.user.id,
+              name: name,
+              role: selectedRole as any,
+              email: email,
+            };
+            await setUser(user);
+            setShowAuthModal(false);
+            router.push('/(tabs)/dashboard');
+          } else {
+            Alert.alert(
+              'Verify Your Email',
+              'Please check your email and click the verification link to complete signup. After verification, you can sign in.',
+              [
+                {
+                  text: 'OK',
+                  onPress: () => {
+                    setAuthMode('login');
+                    setPassword('');
+                  }
+                }
+              ]
+            );
+          }
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -130,9 +153,19 @@ export default function WelcomeScreen() {
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            Alert.alert(
+              'Email Not Verified',
+              'Please check your email and click the verification link before signing in. Check your spam folder if you don\'t see it.',
+              [{ text: 'OK' }]
+            );
+            return;
+          }
+          throw error;
+        }
 
-        if (data.user) {
+        if (data.user && data.session) {
           const user: User = {
             id: data.user.id,
             name: data.user.user_metadata?.name || 'Trade User',
@@ -146,7 +179,16 @@ export default function WelcomeScreen() {
       }
     } catch (error: any) {
       console.error('[Auth] Error:', error);
-      Alert.alert('Authentication Error', error.message || 'Failed to authenticate');
+      
+      let errorMessage = error.message || 'Failed to authenticate';
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        if (authMode === 'login') {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again. If you just signed up, make sure to verify your email first.';
+        }
+      }
+      
+      Alert.alert('Authentication Error', errorMessage);
     } finally {
       setAuthLoading(false);
     }
