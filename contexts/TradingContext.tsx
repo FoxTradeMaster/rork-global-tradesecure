@@ -183,6 +183,30 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.log('[TradingContext] Starting to load data...');
       
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          console.log('[TradingContext] Found existing Supabase session');
+          const user: User = {
+            id: session.user.id,
+            name: session.user.user_metadata?.name || 'Trade User',
+            role: session.user.user_metadata?.role || 'trade_originator',
+            email: session.user.email || '',
+          };
+          setCurrentUser(user);
+          await AsyncStorage.setItem('current_user', JSON.stringify(user));
+          console.log('[TradingContext] Restored user from session:', user.email);
+        } else {
+          const storedUser = await AsyncStorage.getItem('current_user');
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            setCurrentUser(user);
+            console.log('[TradingContext] Restored user from storage:', user.email);
+          } else {
+            console.log('[TradingContext] No existing session or stored user');
+          }
+        }
+
         const { data: counterpartiesData, error: counterpartiesError } = await supabase
           .from('counterparties')
           .select('*')
@@ -252,13 +276,6 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           console.log('[TradingContext] No trades in DB, using mock data');
         }
 
-        try {
-          await AsyncStorage.removeItem('current_user');
-          console.log('[TradingContext] Cleared stored user data');
-        } catch (storageError) {
-          console.log('[TradingContext] Storage error:', storageError);
-        }
-
         console.log('[TradingContext] Finished loading all data');
       } catch (error) {
         console.error('[TradingContext] Error loading data:', error);
@@ -281,6 +298,8 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const clearUser = async () => {
     setCurrentUser(null);
     await AsyncStorage.removeItem('current_user');
+    await supabase.auth.signOut();
+    console.log('[TradingContext] User logged out and session cleared');
   };
 
   const addCounterparties = async (newCounterparties: Counterparty[]) => {
