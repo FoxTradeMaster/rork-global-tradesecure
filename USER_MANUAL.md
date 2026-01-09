@@ -711,11 +711,13 @@ The app can generate and send standard commodity trading documents:
 - **ICPO** (Irrevocable Corporate Purchase Order)
 - **LOI** (Letter of Intent)
 - **POF** (Proof of Funds)
+- **NCNDA** (Non-Circumvention Non-Disclosure Agreement)
+- **IMFPA** (IMFPA Master Fee Protection Agreement)
 
 #### How to Send Documents
 1. Tap the **Send icon** (top right of Documents screen)
 2. Select the trade
-3. Choose document type (CIS, SCO, ICPO, LOI, or POF)
+3. Choose document type (CIS, SCO, ICPO, LOI, POF, NCNDA, or IMFPA)
 4. Enter recipient email address
 5. Review trade details
 6. Tap "Send Document"
@@ -746,6 +748,8 @@ The app can generate and send standard commodity trading documents:
 #### Trade Documents
 - **LOI** - Letter of Intent expressing interest to trade
 - **POF** - Proof of Funds showing financial capability
+- **NCNDA** - Non-Circumvention Non-Disclosure Agreement protecting parties from circumvention and ensuring confidentiality
+- **IMFPA** - IMFPA Master Fee Protection Agreement protecting intermediary fees and commissions in multi-party transactions
 - **MSA** - Master Service Agreement (framework contract)
 - **SPA** - Sales Purchase Agreement (specific transaction)
 - **LC** - Letter of Credit from bank
