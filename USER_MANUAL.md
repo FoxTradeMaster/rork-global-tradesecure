@@ -1777,6 +1777,20 @@ At any approval stage, authorized users can reject a trade:
 - Shows financial capability
 - Typically from bank or financial institution
 
+#### Non-Circumvention Non-Disclosure Agreement (NCNDA)
+- Protects parties from being circumvented in multi-party transactions
+- Ensures confidentiality of business information
+- Prevents direct contact between principals bypassing intermediaries
+- Standard protection agreement in commodity trading
+- Signed by all parties involved in transaction
+
+#### IMFPA (Master Fee Protection Agreement)
+- Protects intermediary fees and commissions
+- Ensures all parties receive agreed compensation
+- Used in multi-party commodity transactions
+- Legally binding fee protection structure
+- Prevents fee disputes and ensures transparent payment distribution
+
 ### Contract Documents
 
 #### Master Service Agreement (MSA)
