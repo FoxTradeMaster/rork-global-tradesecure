@@ -706,18 +706,27 @@ Top of screen shows:
 The app can generate and send standard commodity trading documents:
 
 #### Available Document Types
-- **CIS** (Commercial Invoice Specification)
+- **CIS** (Corporate Information Sheet)
 - **SCO** (Soft Corporate Offer)
+- **FCO** (Full Corporate Offer)
 - **ICPO** (Irrevocable Corporate Purchase Order)
 - **LOI** (Letter of Intent)
 - **POF** (Proof of Funds)
+- **RWA** (Ready, Willing, and Able Letter)
+- **BCL** (Bank Comfort Letter)
 - **NCNDA** (Non-Circumvention Non-Disclosure Agreement)
 - **IMFPA** (Irrevocable Master Fee Protection Agreement)
+- **TSA** (Transaction Support Agreement)
+- **SPA** (Sales Purchase Agreement)
+- **ASWP** (Assignment of Sale with Product)
+- **POP** (2% Performance Bond)
+- **BOL** (Bill of Lading)
+- **COO** (Certificate of Origin)
 
 #### How to Send Documents
 1. Tap the **Send icon** (top right of Documents screen)
 2. Select the trade
-3. Choose document type (CIS, SCO, ICPO, LOI, POF, NCNDA, or IMFPA)
+3. Choose document type (CIS, SCO, FCO, ICPO, LOI, POF, RWA, BCL, NCNDA, IMFPA, TSA, SPA, ASWP, POP, BOL, or COO)
 4. Enter recipient email address
 5. Review trade details
 6. Tap "Send Document"
@@ -1753,6 +1762,12 @@ At any approval stage, authorized users can reject a trade:
 
 ### Pre-Trade Documents
 
+#### Corporate Information Sheet (CIS)
+- Company details and credentials
+- Business registration information
+- Contact information and representatives
+- Foundation document for trade relationships
+
 #### Letter of Intent (LOI)
 - Buyer's preliminary interest in purchasing
 - Non-binding expression of intent
@@ -1765,6 +1780,12 @@ At any approval stage, authorized users can reject a trade:
 - Subject to final negotiation
 - Not legally binding
 
+#### Full Corporate Offer (FCO)
+- Seller's complete binding offer
+- Detailed terms, specifications, and pricing
+- Legally binding commercial offer
+- More comprehensive than SCO
+
 #### Irrevocable Corporate Purchase Order (ICPO)
 - Buyer's binding commitment to purchase
 - Specific quantities, prices, and terms
@@ -1776,6 +1797,18 @@ At any approval stage, authorized users can reject a trade:
 - Required for large transactions
 - Shows financial capability
 - Typically from bank or financial institution
+
+#### Ready, Willing, and Able Letter (RWA)
+- Confirms party's readiness to proceed
+- Demonstrates willingness to transact
+- Shows ability to fulfill obligations
+- Often required before negotiations advance
+
+#### Bank Comfort Letter (BCL)
+- Bank confirmation of client's financial standing
+- Indicates bank's support for the transaction
+- Provides financial assurance to counterparty
+- Not a guarantee but shows creditworthiness
 
 #### Non-Circumvention Non-Disclosure Agreement (NCNDA)
 - Protects parties from being circumvented in multi-party transactions
@@ -1794,6 +1827,12 @@ At any approval stage, authorized users can reject a trade:
 
 ### Contract Documents
 
+#### Transaction Support Agreement (TSA)
+- Supporting agreement for complex transactions
+- Defines roles and responsibilities of parties
+- Coordinates multi-party transactions
+- Ensures smooth transaction execution
+
 #### Master Service Agreement (MSA)
 - Framework agreement for ongoing relationship
 - Sets general terms and conditions
@@ -1807,6 +1846,12 @@ At any approval stage, authorized users can reject a trade:
 - Payment terms and conditions
 - Legally binding contract
 
+#### Assignment of Sale with Product (ASWP)
+- Transfer of sales rights and obligations
+- Assigns product delivery to third party
+- Common in commodity trading chains
+- Legally transfers contractual position
+
 ### Financial Documents
 
 #### Letter of Credit (LC)
@@ -1815,6 +1860,13 @@ At any approval stage, authorized users can reject a trade:
 - Payment upon presentation of documents
 - Reduces payment risk for seller
 - Types: Irrevocable, Confirmed, Transferable
+
+#### 2% Performance Bond (POP)
+- Performance guarantee of 2% of contract value
+- Ensures seller fulfills contractual obligations
+- Provides buyer security against non-performance
+- Typically issued by bank or insurance company
+- Released upon successful delivery
 
 #### Bank Reference
 - Letter from bank confirming relationship
