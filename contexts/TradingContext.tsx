@@ -197,14 +197,9 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           await AsyncStorage.setItem('current_user', JSON.stringify(user));
           console.log('[TradingContext] Restored user from session:', user.email);
         } else {
-          const storedUser = await AsyncStorage.getItem('current_user');
-          if (storedUser) {
-            const user = JSON.parse(storedUser);
-            setCurrentUser(user);
-            console.log('[TradingContext] Restored user from storage:', user.email);
-          } else {
-            console.log('[TradingContext] No existing session or stored user');
-          }
+          console.log('[TradingContext] No valid session found, clearing stored user');
+          await AsyncStorage.removeItem('current_user');
+          setCurrentUser(null);
         }
 
         const { data: counterpartiesData, error: counterpartiesError } = await supabase
