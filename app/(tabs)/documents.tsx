@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA' | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [showCompanyInfoForm, setShowCompanyInfoForm] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
@@ -110,7 +110,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA') => {
+  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP') => {
     try {
       console.log('[Documents] Generating blank', docType, 'template');
       
@@ -120,11 +120,18 @@ export default function DocumentsScreen() {
           const documentNames: Record<string, string> = {
             'CIS': 'Corporate_Information_Sheet',
             'SCO': 'Soft_Corporate_Offer',
+            'FCO': 'Full_Corporate_Offer',
             'ICPO': 'Irrevocable_Corporate_Purchase_Order',
             'LOI': 'Letter_of_Intent',
             'POF': 'Proof_of_Funds',
+            'RWA': 'Ready_Willing_and_Able',
+            'BCL': 'Bank_Comfort_Letter',
             'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
             'IMFPA': 'Irrevocable_Master_Fee_Protection_Agreement',
+            'TSA': 'Transaction_Support_Agreement',
+            'SPA': 'Sales_and_Purchase_Agreement',
+            'ASWP': 'Assignment_of_Sale_with_Product',
+            'POP': '2_Percent_Performance_Bond',
           };
           const filename = `${documentNames[docType]}_Blank_Template.docx`;
           downloadDocx(blob, filename);
@@ -146,7 +153,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA') => {
+  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP') => {
     setSelectedTrade(trade);
     setSelectedDocType(docType);
     setRecipientEmail('');
@@ -567,18 +574,25 @@ export default function DocumentsScreen() {
               <Text style={styles.templatesSectionSubtitle}>Download blank templates to fill out manually</Text>
               <View style={styles.templatesGrid}>
                 {[
+                  { type: 'CIS', name: 'Corporate Info Sheet', desc: 'Company details' },
                   { type: 'LOI', name: 'Letter of Intent', desc: 'Express purchase intent' },
                   { type: 'SCO', name: 'Soft Corporate Offer', desc: 'Non-binding offer' },
-                  { type: 'ICPO', name: 'Irrevocable Corporate PO', desc: 'Binding purchase order' },
+                  { type: 'FCO', name: 'Full Corporate Offer', desc: 'Binding commercial offer' },
+                  { type: 'ICPO', name: 'ICPO', desc: 'Binding purchase order' },
                   { type: 'POF', name: 'Proof of Funds', desc: 'Bank fund certification' },
+                  { type: 'RWA', name: 'RWA Letter', desc: 'Ready willing able' },
+                  { type: 'BCL', name: 'Bank Comfort Letter', desc: 'Bank financial support' },
                   { type: 'NCNDA', name: 'NCNDA', desc: 'Non-disclosure agreement' },
-                  { type: 'IMFPA', name: 'IMFPA', desc: 'Irrevocable fee protection' },
-                  { type: 'CIS', name: 'Corporate Info Sheet', desc: 'Company details' },
+                  { type: 'IMFPA', name: 'IMFPA', desc: 'Fee protection agreement' },
+                  { type: 'TSA', name: 'TSA', desc: 'Transaction support' },
+                  { type: 'SPA', name: 'SPA', desc: 'Sales purchase agreement' },
+                  { type: 'ASWP', name: 'ASWP', desc: 'Assignment of sale' },
+                  { type: 'POP', name: '2% POP', desc: 'Performance bond' },
                 ].map(template => (
                   <TouchableOpacity
                     key={template.type}
                     style={styles.templateCard}
-                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA')}
+                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP')}
                     activeOpacity={0.7}
                   >
                     <View style={styles.templateIconContainer}>
@@ -627,11 +641,11 @@ export default function DocumentsScreen() {
                       <Text style={styles.tradeItemSubtitle}>{trade.counterpartyName}</Text>
                     </View>
                     <View style={styles.docActions}>
-                      {['CIS', 'SCO', 'ICPO', 'LOI', 'POF', 'NCNDA', 'IMFPA'].map(docType => (
+                      {['CIS', 'SCO', 'FCO', 'ICPO', 'LOI', 'POF', 'RWA', 'BCL', 'NCNDA', 'IMFPA', 'TSA', 'SPA', 'ASWP', 'POP'].map(docType => (
                         <TouchableOpacity
                           key={docType}
                           style={styles.docActionButton}
-                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA')}
+                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP')}
                         >
                           <Send size={16} color="#3B82F6" />
                           <Text style={styles.docActionText}>{docType}</Text>

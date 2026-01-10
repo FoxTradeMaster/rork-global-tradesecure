@@ -8,7 +8,7 @@ export interface EmailAttachment {
 export interface SendDocumentParams {
   to: string;
   subject: string;
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'SPA' | 'MSA' | 'IMFPA';
+  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP';
   tradeDetails: {
     commodity: string;
     quantity: number;
@@ -68,13 +68,18 @@ function generateEmailContent(params: SendDocumentParams): string {
   const documentDescriptions = {
     CIS: 'Corporate Information Sheet',
     SCO: 'Soft Corporate Offer',
+    FCO: 'Full Corporate Offer',
     ICPO: 'Irrevocable Corporate Purchase Order',
     LOI: 'Letter of Intent',
     POF: 'Proof of Funds',
+    RWA: 'Ready Willing and Able Letter',
+    BCL: 'Bank Comfort Letter',
     NCNDA: 'Non-Circumvention and Non-Disclosure Agreement',
-    SPA: 'Sales and Purchase Agreement',
-    MSA: 'Master Sales Agreement',
     IMFPA: 'Irrevocable Master Fee Protection Agreement',
+    TSA: 'Transaction Support Agreement',
+    SPA: 'Sales and Purchase Agreement',
+    ASWP: 'Assignment of Sale with Product',
+    POP: '2% Performance Bond',
   };
 
   return `
@@ -145,7 +150,7 @@ function generateEmailContent(params: SendDocumentParams): string {
 }
 
 export function generateDocumentContent(
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA',
+  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP',
   tradeDetails: SendDocumentParams['tradeDetails'] | null,
   additionalInfo?: Record<string, any>
 ): string {
@@ -160,6 +165,14 @@ export function generateDocumentContent(
       return generateCIS(tradeDetails, date, additionalInfo);
     case 'SCO':
       return generateSCO(tradeDetails, date, additionalInfo);
+    case 'FCO':
+    case 'RWA':
+    case 'BCL':
+    case 'TSA':
+    case 'SPA':
+    case 'ASWP':
+    case 'POP':
+      return generatePlaceholderHTML(documentType, tradeDetails, date);
     case 'ICPO':
       return generateICPO(tradeDetails, date, additionalInfo);
     case 'LOI':
@@ -2743,7 +2756,82 @@ function generateMFPA(
   `.trim();
 }
 
-export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA'): string {
+function generatePlaceholderHTML(
+  documentType: string,
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string
+): string {
+  const docNames: Record<string, string> = {
+    'FCO': 'Full Corporate Offer',
+    'RWA': 'Ready Willing and Able Letter',
+    'BCL': 'Bank Comfort Letter',
+    'TSA': 'Transaction Support Agreement',
+    'SPA': 'Sales and Purchase Agreement',
+    'ASWP': 'Assignment of Sale with Product',
+    'POP': '2% Performance Bond',
+  };
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #333;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .title {
+      font-size: 24pt;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .info-box {
+      background: #f5f5f5;
+      padding: 20px;
+      border-left: 4px solid #0284C7;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">${docNames[documentType] || documentType}</div>
+    <div>(${documentType})</div>
+  </div>
+  
+  <div class="info-box">
+    <p><strong>Document Date:</strong> ${date}</p>
+    <p><strong>Reference:</strong> ${documentType}-${Date.now()}</p>
+  </div>
+  
+  <p>This ${docNames[documentType] || documentType} document template is currently being prepared.</p>
+  
+  <p>Please contact our support team for assistance with this document type.</p>
+  
+  ${tradeDetails ? `
+  <div class="info-box">
+    <h3>Trade Details:</h3>
+    <p><strong>Commodity:</strong> ${tradeDetails.commodity.replace(/_/g, ' ').toUpperCase()}</p>
+    <p><strong>Quantity:</strong> ${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}</p>
+    <p><strong>Price:</strong> ${tradeDetails.pricePerUnit.toLocaleString()} per ${tradeDetails.unit}</p>
+    <p><strong>INCOTERM:</strong> ${tradeDetails.incoterm}</p>
+  </div>
+  ` : ''}
+</body>
+</html>
+  `.trim();
+}
+
+export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP'): string {
   return generateDocumentContent(documentType, null, {});
 }
 

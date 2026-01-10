@@ -9,7 +9,7 @@ import {
   Packer
 } from 'docx';
 
-type DocumentType = 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA';
+type DocumentType = 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP';
 
 const MIDNIGHT_BLUE = "1E3A5F";
 const LIGHT_GRAY = "F5F5F5";
@@ -1565,6 +1565,25 @@ function generateIMFPADocument(): Document {
   });
 }
 
+function generatePlaceholderDocument(title: string, subtitle: string): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(title, subtitle),
+        new Paragraph({
+          text: "This document template is under construction.",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: "Please contact support for more information.",
+          spacing: { after: 300 },
+        }),
+      ],
+    }],
+  });
+}
+
 export async function generateBlankDocx(documentType: DocumentType): Promise<Blob> {
   let doc: Document;
   
@@ -1575,6 +1594,9 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
     case 'SCO':
       doc = generateSCODocument();
       break;
+    case 'FCO':
+      doc = generatePlaceholderDocument('FULL CORPORATE OFFER', '(FCO) - Binding Commercial Offer');
+      break;
     case 'ICPO':
       doc = generateICPODocument();
       break;
@@ -1584,11 +1606,29 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
     case 'POF':
       doc = generatePOFDocument();
       break;
+    case 'RWA':
+      doc = generatePlaceholderDocument('READY WILLING AND ABLE', '(RWA) - Bank Confirmation Letter');
+      break;
+    case 'BCL':
+      doc = generatePlaceholderDocument('BANK COMFORT LETTER', '(BCL) - Bank Financial Support Letter');
+      break;
     case 'NCNDA':
       doc = generateNCNDADocument();
       break;
     case 'IMFPA':
       doc = generateIMFPADocument();
+      break;
+    case 'TSA':
+      doc = generatePlaceholderDocument('TRANSACTION SUPPORT AGREEMENT', '(TSA) - Transaction Support Document');
+      break;
+    case 'SPA':
+      doc = generatePlaceholderDocument('SALES AND PURCHASE AGREEMENT', '(SPA) - Sales Contract');
+      break;
+    case 'ASWP':
+      doc = generatePlaceholderDocument('ASSIGNMENT OF SALE WITH PRODUCT', '(ASWP) - Assignment Agreement');
+      break;
+    case 'POP':
+      doc = generatePlaceholderDocument('2% PERFORMANCE BOND', '(2% POP) - Performance Guarantee');
       break;
     default:
       throw new Error(`Unknown document type: ${documentType}`);
