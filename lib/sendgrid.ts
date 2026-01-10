@@ -8,7 +8,7 @@ export interface EmailAttachment {
 export interface SendDocumentParams {
   to: string;
   subject: string;
-  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP';
+  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO';
   tradeDetails: {
     commodity: string;
     quantity: number;
@@ -80,6 +80,8 @@ function generateEmailContent(params: SendDocumentParams): string {
     SPA: 'Sales and Purchase Agreement',
     ASWP: 'Assignment of Sale with Product',
     POP: '2% Performance Bond',
+    BOL: 'Bill of Lading',
+    COO: 'Certificate of Origin',
   };
 
   return `
@@ -150,7 +152,7 @@ function generateEmailContent(params: SendDocumentParams): string {
 }
 
 export function generateDocumentContent(
-  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP',
+  documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO',
   tradeDetails: SendDocumentParams['tradeDetails'] | null,
   additionalInfo?: Record<string, any>
 ): string {
@@ -172,6 +174,8 @@ export function generateDocumentContent(
     case 'SPA':
     case 'ASWP':
     case 'POP':
+    case 'BOL':
+    case 'COO':
       return generatePlaceholderHTML(documentType, tradeDetails, date);
     case 'ICPO':
       return generateICPO(tradeDetails, date, additionalInfo);
@@ -2769,6 +2773,8 @@ function generatePlaceholderHTML(
     'SPA': 'Sales and Purchase Agreement',
     'ASWP': 'Assignment of Sale with Product',
     'POP': '2% Performance Bond',
+    'BOL': 'Bill of Lading',
+    'COO': 'Certificate of Origin',
   };
 
   return `
@@ -2831,7 +2837,7 @@ function generatePlaceholderHTML(
   `.trim();
 }
 
-export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP'): string {
+export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO'): string {
   return generateDocumentContent(documentType, null, {});
 }
 

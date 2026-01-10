@@ -9,7 +9,7 @@ import {
   Packer
 } from 'docx';
 
-type DocumentType = 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP';
+type DocumentType = 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO';
 
 const MIDNIGHT_BLUE = "1E3A5F";
 const LIGHT_GRAY = "F5F5F5";
@@ -1629,6 +1629,12 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       break;
     case 'POP':
       doc = generatePlaceholderDocument('2% PERFORMANCE BOND', '(2% POP) - Performance Guarantee');
+      break;
+    case 'BOL':
+      doc = generatePlaceholderDocument('BILL OF LADING', '(BOL) - Shipping Document');
+      break;
+    case 'COO':
+      doc = generatePlaceholderDocument('CERTIFICATE OF ORIGIN', '(COO) - Origin Certification');
       break;
     default:
       throw new Error(`Unknown document type: ${documentType}`);

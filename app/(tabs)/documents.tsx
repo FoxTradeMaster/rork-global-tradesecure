@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [showCompanyInfoForm, setShowCompanyInfoForm] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
@@ -110,7 +110,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP') => {
+  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO') => {
     try {
       console.log('[Documents] Generating blank', docType, 'template');
       
@@ -132,6 +132,8 @@ export default function DocumentsScreen() {
             'SPA': 'Sales_and_Purchase_Agreement',
             'ASWP': 'Assignment_of_Sale_with_Product',
             'POP': '2_Percent_Performance_Bond',
+            'BOL': 'Bill_of_Lading',
+            'COO': 'Certificate_of_Origin',
           };
           const filename = `${documentNames[docType]}_Blank_Template.docx`;
           downloadDocx(blob, filename);
@@ -153,7 +155,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP') => {
+  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO') => {
     setSelectedTrade(trade);
     setSelectedDocType(docType);
     setRecipientEmail('');
@@ -588,11 +590,13 @@ export default function DocumentsScreen() {
                   { type: 'SPA', name: 'SPA', desc: 'Sales purchase agreement' },
                   { type: 'ASWP', name: 'ASWP', desc: 'Assignment of sale' },
                   { type: 'POP', name: '2% POP', desc: 'Performance bond' },
+                  { type: 'BOL', name: 'Bill of Lading', desc: 'Shipping document' },
+                  { type: 'COO', name: 'Certificate of Origin', desc: 'Origin certification' },
                 ].map(template => (
                   <TouchableOpacity
                     key={template.type}
                     style={styles.templateCard}
-                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP')}
+                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO')}
                     activeOpacity={0.7}
                   >
                     <View style={styles.templateIconContainer}>
@@ -641,11 +645,11 @@ export default function DocumentsScreen() {
                       <Text style={styles.tradeItemSubtitle}>{trade.counterpartyName}</Text>
                     </View>
                     <View style={styles.docActions}>
-                      {['CIS', 'SCO', 'FCO', 'ICPO', 'LOI', 'POF', 'RWA', 'BCL', 'NCNDA', 'IMFPA', 'TSA', 'SPA', 'ASWP', 'POP'].map(docType => (
+                      {['CIS', 'SCO', 'FCO', 'ICPO', 'LOI', 'POF', 'RWA', 'BCL', 'NCNDA', 'IMFPA', 'TSA', 'SPA', 'ASWP', 'POP', 'BOL', 'COO'].map(docType => (
                         <TouchableOpacity
                           key={docType}
                           style={styles.docActionButton}
-                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP')}
+                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO')}
                         >
                           <Send size={16} color="#3B82F6" />
                           <Text style={styles.docActionText}>{docType}</Text>
