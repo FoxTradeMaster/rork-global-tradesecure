@@ -1760,161 +1760,138 @@ At any approval stage, authorized users can reject a trade:
 
 ## Document Types
 
-### Pre-Trade Documents
+Fox Trade Master™ supports 16 standard commodity trading documents. All documents are available as downloadable blank templates (editable Word .docx format) in the Documents tab.
 
-#### Corporate Information Sheet (CIS)
+### Available Document Templates (16 Total)
+
+#### Pre-Trade Documents (10)
+
+**1. Corporate Information Sheet (CIS)**
 - Company details and credentials
 - Business registration information
 - Contact information and representatives
-- Foundation document for trade relationships
+- Banking details
+- Foundation document for establishing trade relationships
 
-#### Letter of Intent (LOI)
+**2. Letter of Intent (LOI)**
 - Buyer's preliminary interest in purchasing
 - Non-binding expression of intent
 - Includes approximate quantities and terms
 - Starts negotiation process
 
-#### Soft Corporate Offer (SCO)
+**3. Soft Corporate Offer (SCO)**
 - Seller's preliminary offer
 - Outlines basic terms of sale
 - Subject to final negotiation
-- Not legally binding
+- Non-binding commercial proposal
 
-#### Full Corporate Offer (FCO)
+**4. Full Corporate Offer (FCO)**
 - Seller's complete binding offer
 - Detailed terms, specifications, and pricing
 - Legally binding commercial offer
-- More comprehensive than SCO
+- More comprehensive and formal than SCO
 
-#### Irrevocable Corporate Purchase Order (ICPO)
+**5. Irrevocable Corporate Purchase Order (ICPO)**
 - Buyer's binding commitment to purchase
-- Specific quantities, prices, and terms
-- Legally binding once accepted
-- Typically requires Proof of Funds
+- Specific quantities, prices, and delivery terms
+- Legally binding once accepted by seller
+- Typically requires accompanying Proof of Funds
 
-#### Proof of Funds (POF)
-- Bank document verifying buyer has funds
+**6. Proof of Funds (POF)**
+- Bank document verifying buyer has available funds
 - Required for large transactions
-- Shows financial capability
-- Typically from bank or financial institution
+- Shows financial capability to complete purchase
+- Issued by buyer's bank to seller
 
-#### Ready, Willing, and Able Letter (RWA)
-- Confirms party's readiness to proceed
+**7. Ready, Willing, and Able Letter (RWA)**
+- Bank confirmation of party's readiness to proceed
 - Demonstrates willingness to transact
-- Shows ability to fulfill obligations
-- Often required before negotiations advance
+- Shows financial ability to fulfill obligations
+- Often required before negotiations advance to contract stage
 
-#### Bank Comfort Letter (BCL)
+**8. Bank Comfort Letter (BCL)**
 - Bank confirmation of client's financial standing
 - Indicates bank's support for the transaction
 - Provides financial assurance to counterparty
-- Not a guarantee but shows creditworthiness
+- Not a payment guarantee but shows creditworthiness
 
-#### Non-Circumvention Non-Disclosure Agreement (NCNDA)
+**9. Non-Circumvention Non-Disclosure Agreement (NCNDA)**
 - Protects parties from being circumvented in multi-party transactions
 - Ensures confidentiality of business information
 - Prevents direct contact between principals bypassing intermediaries
 - Standard protection agreement in commodity trading
-- Signed by all parties involved in transaction
+- Must be signed by all parties involved in transaction chain
 
-#### Irrevocable Master Fee Protection Agreement (IMFPA)
-- Legally guarantees payment of fees (commissions) to intermediaries (brokers) involved in a deal
-- Ensures intermediaries are paid once the transaction closes, usually through automatic bank transfers
-- Prevents intermediaries from being bypassed in multi-party transactions
-- Crucial contract in international trade, especially for bulk commodities
+**10. Irrevocable Master Fee Protection Agreement (IMFPA)**
+- Legally guarantees payment of fees/commissions to intermediaries (brokers)
+- Ensures intermediaries are paid once transaction closes
+- Prevents intermediaries from being bypassed
+- Crucial contract in international trade, especially bulk commodities
 - Protects all parties and ensures transparent fee distribution
-- Legally binding fee protection structure
+- Legally binding and irrevocable fee protection structure
 
-### Contract Documents
+#### Contract Documents (3)
 
-#### Transaction Support Agreement (TSA)
-- Supporting agreement for complex transactions
-- Defines roles and responsibilities of parties
-- Coordinates multi-party transactions
+**11. Transaction Support Agreement (TSA)**
+- Supporting agreement for complex multi-party transactions
+- Defines roles and responsibilities of each party
+- Coordinates logistics, documentation, and payments
 - Ensures smooth transaction execution
 
-#### Master Service Agreement (MSA)
-- Framework agreement for ongoing relationship
-- Sets general terms and conditions
-- Covers multiple transactions
-- Long-term commercial relationship
-
-#### Sales Purchase Agreement (SPA)
-- Specific contract for individual trade
-- Detailed terms, quantities, quality specs
+**12. Sales and Purchase Agreement (SPA)**
+- Primary binding contract for individual trade
+- Detailed terms, quantities, quality specifications
 - Delivery schedule and location
 - Payment terms and conditions
-- Legally binding contract
+- Legally enforceable sales contract
 
-#### Assignment of Sale with Product (ASWP)
-- Transfer of sales rights and obligations
-- Assigns product delivery to third party
-- Common in commodity trading chains
-- Legally transfers contractual position
+**13. Assignment of Sale with Product (ASWP)**
+- Transfer of sales rights and obligations to third party
+- Assigns product delivery rights
+- Common in commodity trading chains with multiple intermediaries
+- Legally transfers seller's contractual position
 
-### Financial Documents
+#### Financial & Shipping Documents (3)
 
-#### Letter of Credit (LC)
-- Bank guarantee of payment
-- Issued by buyer's bank
-- Payment upon presentation of documents
-- Reduces payment risk for seller
-- Types: Irrevocable, Confirmed, Transferable
-
-#### 2% Performance Bond (POP)
-- Performance guarantee of 2% of contract value
+**14. 2% Performance Bond (POP)**
+- Performance guarantee equal to 2% of contract value
 - Ensures seller fulfills contractual obligations
-- Provides buyer security against non-performance
+- Provides buyer security against non-performance or default
 - Typically issued by bank or insurance company
-- Released upon successful delivery
+- Released upon successful delivery and acceptance
 
-#### Bank Reference
-- Letter from bank confirming relationship
-- Verifies account existence
-- May include credit limits
-- Used in due diligence
+**15. Bill of Lading (BOL)**
+- Issued by shipping carrier/freight forwarder
+- Serves as receipt for goods shipped
+- Acts as title document for cargo ownership
+- Required for customs clearance at destination
+- Types: Ocean BOL, Master BOL, House BOL, Negotiable BOL
 
-### Shipping Documents
+**16. Certificate of Origin (COO)**
+- Certifies country where goods were produced/manufactured
+- Required for customs clearance and duty calculation
+- May affect import tariffs and trade preferences
+- Issued by chamber of commerce or authorized trade authority
+- Essential for preferential trade agreements (FTA benefits)
 
-#### Bill of Lading (BOL)
-- Issued by shipping carrier
-- Receipt for goods
-- Title document
-- Required for customs clearance
-- Types: Ocean BOL, Master BOL, House BOL
+---
 
-#### Certificate of Origin
-- Certifies country where goods were produced
-- Required for customs
-- May affect tariffs and duties
-- Issued by chamber of commerce or authority
+### Other Important Trading Documents
 
-#### Quality Certificate
-- Verifies product specifications
-- Issued by inspection company
-- Tests for purity, grade, composition
-- Required for commodity trades
-- SGS, Bureau Veritas, Intertek are common issuers
+While not available as blank templates in the app, these documents are also commonly used in commodity trading:
 
-### Due Diligence Documents
+#### Financial Documents
+- **Letter of Credit (LC)** - Bank guarantee of payment issued by buyer's bank
+- **Bank Reference** - Letter from bank confirming account relationship
 
-#### Financial Statements
-- Balance sheet, income statement, cash flow
-- Audited preferred
-- Shows financial health
-- Typically past 2-3 years
+#### Quality & Inspection Documents
+- **Quality Certificate** - Verifies product specifications (SGS, Bureau Veritas, Intertek)
+- **Quantity Certificate** - Confirms quantity shipped matches contract
 
-#### Business Licenses
-- Legal authorization to conduct business
-- Import/export licenses
-- Commodity-specific permits
-- Must be current and valid
-
-#### Corporate Documents
-- Articles of incorporation
-- Certificate of good standing
-- Shareholder registry
-- Board resolutions for trading authority
+#### Corporate Due Diligence Documents
+- **Financial Statements** - Balance sheet, income statement, cash flow
+- **Business Licenses** - Import/export licenses, commodity permits
+- **Corporate Documents** - Articles of incorporation, certificates of good standing
 
 ---
 
