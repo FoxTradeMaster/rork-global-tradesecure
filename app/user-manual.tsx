@@ -18,6 +18,7 @@ const MANUAL_CONTENT = `# Fox Trade Master™ Global Trading App
 8. [Understanding Risk Levels](#understanding-risk-levels)
 9. [Trade Workflow](#trade-workflow)
 10. [Document Types](#document-types)
+11. [Support & Contact](#support--contact)
 
 ---
 
@@ -259,6 +260,19 @@ Tap filter chips to view trades by status:
 **Proof of Funds (POF)**
 - Bank document verifying buyer has funds
 - Required for large transactions
+
+**Non-Circumvention Non-Disclosure Agreement (NCNDA)**
+- Protects parties from being circumvented in multi-party transactions
+- Ensures confidentiality of business information
+- Prevents direct contact between principals bypassing intermediaries
+- Standard protection agreement in commodity trading
+
+**Irrevocable Master Fee Protection Agreement (IMFPA)**
+- Legally guarantees payment of fees (commissions) to intermediaries (brokers)
+- Ensures intermediaries are paid once the transaction closes
+- Prevents intermediaries from being bypassed
+- Crucial contract in international trade, especially for bulk commodities
+- Protects all parties and ensures transparent fee distribution
 
 ### Contract Documents
 
