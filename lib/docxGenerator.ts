@@ -2007,19 +2007,1321 @@ function generateCOODocument(): Document {
   });
 }
 
-function generatePlaceholderDocument(title: string, subtitle: string): Document {
+function generateFCODocument(): Document {
   return new Document({
     sections: [{
       properties: {},
       children: [
-        ...createDocumentHeader(title, subtitle),
+        ...createDocumentHeader(
+          "FULL CORPORATE OFFER",
+          "(FCO) - Binding Commercial Offer"
+        ),
+        
         new Paragraph({
-          text: "This document template is under construction.",
+          children: [
+            new TextRun({
+              text: "FROM (Seller): ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "TO (Buyer): ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        new Paragraph({
+          text: "Dear Sir/Madam,",
           spacing: { after: 200 },
         }),
         new Paragraph({
-          text: "Please contact support for more information.",
+          text: "We, the undersigned, acting as Seller, hereby issue this Full Corporate Offer (FCO) with full corporate authority and responsibility, confirming our readiness to supply the following commodity under the terms and conditions herein specified:",
           spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 1: COMMODITY SPECIFICATION"),
+        createBlankLine("1.1 Product Name:"),
+        createBlankLine("1.2 Commodity Description:"),
+        createBlankLine("1.3 Total Quantity:"),
+        createBlankLine("1.4 Unit of Measurement:"),
+        createBlankLine("1.5 Country of Origin:"),
+        createBlankLine("1.6 Quality Standard:"),
+        createBlankLine("1.7 Packing:"),
+        createBlankLine("1.8 HS Code:"),
+        
+        createSectionTitle("ARTICLE 2: PRICING"),
+        createBlankLine("2.1 Unit Price (USD):"),
+        createBlankLine("2.2 Total Contract Value (USD):"),
+        createBlankLine("2.3 Currency:"),
+        createBlankLine("2.4 Price Basis:"),
+        createBlankLine("2.5 Price Validity Period:"),
+        
+        createSectionTitle("ARTICLE 3: DELIVERY TERMS"),
+        createBlankLine("3.1 INCOTERM 2020:"),
+        createBlankLine("3.2 Shipment Period:"),
+        createBlankLine("3.3 Loading Port:"),
+        createBlankLine("3.4 Destination Port:"),
+        createBlankLine("3.5 Partial Shipments:"),
+        createBlankLine("3.6 Transshipment:"),
+        createBlankLine("3.7 Delivery Schedule:"),
+        
+        createSectionTitle("ARTICLE 4: PAYMENT TERMS"),
+        createBlankLine("4.1 Payment Instrument:"),
+        createBlankLine("4.2 Payment Terms:"),
+        createBlankLine("4.3 Issuing Bank:"),
+        createBlankLine("4.4 Advising/Confirming Bank:"),
+        createBlankLine("4.5 Letter of Credit Type:"),
+        createBlankLine("4.6 LC Opening Timeline:"),
+        
+        createSectionTitle("ARTICLE 5: INSPECTION AND QUALITY CONTROL"),
+        createBlankLine("5.1 Pre-shipment Inspector:"),
+        createBlankLine("5.2 Quality Certificate:"),
+        createBlankLine("5.3 Quantity Certificate:"),
+        createBlankLine("5.4 Inspection Location:"),
+        createBlankLine("5.5 Inspection Costs:"),
+        createBlankLine("5.6 Acceptance Criteria:"),
+        
+        createSectionTitle("ARTICLE 6: REQUIRED DOCUMENTS"),
+        new Paragraph({
+          text: "☐ Commercial Invoice (3 originals + 3 copies)",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Full Set Clean On Board Bill of Lading",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Certificate of Origin (Form A)",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Certificate of Quality",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Certificate of Quantity",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Packing List",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Insurance Policy/Certificate (if applicable)",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Fumigation Certificate (if required)",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Other: _____________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 7: VALIDITY AND BINDING NATURE"),
+        createBlankLine("7.1 This FCO is valid for:"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "7.2 This is a BINDING OFFER and constitutes a firm commitment from the Seller to supply the goods upon acceptance by Buyer.",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 200, after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 8: PERFORMANCE BOND"),
+        createBlankLine("8.1 Performance Bond Required:"),
+        createBlankLine("8.2 Performance Bond Amount:"),
+        createBlankLine("8.3 Issuing Bank:"),
+        
+        createSectionTitle("ARTICLE 9: INSURANCE"),
+        createBlankLine("9.1 Insurance Coverage:"),
+        createBlankLine("9.2 Insured By:"),
+        createBlankLine("9.3 Insurance Value:"),
+        
+        createSectionTitle("ARTICLE 10: FORCE MAJEURE"),
+        new Paragraph({
+          text: "Neither party shall be liable for failure to perform if such failure results from causes beyond reasonable control including but not limited to: acts of God, war, terrorism, strikes, government actions, pandemics, or natural disasters.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 11: GOVERNING LAW AND ARBITRATION"),
+        createBlankLine("11.1 Governing Law:"),
+        createBlankLine("11.2 Arbitration Rules:"),
+        createBlankLine("11.3 Arbitration Seat:"),
+        
+        new Paragraph({
+          text: "Yours faithfully,",
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("SELLER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Company:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[COMPANY SEAL/STAMP]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
+function generateRWADocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "READY, WILLING AND ABLE LETTER",
+          "(RWA) - Bank Confirmation of Financial Capability"
+        ),
+        
+        new Paragraph({
+          text: "TO WHOM IT MAY CONCERN",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "RE: CONFIRMATION OF READY, WILLING AND ABLE FOR ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "______________________________",
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("CLIENT INFORMATION"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Account Number:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Registered Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("BANK INFORMATION"),
+        createBlankLine("Bank Name:"),
+        createBlankLine("Bank Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("SWIFT/BIC Code:"),
+        createBlankLine("Bank License Number:"),
+        
+        createSectionTitle("TRANSACTION DETAILS"),
+        createBlankLine("Commodity:"),
+        createBlankLine("Quantity:"),
+        createBlankLine("Estimated Transaction Value (USD):"),
+        createBlankLine("Seller/Beneficiary:"),
+        
+        createSectionTitle("BANK CONFIRMATION"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "We, the undersigned financial institution, hereby certify and confirm that:",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 200, after: 200 },
+        }),
+        new Paragraph({
+          text: "1. The above-named client is our valued customer and maintains an active account in good standing.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "2. Our client is READY, WILLING, and ABLE to engage in the above-referenced transaction.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "3. Our client has sufficient funds and/or approved credit facilities to complete this transaction.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "4. The funds are unencumbered, of non-criminal origin, and free from any legal restrictions.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "5. We are prepared to issue a Letter of Credit or effect payment via bank-to-bank transfer upon presentation of proper documentation.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("VALIDITY"),
+        createBlankLine("Valid From:"),
+        createBlankLine("Valid Until:"),
+        
+        new Paragraph({
+          text: "Yours faithfully,",
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("BANK OFFICER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Department:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[BANK OFFICIAL STAMP/SEAL]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
+function generateBCLDocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "BANK COMFORT LETTER",
+          "(BCL) - Bank Financial Support Confirmation"
+        ),
+        
+        new Paragraph({
+          text: "TO WHOM IT MAY CONCERN",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "RE: BANK COMFORT LETTER FOR ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "______________________________",
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("CLIENT DETAILS"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Account Number:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Registered Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("BANK DETAILS"),
+        createBlankLine("Bank Name:"),
+        createBlankLine("Bank Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("SWIFT Code:"),
+        createBlankLine("Regulatory License:"),
+        
+        createSectionTitle("TRANSACTION INFORMATION"),
+        createBlankLine("Transaction Purpose:"),
+        createBlankLine("Commodity/Service:"),
+        createBlankLine("Estimated Value (USD):"),
+        createBlankLine("Counterparty:"),
+        
+        createSectionTitle("BANK COMFORT STATEMENT"),
+        new Paragraph({
+          text: "We, the undersigned bank, provide this Comfort Letter regarding our client referenced above:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: "1. The above-named company is our valued customer and maintains a business relationship with our institution.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "2. Our client maintains accounts with our bank in good standing.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "3. To the best of our knowledge, our client is financially sound and capable of conducting business transactions.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "4. Our bank maintains a satisfactory banking relationship with the client.",
+          spacing: { after: 150 },
+        }),
+        new Paragraph({
+          text: "5. We would view favorably a request from our client to facilitate the referenced transaction, subject to our normal credit approval process.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("IMPORTANT DISCLAIMER"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "This letter is issued as a matter of goodwill and does not constitute:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• A guarantee of payment or performance",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• A commitment to provide financing",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• A legally binding obligation on the part of the bank",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• An indication of specific account balances or credit limits",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("VALIDITY"),
+        createBlankLine("This letter is valid for:"),
+        createBlankLine("Issue Date:"),
+        createBlankLine("Expiry Date:"),
+        
+        new Paragraph({
+          text: "Yours faithfully,",
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("BANK OFFICER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[BANK OFFICIAL STAMP]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
+function generateTSADocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "TRANSACTION SUPPORT AGREEMENT",
+          "(TSA) - Transaction Facilitation Agreement"
+        ),
+        
+        new Paragraph({
+          text: "This Transaction Support Agreement is entered into on:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("PARTIES"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "PARTY A (Principal):",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "PARTY B (Support Provider):",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 200, after: 100 },
+        }),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 1: PURPOSE"),
+        new Paragraph({
+          text: "This Agreement establishes the terms under which Party B will provide transaction support services to Party A for:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Transaction Description:"),
+        createBlankLine("Commodity:"),
+        createBlankLine("Quantity:"),
+        createBlankLine("Estimated Value:"),
+        
+        createSectionTitle("ARTICLE 2: SCOPE OF SERVICES"),
+        new Paragraph({
+          text: "Party B agrees to provide the following support services:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Document preparation and verification",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Quality assurance and inspection coordination",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Logistics and shipping coordination",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Banking and payment facilitation",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Customs clearance support",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Other: _____________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 3: RESPONSIBILITIES"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "3.1 Party A Responsibilities:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Provide all necessary documentation and information",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Pay agreed fees on time",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Cooperate with Party B in service delivery",
+          spacing: { after: 200 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "3.2 Party B Responsibilities:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Execute services professionally and timely",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Maintain confidentiality",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Provide regular status updates",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 4: FEES AND PAYMENT"),
+        createBlankLine("4.1 Service Fee:"),
+        createBlankLine("4.2 Payment Terms:"),
+        createBlankLine("4.3 Payment Method:"),
+        createBlankLine("4.4 Additional Costs:"),
+        
+        createSectionTitle("ARTICLE 5: TERM AND TERMINATION"),
+        createBlankLine("5.1 Initial Term:"),
+        createBlankLine("5.2 Notice Period for Termination:"),
+        
+        createSectionTitle("ARTICLE 6: CONFIDENTIALITY"),
+        new Paragraph({
+          text: "Both parties agree to maintain confidentiality of all transaction-related information.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 7: LIABILITY AND INDEMNIFICATION"),
+        createBlankLine("7.1 Liability Cap:"),
+        new Paragraph({
+          text: "7.2 Each party shall indemnify the other against losses arising from breach of this Agreement.",
+          spacing: { before: 200, after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 8: GOVERNING LAW"),
+        createBlankLine("Governing Jurisdiction:"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "IN WITNESS WHEREOF, the parties have executed this Agreement.",
+              bold: true,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("PARTY A SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("PARTY B SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+      ],
+    }],
+  });
+}
+
+function generateSPADocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "SALES AND PURCHASE AGREEMENT",
+          "(SPA) - Binding Sales Contract"
+        ),
+        
+        new Paragraph({
+          text: "This Sales and Purchase Agreement is entered into on:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("SELLER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Represented by:"),
+        
+        createSectionTitle("BUYER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Represented by:"),
+        
+        createSectionTitle("ARTICLE 1: COMMODITY"),
+        createBlankLine("1.1 Product Description:"),
+        createBlankLine("1.2 Total Quantity:"),
+        createBlankLine("1.3 Unit of Measurement:"),
+        createBlankLine("1.4 Quality Specification:"),
+        createBlankLine("1.5 Country of Origin:"),
+        createBlankLine("1.6 Packing:"),
+        createBlankLine("1.7 HS Code:"),
+        
+        createSectionTitle("ARTICLE 2: PRICE AND PAYMENT"),
+        createBlankLine("2.1 Unit Price (USD):"),
+        createBlankLine("2.2 Total Contract Value (USD):"),
+        createBlankLine("2.3 Currency:"),
+        createBlankLine("2.4 Payment Terms:"),
+        createBlankLine("2.5 Payment Method:"),
+        createBlankLine("2.6 Down Payment (if any):"),
+        
+        createSectionTitle("ARTICLE 3: DELIVERY"),
+        createBlankLine("3.1 INCOTERM 2020:"),
+        createBlankLine("3.2 Loading Port:"),
+        createBlankLine("3.3 Destination Port:"),
+        createBlankLine("3.4 Delivery Period:"),
+        createBlankLine("3.5 Partial Shipments:"),
+        createBlankLine("3.6 Transshipment:"),
+        
+        createSectionTitle("ARTICLE 4: INSPECTION AND QUALITY"),
+        createBlankLine("4.1 Inspector:"),
+        createBlankLine("4.2 Inspection Location:"),
+        createBlankLine("4.3 Quality Standards:"),
+        createBlankLine("4.4 Rejection Criteria:"),
+        createBlankLine("4.5 Inspection Costs:"),
+        
+        createSectionTitle("ARTICLE 5: INSURANCE"),
+        createBlankLine("5.1 Insured by:"),
+        createBlankLine("5.2 Coverage:"),
+        createBlankLine("5.3 Insurance Value:"),
+        
+        createSectionTitle("ARTICLE 6: DOCUMENTS"),
+        new Paragraph({
+          text: "Seller shall provide:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Commercial Invoice",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Bill of Lading",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Certificate of Origin",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Quality Certificate",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Quantity Certificate",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Packing List",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 7: WARRANTIES"),
+        new Paragraph({
+          text: "7.1 Seller warrants that goods conform to specifications",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "7.2 Seller warrants clear title to goods",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "7.3 Seller warrants compliance with all laws",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 8: FORCE MAJEURE"),
+        new Paragraph({
+          text: "Neither party liable for delays caused by events beyond reasonable control.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 9: DISPUTE RESOLUTION"),
+        createBlankLine("9.1 Governing Law:"),
+        createBlankLine("9.2 Arbitration:"),
+        createBlankLine("9.3 Arbitration Seat:"),
+        
+        createSectionTitle("ARTICLE 10: GENERAL PROVISIONS"),
+        new Paragraph({
+          text: "10.1 This Agreement constitutes the entire agreement",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "10.2 Amendments must be in writing",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "10.3 No assignment without consent",
+          spacing: { after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "IN WITNESS WHEREOF, the parties have executed this Agreement.",
+              bold: true,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("SELLER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[SEAL]",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("BUYER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[SEAL]",
+        }),
+      ],
+    }],
+  });
+}
+
+function generateASWPDocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "ASSIGNMENT OF SALE WITH PRODUCT",
+          "(ASWP) - Product Assignment Agreement"
+        ),
+        
+        new Paragraph({
+          text: "This Assignment Agreement is entered into on:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("ASSIGNOR (Original Seller)"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("ASSIGNEE (New Seller)"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("BUYER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("RECITALS"),
+        new Paragraph({
+          text: "WHEREAS, the Assignor has entered into a contract with the Buyer for the sale of:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Commodity:"),
+        createBlankLine("Quantity:"),
+        createBlankLine("Contract Reference:"),
+        createBlankLine("Contract Date:"),
+        new Paragraph({
+          text: "WHEREAS, the Assignor wishes to assign all rights and obligations under the said contract to the Assignee;",
+          spacing: { before: 200, after: 200 },
+        }),
+        new Paragraph({
+          text: "WHEREAS, the Assignee accepts such assignment;",
+          spacing: { after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "NOW THEREFORE, the parties agree as follows:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 1: ASSIGNMENT"),
+        new Paragraph({
+          text: "1.1 The Assignor hereby assigns, transfers, and conveys to the Assignee all of Assignor's rights, title, interest, and obligations in the Contract.",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: "1.2 The Assignee accepts the assignment and assumes all obligations of the Assignor under the Contract.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 2: PRODUCT DETAILS"),
+        createBlankLine("Product Description:"),
+        createBlankLine("Total Quantity:"),
+        createBlankLine("Unit Price:"),
+        createBlankLine("Total Contract Value:"),
+        createBlankLine("Delivery Terms:"),
+        createBlankLine("Delivery Date:"),
+        
+        createSectionTitle("ARTICLE 3: CONSIDERATION"),
+        createBlankLine("Assignment Fee:"),
+        createBlankLine("Payment Terms for Assignment:"),
+        createBlankLine("Payment Method:"),
+        
+        createSectionTitle("ARTICLE 4: REPRESENTATIONS AND WARRANTIES"),
+        new Paragraph({
+          text: "4.1 Assignor represents that:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• The Contract is valid and enforceable",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Assignor has full authority to assign the Contract",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• No breach of Contract exists",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• All required consents have been obtained",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 5: ASSIGNEE OBLIGATIONS"),
+        new Paragraph({
+          text: "5.1 The Assignee agrees to:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Perform all obligations under the Contract",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Deliver goods per Contract terms",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Indemnify Assignor for any breach",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 6: BUYER CONSENT"),
+        new Paragraph({
+          text: "The Buyer hereby acknowledges and consents to this assignment.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("ARTICLE 7: EFFECTIVE DATE"),
+        createBlankLine("This Assignment becomes effective on:"),
+        
+        createSectionTitle("ARTICLE 8: GOVERNING LAW"),
+        createBlankLine("Governing Jurisdiction:"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "IN WITNESS WHEREOF, the parties have executed this Assignment.",
+              bold: true,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("ASSIGNOR SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("ASSIGNEE SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        
+        createSectionTitle("BUYER CONSENT AND SIGNATURE"),
+        new Paragraph({
+          text: "The Buyer consents to this assignment:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+      ],
+    }],
+  });
+}
+
+function generatePOPDocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "2% PERFORMANCE BOND",
+          "(2% POP) - Performance Guarantee"
+        ),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Bond Number: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("ISSUING BANK/GUARANTOR"),
+        createBlankLine("Bank Name:"),
+        createBlankLine("Bank Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("SWIFT Code:"),
+        createBlankLine("License Number:"),
+        
+        createSectionTitle("PRINCIPAL (Seller/Contractor)"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("BENEFICIARY (Buyer)"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("CONTRACT DETAILS"),
+        createBlankLine("Contract Reference:"),
+        createBlankLine("Contract Date:"),
+        createBlankLine("Commodity:"),
+        createBlankLine("Quantity:"),
+        createBlankLine("Total Contract Value (USD):"),
+        
+        createSectionTitle("BOND DETAILS"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Bond Amount (2% of Contract Value): USD ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Bond Currency:"),
+        createBlankLine("Effective Date:"),
+        createBlankLine("Expiry Date:"),
+        
+        createSectionTitle("GUARANTEE TERMS"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "We, the undersigned bank/guarantor, hereby irrevocably and unconditionally guarantee payment to the Beneficiary of an amount not exceeding 2% of the Contract Value in the event that:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: "1. The Principal fails to perform any obligations under the Contract;",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "2. The Principal breaches any material terms of the Contract;",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "3. The Principal fails to deliver goods according to specifications;",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "4. The Principal fails to meet delivery deadlines without valid cause;",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "5. The Principal is in default under the Contract.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("CLAIM PROCEDURE"),
+        new Paragraph({
+          text: "To make a claim under this Bond, the Beneficiary must:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "1. Submit a written claim to the issuing bank",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "2. Provide evidence of Principal's default",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "3. Submit claim before expiry date",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "4. Include signed statement of default",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("PAYMENT TERMS"),
+        new Paragraph({
+          text: "Upon receipt of a valid claim, we undertake to pay the Beneficiary within:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Payment Timeline (banking days):"),
+        new Paragraph({
+          text: "Payment will be made without reference to the Principal and regardless of any dispute between the Principal and Beneficiary.",
+          spacing: { before: 200, after: 300 },
+        }),
+        
+        createSectionTitle("BOND REDUCTION/RELEASE"),
+        new Paragraph({
+          text: "This Bond may be reduced or released upon:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Partial delivery acceptance (proportional reduction)",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Full contract performance",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Written release by Beneficiary",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "• Expiry of Bond period",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("GOVERNING LAW"),
+        createBlankLine("Governing Jurisdiction:"),
+        createBlankLine("Dispute Resolution:"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "This Bond is irrevocable and remains in full force until expiry or written release.",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 300, after: 300 },
+        }),
+        
+        createSectionTitle("BANK/GUARANTOR SIGNATURE"),
+        new Paragraph({
+          text: "For and on behalf of the Bank/Guarantor:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[BANK OFFICIAL STAMP/SEAL]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
         }),
       ],
     }],
@@ -2037,7 +3339,7 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       doc = generateSCODocument();
       break;
     case 'FCO':
-      doc = generatePlaceholderDocument('FULL CORPORATE OFFER', '(FCO) - Binding Commercial Offer');
+      doc = generateFCODocument();
       break;
     case 'ICPO':
       doc = generateICPODocument();
@@ -2049,10 +3351,10 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       doc = generatePOFDocument();
       break;
     case 'RWA':
-      doc = generatePlaceholderDocument('READY WILLING AND ABLE', '(RWA) - Bank Confirmation Letter');
+      doc = generateRWADocument();
       break;
     case 'BCL':
-      doc = generatePlaceholderDocument('BANK COMFORT LETTER', '(BCL) - Bank Financial Support Letter');
+      doc = generateBCLDocument();
       break;
     case 'NCNDA':
       doc = generateNCNDADocument();
@@ -2061,16 +3363,16 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       doc = generateIMFPADocument();
       break;
     case 'TSA':
-      doc = generatePlaceholderDocument('TRANSACTION SUPPORT AGREEMENT', '(TSA) - Transaction Support Document');
+      doc = generateTSADocument();
       break;
     case 'SPA':
-      doc = generatePlaceholderDocument('SALES AND PURCHASE AGREEMENT', '(SPA) - Sales Contract');
+      doc = generateSPADocument();
       break;
     case 'ASWP':
-      doc = generatePlaceholderDocument('ASSIGNMENT OF SALE WITH PRODUCT', '(ASWP) - Assignment Agreement');
+      doc = generateASWPDocument();
       break;
     case 'POP':
-      doc = generatePlaceholderDocument('2% PERFORMANCE BOND', '(2% POP) - Performance Guarantee');
+      doc = generatePOPDocument();
       break;
     case 'BOL':
       doc = generateBOLDocument();
