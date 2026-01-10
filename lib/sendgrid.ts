@@ -8,7 +8,7 @@ export interface EmailAttachment {
 export interface SendDocumentParams {
   to: string;
   subject: string;
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'SPA' | 'MSA' | 'MFPA';
+  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'SPA' | 'MSA' | 'IMFPA';
   tradeDetails: {
     commodity: string;
     quantity: number;
@@ -74,7 +74,7 @@ function generateEmailContent(params: SendDocumentParams): string {
     NCNDA: 'Non-Circumvention and Non-Disclosure Agreement',
     SPA: 'Sales and Purchase Agreement',
     MSA: 'Master Sales Agreement',
-    MFPA: 'Master Fee Protection Agreement',
+    IMFPA: 'Irrevocable Master Fee Protection Agreement',
   };
 
   return `
@@ -145,7 +145,7 @@ function generateEmailContent(params: SendDocumentParams): string {
 }
 
 export function generateDocumentContent(
-  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA',
+  documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA',
   tradeDetails: SendDocumentParams['tradeDetails'] | null,
   additionalInfo?: Record<string, any>
 ): string {
@@ -168,7 +168,7 @@ export function generateDocumentContent(
       return generatePOF(tradeDetails, date, additionalInfo);
     case 'NCNDA':
       return generateNCNDA(tradeDetails, date, additionalInfo);
-    case 'MFPA':
+    case 'IMFPA':
       return generateMFPA(tradeDetails, date, additionalInfo);
     default:
       return '';
@@ -2743,7 +2743,7 @@ function generateMFPA(
   `.trim();
 }
 
-export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA'): string {
+export function generateBlankDocument(documentType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA'): string {
   return generateDocumentContent(documentType, null, {});
 }
 

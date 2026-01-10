@@ -9,7 +9,7 @@ import {
   Packer
 } from 'docx';
 
-type DocumentType = 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA';
+type DocumentType = 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA';
 
 const MIDNIGHT_BLUE = "1E3A5F";
 const LIGHT_GRAY = "F5F5F5";
@@ -1263,18 +1263,18 @@ function generateNCNDADocument(): Document {
   });
 }
 
-function generateMFPADocument(): Document {
+function generateIMFPADocument(): Document {
   return new Document({
     sections: [{
       properties: {},
       children: [
         ...createDocumentHeader(
-          "MASTER FEE PROTECTION AGREEMENT",
-          "(MFPA)"
+          "IRREVOCABLE MASTER FEE PROTECTION AGREEMENT",
+          "(IMFPA)"
         ),
         
         new Paragraph({
-          text: "This Master Fee Protection Agreement (\"Agreement\") is entered into on:",
+          text: "This Irrevocable Master Fee Protection Agreement (\"Agreement\") is entered into on:",
           spacing: { after: 100 },
         }),
         createBlankLine("Effective Date:"),
@@ -1587,8 +1587,8 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
     case 'NCNDA':
       doc = generateNCNDADocument();
       break;
-    case 'MFPA':
-      doc = generateMFPADocument();
+    case 'IMFPA':
+      doc = generateIMFPADocument();
       break;
     default:
       throw new Error(`Unknown document type: ${documentType}`);

@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA' | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [showCompanyInfoForm, setShowCompanyInfoForm] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
@@ -110,7 +110,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
+  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA') => {
     try {
       console.log('[Documents] Generating blank', docType, 'template');
       
@@ -124,7 +124,7 @@ export default function DocumentsScreen() {
             'LOI': 'Letter_of_Intent',
             'POF': 'Proof_of_Funds',
             'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
-            'MFPA': 'Master_Fee_Protection_Agreement',
+            'IMFPA': 'Irrevocable_Master_Fee_Protection_Agreement',
           };
           const filename = `${documentNames[docType]}_Blank_Template.docx`;
           downloadDocx(blob, filename);
@@ -146,7 +146,7 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA') => {
+  const handleSendDocument = (trade: Trade, docType: 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA') => {
     setSelectedTrade(trade);
     setSelectedDocType(docType);
     setRecipientEmail('');
@@ -572,13 +572,13 @@ export default function DocumentsScreen() {
                   { type: 'ICPO', name: 'Irrevocable Corporate PO', desc: 'Binding purchase order' },
                   { type: 'POF', name: 'Proof of Funds', desc: 'Bank fund certification' },
                   { type: 'NCNDA', name: 'NCNDA', desc: 'Non-disclosure agreement' },
-                  { type: 'MFPA', name: 'Master Fee Protection Agreement', desc: 'Fee protection contract' },
+                  { type: 'IMFPA', name: 'IMFPA', desc: 'Irrevocable fee protection' },
                   { type: 'CIS', name: 'Corporate Info Sheet', desc: 'Company details' },
                 ].map(template => (
                   <TouchableOpacity
                     key={template.type}
                     style={styles.templateCard}
-                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA')}
+                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA')}
                     activeOpacity={0.7}
                   >
                     <View style={styles.templateIconContainer}>
@@ -627,11 +627,11 @@ export default function DocumentsScreen() {
                       <Text style={styles.tradeItemSubtitle}>{trade.counterpartyName}</Text>
                     </View>
                     <View style={styles.docActions}>
-                      {['CIS', 'SCO', 'ICPO', 'LOI', 'POF', 'NCNDA', 'MFPA'].map(docType => (
+                      {['CIS', 'SCO', 'ICPO', 'LOI', 'POF', 'NCNDA', 'IMFPA'].map(docType => (
                         <TouchableOpacity
                           key={docType}
                           style={styles.docActionButton}
-                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'MFPA')}
+                          onPress={() => handleSendDocument(trade, docType as 'CIS' | 'SCO' | 'ICPO' | 'LOI' | 'POF' | 'NCNDA' | 'IMFPA')}
                         >
                           <Send size={16} color="#3B82F6" />
                           <Text style={styles.docActionText}>{docType}</Text>
