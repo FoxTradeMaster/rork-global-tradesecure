@@ -112,7 +112,19 @@ export default function WelcomeScreen() {
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message?.includes('Error sending confirmation email') || 
+              error.message?.includes('email') && error.message?.includes('send')) {
+            Alert.alert(
+              'Email Configuration Required',
+              'Email verification is not configured. Please go to your Supabase project settings > Authentication > Email Templates and either:\n\n1. Configure SMTP settings, or\n2. Disable "Enable email confirmations" under Auth settings',
+              [{ text: 'OK' }]
+            );
+            setAuthLoading(false);
+            return;
+          }
+          throw error;
+        }
 
         if (data.user) {
           if (data.user.identities && data.user.identities.length === 0) {
