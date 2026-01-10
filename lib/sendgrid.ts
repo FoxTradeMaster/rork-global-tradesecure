@@ -168,15 +168,23 @@ export function generateDocumentContent(
     case 'SCO':
       return generateSCO(tradeDetails, date, additionalInfo);
     case 'FCO':
+      return generateFCO(tradeDetails, date, additionalInfo);
     case 'RWA':
+      return generateRWA(tradeDetails, date, additionalInfo);
     case 'BCL':
+      return generateBCL(tradeDetails, date, additionalInfo);
     case 'TSA':
+      return generateTSA(tradeDetails, date, additionalInfo);
     case 'SPA':
+      return generateSPA(tradeDetails, date, additionalInfo);
     case 'ASWP':
+      return generateASWP(tradeDetails, date, additionalInfo);
     case 'POP':
+      return generatePOP(tradeDetails, date, additionalInfo);
     case 'BOL':
+      return generateBOL(tradeDetails, date, additionalInfo);
     case 'COO':
-      return generatePlaceholderHTML(documentType, tradeDetails, date);
+      return generateCOO(tradeDetails, date, additionalInfo);
     case 'ICPO':
       return generateICPO(tradeDetails, date, additionalInfo);
     case 'LOI':
@@ -2760,22 +2768,552 @@ function generateMFPA(
   `.trim();
 }
 
-function generatePlaceholderHTML(
-  documentType: string,
+function generateFCO(
   tradeDetails: SendDocumentParams['tradeDetails'] | null,
-  date: string
+  date: string,
+  additionalInfo?: Record<string, any>
 ): string {
-  const docNames: Record<string, string> = {
-    'FCO': 'Full Corporate Offer',
-    'RWA': 'Ready Willing and Able Letter',
-    'BCL': 'Bank Comfort Letter',
-    'TSA': 'Transaction Support Agreement',
-    'SPA': 'Sales and Purchase Agreement',
-    'ASWP': 'Assignment of Sale with Product',
-    'POP': '2% Performance Bond',
-    'BOL': 'Bill of Lading',
-    'COO': 'Certificate of Origin',
-  };
+  return generateStandardDocument(
+    'FULL CORPORATE OFFER',
+    'FCO - Binding Commercial Offer',
+    date,
+    [
+      {
+        title: 'FROM (Seller)',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.sellerName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.sellerRegistration || '_______________________________' },
+          { label: 'Address', value: additionalInfo?.sellerAddress || '_______________________________' },
+        ]
+      },
+      {
+        title: 'TO (Buyer)',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || tradeDetails?.counterpartyName || '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 1: COMMODITY SPECIFICATION',
+        fields: [
+          { label: '1.1 Product Name', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: '1.2 Total Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: '1.3 Country of Origin', value: additionalInfo?.country || '_______________________________' },
+          { label: '1.4 Quality Standard', value: '_______________________________' },
+          { label: '1.5 Packing', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 2: PRICING',
+        fields: [
+          { label: '2.1 Unit Price (USD)', value: tradeDetails ? `${tradeDetails.pricePerUnit.toLocaleString()}` : '_______________________________' },
+          { label: '2.2 Total Contract Value (USD)', value: tradeDetails ? `${(tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString()}` : '_______________________________' },
+          { label: '2.3 Currency', value: 'USD' },
+          { label: '2.4 Price Basis', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 3: DELIVERY TERMS',
+        fields: [
+          { label: '3.1 INCOTERM 2020', value: tradeDetails?.incoterm || '_______________________________' },
+          { label: '3.2 Shipment Period', value: '_______________________________' },
+          { label: '3.3 Loading Port', value: '_______________________________' },
+          { label: '3.4 Destination Port', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 4: PAYMENT TERMS',
+        fields: [
+          { label: '4.1 Payment Method', value: '_______________________________' },
+          { label: '4.2 Letter of Credit Type', value: '_______________________________' },
+        ]
+      },
+    ]
+  );
+}
+
+function generateBOL(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'BILL OF LADING',
+    'BOL - Transport Document and Receipt of Goods',
+    date,
+    [
+      {
+        title: 'B/L NUMBER',
+        fields: [
+          { label: 'Reference', value: `BOL-${Date.now()}` },
+        ]
+      },
+      {
+        title: 'SHIPPER (Consignor)',
+        fields: [
+          { label: 'Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Address', value: additionalInfo?.address || '_______________________________' },
+          { label: 'Tax ID', value: additionalInfo?.registrationNumber || '_______________________________' },
+        ]
+      },
+      {
+        title: 'CONSIGNEE',
+        fields: [
+          { label: 'Name', value: tradeDetails?.counterpartyName || '_______________________________' },
+          { label: 'Address', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'VESSEL AND VOYAGE',
+        fields: [
+          { label: 'Vessel Name', value: '_______________________________' },
+          { label: 'Voyage Number', value: '_______________________________' },
+          { label: 'IMO Number', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'PORT INFORMATION',
+        fields: [
+          { label: 'Port of Loading', value: '_______________________________' },
+          { label: 'Port of Discharge', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'CARGO DETAILS',
+        fields: [
+          { label: 'Description of Goods', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'Gross Weight (kg)', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'FREIGHT AND CHARGES',
+        fields: [
+          { label: 'Freight Terms', value: '☐ PREPAID  ☐ COLLECT' },
+          { label: 'Date of Issue', value: date },
+        ]
+      },
+    ]
+  );
+}
+
+function generateCOO(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'CERTIFICATE OF ORIGIN',
+    'COO - Certification of Country of Origin',
+    date,
+    [
+      {
+        title: 'EXPORTER/PRODUCER',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.registrationNumber || '_______________________________' },
+          { label: 'Address', value: additionalInfo?.address || '_______________________________' },
+          { label: 'Country', value: additionalInfo?.country || '_______________________________' },
+        ]
+      },
+      {
+        title: 'CONSIGNEE/BUYER',
+        fields: [
+          { label: 'Company Name', value: tradeDetails?.counterpartyName || '_______________________________' },
+          { label: 'Country', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'TRANSPORT DETAILS',
+        fields: [
+          { label: 'Means of Transport', value: '_______________________________' },
+          { label: 'Port of Loading', value: '_______________________________' },
+          { label: 'Port of Discharge', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'GOODS DESCRIPTION',
+        fields: [
+          { label: 'Description of Goods', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'HS Code', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ORIGIN DECLARATION',
+        fields: [
+          { label: 'Country of Origin', value: additionalInfo?.country || '_______________________________' },
+          { label: 'Declaration', value: '☐ Goods wholly obtained/produced in the country of origin' },
+        ]
+      },
+      {
+        title: 'CERTIFICATION',
+        content: '<p style="margin-top: 20px; font-style: italic;">The undersigned hereby certifies that the above details are correct and that all goods were produced/manufactured in the stated country of origin.</p>'
+      },
+    ]
+  );
+}
+
+function generateRWA(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'READY, WILLING AND ABLE LETTER',
+    'RWA - Bank Confirmation of Financial Capability',
+    date,
+    [
+      {
+        title: 'TO WHOM IT MAY CONCERN',
+        content: '<p style="text-align: center; font-weight: bold; font-size: 14pt; margin: 20px 0;">RE: CONFIRMATION OF READY, WILLING AND ABLE</p>'
+      },
+      {
+        title: 'CLIENT INFORMATION',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.registrationNumber || '_______________________________' },
+        ]
+      },
+      {
+        title: 'BANK INFORMATION',
+        fields: [
+          { label: 'Bank Name', value: additionalInfo?.bankName || '_______________________________' },
+          { label: 'SWIFT/BIC Code', value: additionalInfo?.swiftCode || '_______________________________' },
+        ]
+      },
+      {
+        title: 'TRANSACTION DETAILS',
+        fields: [
+          { label: 'Commodity', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'Estimated Value (USD)', value: tradeDetails ? `${(tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString()}` : '_______________________________' },
+        ]
+      },
+      {
+        title: 'BANK CONFIRMATION',
+        content: `
+          <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-left: 4px solid #0284C7;">
+            <p style="margin-bottom: 10px;">We, the undersigned financial institution, hereby certify and confirm that:</p>
+            <p style="margin-left: 20px;">1. The above-named client is our valued customer</p>
+            <p style="margin-left: 20px;">2. Our client is READY, WILLING, and ABLE to engage in this transaction</p>
+            <p style="margin-left: 20px;">3. Sufficient funds are available to complete this transaction</p>
+            <p style="margin-left: 20px;">4. We are prepared to issue a Letter of Credit or effect payment</p>
+          </div>
+        `
+      },
+    ]
+  );
+}
+
+function generateBCL(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'BANK COMFORT LETTER',
+    'BCL - Bank Financial Support Confirmation',
+    date,
+    [
+      {
+        title: 'TO WHOM IT MAY CONCERN',
+        content: '<p style="text-align: center; font-weight: bold; font-size: 14pt; margin: 20px 0;">RE: BANK COMFORT LETTER</p>'
+      },
+      {
+        title: 'CLIENT DETAILS',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Account Number', value: additionalInfo?.accountNumber || '****' + (Math.floor(Math.random() * 10000)).toString().padStart(4, '0') },
+        ]
+      },
+      {
+        title: 'BANK DETAILS',
+        fields: [
+          { label: 'Bank Name', value: additionalInfo?.bankName || '_______________________________' },
+          { label: 'SWIFT Code', value: additionalInfo?.swiftCode || '_______________________________' },
+        ]
+      },
+      {
+        title: 'BANK COMFORT STATEMENT',
+        content: `
+          <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-left: 4px solid #10B981;">
+            <p style="margin-bottom: 10px;">We provide this Comfort Letter regarding our client:</p>
+            <p style="margin-left: 20px;">• The company maintains accounts with our bank in good standing</p>
+            <p style="margin-left: 20px;">• Our client is financially sound and capable of conducting business</p>
+            <p style="margin-left: 20px;">• We would view favorably a request to facilitate this transaction</p>
+          </div>
+          <p style="margin-top: 20px; font-style: italic; color: #666;"><strong>Disclaimer:</strong> This letter does not constitute a guarantee of payment or a commitment to provide financing.</p>
+        `
+      },
+    ]
+  );
+}
+
+function generateTSA(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'TRANSACTION SUPPORT AGREEMENT',
+    'TSA - Transaction Facilitation Agreement',
+    date,
+    [
+      {
+        title: 'PARTIES',
+        fields: [
+          { label: 'Party A (Principal)', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Party B (Support Provider)', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'PURPOSE',
+        fields: [
+          { label: 'Transaction Description', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'Estimated Value', value: tradeDetails ? `${(tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString()}` : '_______________________________' },
+        ]
+      },
+      {
+        title: 'SCOPE OF SERVICES',
+        content: `
+          <div style="margin: 20px 0;">
+            <p>Party B agrees to provide the following support services:</p>
+            <p style="margin-left: 20px;">☐ Document preparation and verification</p>
+            <p style="margin-left: 20px;">☐ Quality assurance and inspection coordination</p>
+            <p style="margin-left: 20px;">☐ Logistics and shipping coordination</p>
+            <p style="margin-left: 20px;">☐ Banking and payment facilitation</p>
+          </div>
+        `
+      },
+      {
+        title: 'FEES AND PAYMENT',
+        fields: [
+          { label: 'Service Fee', value: '_______________________________' },
+          { label: 'Payment Terms', value: '_______________________________' },
+        ]
+      },
+    ]
+  );
+}
+
+function generateSPA(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'SALES AND PURCHASE AGREEMENT',
+    'SPA - Binding Sales Contract',
+    date,
+    [
+      {
+        title: 'SELLER',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.sellerName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.sellerRegistration || '_______________________________' },
+        ]
+      },
+      {
+        title: 'BUYER',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || tradeDetails?.counterpartyName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.buyerRegistration || '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 1: COMMODITY',
+        fields: [
+          { label: '1.1 Product Description', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: '1.2 Total Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: '1.3 Country of Origin', value: additionalInfo?.country || '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 2: PRICE AND PAYMENT',
+        fields: [
+          { label: '2.1 Unit Price (USD)', value: tradeDetails ? `${tradeDetails.pricePerUnit.toLocaleString()}` : '_______________________________' },
+          { label: '2.2 Total Contract Value (USD)', value: tradeDetails ? `${(tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString()}` : '_______________________________' },
+          { label: '2.3 Payment Method', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 3: DELIVERY',
+        fields: [
+          { label: '3.1 INCOTERM 2020', value: tradeDetails?.incoterm || '_______________________________' },
+          { label: '3.2 Delivery Period', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 4: INSPECTION AND QUALITY',
+        fields: [
+          { label: 'Inspector', value: '_______________________________' },
+          { label: 'Quality Standards', value: '_______________________________' },
+        ]
+      },
+    ]
+  );
+}
+
+function generateASWP(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  return generateStandardDocument(
+    'ASSIGNMENT OF SALE WITH PRODUCT',
+    'ASWP - Product Assignment Agreement',
+    date,
+    [
+      {
+        title: 'ASSIGNOR (Original Seller)',
+        fields: [
+          { label: 'Company Name', value: '_______________________________' },
+          { label: 'Registration Number', value: '_______________________________' },
+        ]
+      },
+      {
+        title: 'ASSIGNEE (New Seller)',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.registrationNumber || '_______________________________' },
+        ]
+      },
+      {
+        title: 'BUYER',
+        fields: [
+          { label: 'Company Name', value: tradeDetails?.counterpartyName || '_______________________________' },
+        ]
+      },
+      {
+        title: 'RECITALS',
+        content: '<p style="margin: 20px 0;">WHEREAS, the Assignor has entered into a contract with the Buyer for the sale of the commodity specified below, and wishes to assign all rights and obligations to the Assignee.</p>'
+      },
+      {
+        title: 'ARTICLE 1: ASSIGNMENT',
+        content: '<p style="margin: 20px 0;">The Assignor hereby assigns, transfers, and conveys to the Assignee all rights, title, interest, and obligations in the Contract. The Assignee accepts the assignment and assumes all obligations.</p>'
+      },
+      {
+        title: 'ARTICLE 2: PRODUCT DETAILS',
+        fields: [
+          { label: 'Product Description', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Total Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'Unit Price', value: tradeDetails ? `${tradeDetails.pricePerUnit.toLocaleString()}` : '_______________________________' },
+        ]
+      },
+      {
+        title: 'ARTICLE 3: CONSIDERATION',
+        fields: [
+          { label: 'Assignment Fee', value: '_______________________________' },
+          { label: 'Payment Terms', value: '_______________________________' },
+        ]
+      },
+    ]
+  );
+}
+
+function generatePOP(
+  tradeDetails: SendDocumentParams['tradeDetails'] | null,
+  date: string,
+  additionalInfo?: Record<string, any>
+): string {
+  const bondAmount = tradeDetails ? (tradeDetails.quantity * tradeDetails.pricePerUnit * 0.02).toFixed(2) : '___________';
+  
+  return generateStandardDocument(
+    '2% PERFORMANCE BOND',
+    'POP - Performance Guarantee',
+    date,
+    [
+      {
+        title: 'BOND REFERENCE',
+        fields: [
+          { label: 'Bond Number', value: `POP-${Date.now()}` },
+        ]
+      },
+      {
+        title: 'ISSUING BANK/GUARANTOR',
+        fields: [
+          { label: 'Bank Name', value: additionalInfo?.bankName || '_______________________________' },
+          { label: 'SWIFT Code', value: additionalInfo?.swiftCode || '_______________________________' },
+        ]
+      },
+      {
+        title: 'PRINCIPAL (Seller/Contractor)',
+        fields: [
+          { label: 'Company Name', value: additionalInfo?.companyName || '_______________________________' },
+          { label: 'Registration Number', value: additionalInfo?.registrationNumber || '_______________________________' },
+        ]
+      },
+      {
+        title: 'BENEFICIARY (Buyer)',
+        fields: [
+          { label: 'Company Name', value: tradeDetails?.counterpartyName || '_______________________________' },
+        ]
+      },
+      {
+        title: 'CONTRACT DETAILS',
+        fields: [
+          { label: 'Commodity', value: tradeDetails?.commodity.replace(/_/g, ' ').toUpperCase() || '_______________________________' },
+          { label: 'Quantity', value: tradeDetails ? `${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}` : '_______________________________' },
+          { label: 'Total Contract Value', value: tradeDetails ? `${(tradeDetails.quantity * tradeDetails.pricePerUnit).toLocaleString()}` : '_______________________________' },
+        ]
+      },
+      {
+        title: 'BOND DETAILS',
+        fields: [
+          { label: 'Bond Amount (2% of Contract)', value: bondAmount !== '___________' ? `${parseFloat(bondAmount).toLocaleString()}` : bondAmount },
+          { label: 'Effective Date', value: date },
+        ]
+      },
+      {
+        title: 'GUARANTEE TERMS',
+        content: `
+          <div style="margin: 20px 0; padding: 20px; background: #fef3c7; border-left: 4px solid #f59e0b;">
+            <p style="font-weight: bold; margin-bottom: 10px;">We hereby irrevocably and unconditionally guarantee payment in the event that:</p>
+            <p style="margin-left: 20px;">1. The Principal fails to perform any obligations under the Contract</p>
+            <p style="margin-left: 20px;">2. The Principal breaches material terms of the Contract</p>
+            <p style="margin-left: 20px;">3. The Principal fails to deliver goods according to specifications</p>
+            <p style="margin-left: 20px;">4. The Principal is in default under the Contract</p>
+          </div>
+        `
+      },
+    ]
+  );
+}
+
+function generateStandardDocument(
+  title: string,
+  subtitle: string,
+  date: string,
+  sections: {
+    title: string;
+    fields?: { label: string; value: string }[];
+    content?: string;
+  }[]
+): string {
+  const sectionsHtml = sections.map(section => {
+    let sectionContent = '';
+    
+    if (section.fields) {
+      sectionContent = section.fields.map(field => `
+        <div class="field">
+          <span class="field-label">${field.label}:</span>
+          <span class="field-value">${field.value}</span>
+        </div>
+      `).join('');
+    }
+    
+    if (section.content) {
+      sectionContent += section.content;
+    }
+    
+    return `
+      <div class="section">
+        <div class="section-title">${section.title}</div>
+        ${sectionContent}
+      </div>
+    `;
+  }).join('');
 
   return `
 <!DOCTYPE html>
@@ -2783,55 +3321,111 @@ function generatePlaceholderHTML(
 <head>
   <meta charset="UTF-8">
   <style>
+    @page { margin: 2cm; }
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Calibri', 'Arial', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #000;
+      margin: 0;
       padding: 40px;
+      background: #fff;
+    }
+    .document {
       max-width: 800px;
       margin: 0 auto;
+      background: white;
     }
     .header {
       text-align: center;
-      border-bottom: 3px solid #333;
-      padding-bottom: 20px;
       margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #1a1a1a;
     }
-    .title {
-      font-size: 24pt;
+    .doc-title {
+      font-size: 18pt;
       font-weight: bold;
-      margin-bottom: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
     }
-    .info-box {
-      background: #f5f5f5;
-      padding: 20px;
-      border-left: 4px solid #0284C7;
+    .doc-subtitle {
+      font-size: 10pt;
+      color: #555;
+      font-style: italic;
+    }
+    .date-ref {
       margin: 20px 0;
+      padding: 10px 15px;
+      background: #f5f5f5;
+      border-left: 4px solid #333;
+    }
+    .section {
+      margin-bottom: 25px;
+    }
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e0e0e0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field {
+      margin-bottom: 10px;
+      padding-left: 15px;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #333;
+      display: inline-block;
+      min-width: 180px;
+    }
+    .field-value {
+      color: #000;
+    }
+    .signature-section {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ccc;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="title">${docNames[documentType] || documentType}</div>
-    <div>(${documentType})</div>
+  <div class="document">
+    <div class="header">
+      <div class="doc-title">${title}</div>
+      <div class="doc-subtitle">${subtitle}</div>
+    </div>
+
+    <div class="date-ref">
+      <strong>Document Date:</strong> ${date}
+    </div>
+
+    ${sectionsHtml}
+
+    <div class="signature-section">
+      <p style="margin-bottom: 40px;"><strong>For signature and execution by authorized parties</strong></p>
+      <div style="margin-top: 60px; padding-top: 10px; border-top: 2px solid #000; max-width: 400px;">
+        Authorized Signature
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>This document is generated by Commodity Trading Platform</p>
+      <p>For official use only - Verify authenticity before relying on this document</p>
+    </div>
   </div>
-  
-  <div class="info-box">
-    <p><strong>Document Date:</strong> ${date}</p>
-    <p><strong>Reference:</strong> ${documentType}-${Date.now()}</p>
-  </div>
-  
-  <p>This ${docNames[documentType] || documentType} document template is currently being prepared.</p>
-  
-  <p>Please contact our support team for assistance with this document type.</p>
-  
-  ${tradeDetails ? `
-  <div class="info-box">
-    <h3>Trade Details:</h3>
-    <p><strong>Commodity:</strong> ${tradeDetails.commodity.replace(/_/g, ' ').toUpperCase()}</p>
-    <p><strong>Quantity:</strong> ${tradeDetails.quantity.toLocaleString()} ${tradeDetails.unit}</p>
-    <p><strong>Price:</strong> ${tradeDetails.pricePerUnit.toLocaleString()} per ${tradeDetails.unit}</p>
-    <p><strong>INCOTERM:</strong> ${tradeDetails.incoterm}</p>
-  </div>
-  ` : ''}
 </body>
 </html>
   `.trim();
