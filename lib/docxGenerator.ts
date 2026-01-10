@@ -1565,6 +1565,448 @@ function generateIMFPADocument(): Document {
   });
 }
 
+function generateBOLDocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "BILL OF LADING",
+          "(BOL) - Transport Document and Receipt of Goods"
+        ),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "B/L NUMBER: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("SHIPPER (Consignor)"),
+        createBlankLine("Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Tax ID:"),
+        
+        createSectionTitle("CONSIGNEE"),
+        createBlankLine("Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Tax ID:"),
+        
+        createSectionTitle("NOTIFY PARTY"),
+        createBlankLine("Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Phone/Email:"),
+        
+        createSectionTitle("VESSEL AND VOYAGE"),
+        createBlankLine("Vessel Name:"),
+        createBlankLine("Voyage Number:"),
+        createBlankLine("Flag:"),
+        createBlankLine("IMO Number:"),
+        
+        createSectionTitle("PORT INFORMATION"),
+        createBlankLine("Port of Loading:"),
+        createBlankLine("Port of Discharge:"),
+        createBlankLine("Place of Receipt:"),
+        createBlankLine("Place of Delivery:"),
+        
+        createSectionTitle("CARGO DETAILS"),
+        createBlankLine("Marks and Numbers:"),
+        createBlankLine("Number and Kind of Packages:"),
+        createBlankLine("Description of Goods:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Gross Weight (kg):"),
+        createBlankLine("Measurement (m³):"),
+        createBlankLine("Container Numbers:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("FREIGHT AND CHARGES"),
+        new Paragraph({
+          text: "☐ FREIGHT PREPAID",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ FREIGHT COLLECT",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Freight Amount:"),
+        createBlankLine("Place of Payment:"),
+        
+        createSectionTitle("TERMS AND CONDITIONS"),
+        new Paragraph({
+          text: "Number of Original B/Ls: ☐ 3  ☐ Other: _______",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Date of Issue:"),
+        createBlankLine("Place of Issue:"),
+        new Paragraph({
+          text: "☐ Clean On Board",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Received for Shipment",
+          spacing: { after: 200 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Shipped on board: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "IMPORTANT: This is a negotiable document and title to the goods. All terms and conditions of the carrier's standard Bill of Lading apply.",
+              italics: true,
+              size: 20,
+            }),
+          ],
+          spacing: { before: 200, after: 300 },
+        }),
+        
+        createSectionTitle("CARRIER SIGNATURE"),
+        new Paragraph({
+          text: "For and on behalf of the Carrier:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[CARRIER STAMP/SEAL]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
+function generateCOODocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "CERTIFICATE OF ORIGIN",
+          "(COO) - Certification of Country of Origin"
+        ),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Certificate Number: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("EXPORTER/PRODUCER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Business Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Country:"),
+        createBlankLine("Phone:"),
+        createBlankLine("Email:"),
+        
+        createSectionTitle("CONSIGNEE/BUYER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Country:"),
+        
+        createSectionTitle("TRANSPORT DETAILS"),
+        createBlankLine("Means of Transport:"),
+        createBlankLine("Vessel/Flight/Vehicle:"),
+        createBlankLine("Port of Loading:"),
+        createBlankLine("Port of Discharge:"),
+        createBlankLine("Final Destination:"),
+        
+        createSectionTitle("GOODS DESCRIPTION"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Marks, Numbers, and Packages:",
+              bold: true,
+              size: 22,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 200 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Number and Type of Packages:",
+              bold: true,
+              size: 22,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Quantity:"),
+        createBlankLine("Package Type:"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Description of Goods:",
+              bold: true,
+              size: 22,
+            }),
+          ],
+          spacing: { before: 200, after: 100 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 200 },
+        }),
+        
+        createBlankLine("HS Code:"),
+        createBlankLine("Gross Weight:"),
+        createBlankLine("Net Weight:"),
+        createBlankLine("Invoice Number:"),
+        createBlankLine("Invoice Date:"),
+        
+        createSectionTitle("ORIGIN DECLARATION"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Country of Origin: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        
+        new Paragraph({
+          text: "☐ The goods described above originate from the country stated",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Goods wholly obtained/produced in the country of origin",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Goods substantially transformed in the country of origin",
+          spacing: { after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Percentage of Local Content: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_____________ %",
+            }),
+          ],
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("CERTIFICATION"),
+        new Paragraph({
+          text: "The undersigned hereby certifies that the above details and statements are correct; that all goods were produced/manufactured in:",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Country of Origin:"),
+        new Paragraph({
+          text: "and that they comply with the origin requirements specified for the goods in the applicable preferential trade agreements or rules of origin.",
+          spacing: { before: 100, after: 300 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Issued by (Chamber of Commerce/Trade Authority):",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Authority Name:"),
+        createBlankLine("Registration Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        new Paragraph({
+          text: "",
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("EXPORTER DECLARATION"),
+        new Paragraph({
+          text: "I/We declare that the information provided is true and correct:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        
+        new Paragraph({
+          text: "",
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("CERTIFICATION AUTHORITY"),
+        new Paragraph({
+          text: "Certified by the undersigned authority:",
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Officer Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date of Issue:"),
+        createBlankLine("Place of Issue:"),
+        new Paragraph({
+          text: "[OFFICIAL STAMP/SEAL]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
 function generatePlaceholderDocument(title: string, subtitle: string): Document {
   return new Document({
     sections: [{
@@ -1631,10 +2073,10 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       doc = generatePlaceholderDocument('2% PERFORMANCE BOND', '(2% POP) - Performance Guarantee');
       break;
     case 'BOL':
-      doc = generatePlaceholderDocument('BILL OF LADING', '(BOL) - Shipping Document');
+      doc = generateBOLDocument();
       break;
     case 'COO':
-      doc = generatePlaceholderDocument('CERTIFICATE OF ORIGIN', '(COO) - Origin Certification');
+      doc = generateCOODocument();
       break;
     default:
       throw new Error(`Unknown document type: ${documentType}`);
