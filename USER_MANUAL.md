@@ -712,7 +712,7 @@ The app can generate and send standard commodity trading documents:
 - **LOI** (Letter of Intent)
 - **POF** (Proof of Funds)
 - **NCNDA** (Non-Circumvention Non-Disclosure Agreement)
-- **IMFPA** (IMFPA Master Fee Protection Agreement)
+- **IMFPA** (Irrevocable Master Fee Protection Agreement)
 
 #### How to Send Documents
 1. Tap the **Send icon** (top right of Documents screen)
@@ -1784,12 +1784,13 @@ At any approval stage, authorized users can reject a trade:
 - Standard protection agreement in commodity trading
 - Signed by all parties involved in transaction
 
-#### IMFPA (Master Fee Protection Agreement)
-- Protects intermediary fees and commissions
-- Ensures all parties receive agreed compensation
-- Used in multi-party commodity transactions
+#### Irrevocable Master Fee Protection Agreement (IMFPA)
+- Legally guarantees payment of fees (commissions) to intermediaries (brokers) involved in a deal
+- Ensures intermediaries are paid once the transaction closes, usually through automatic bank transfers
+- Prevents intermediaries from being bypassed in multi-party transactions
+- Crucial contract in international trade, especially for bulk commodities
+- Protects all parties and ensures transparent fee distribution
 - Legally binding fee protection structure
-- Prevents fee disputes and ensures transparent payment distribution
 
 ### Contract Documents
 
