@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen, User, Edit3 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Trade, Document, DocumentType } from '@/types';
@@ -70,10 +70,10 @@ export default function DocumentsScreen() {
     }
   };
 
-  const allDocuments = [
+  const allDocuments = useMemo(() => [
     ...trades.flatMap(trade => trade.documents.map(doc => ({ ...doc, source: 'trade', sourceId: trade.id, sourceName: trade.counterpartyName }))),
     ...counterparties.flatMap(cp => cp.documents.map(doc => ({ ...doc, source: 'counterparty', sourceId: cp.id, sourceName: cp.name })))
-  ].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  ].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()), [trades, counterparties]);
 
   const getDocumentIcon = (type: string) => {
     return type.includes('lc') || type.includes('contract') ? FileText : FileIcon;
@@ -115,19 +115,24 @@ export default function DocumentsScreen() {
       console.log('[Documents] Generating blank', docType, 'template');
       
       if (Platform.OS === 'web') {
-        const blob = await generateBlankDocx(docType);
-        const documentNames: Record<string, string> = {
-          'CIS': 'Corporate_Information_Sheet',
-          'SCO': 'Soft_Corporate_Offer',
-          'ICPO': 'Irrevocable_Corporate_Purchase_Order',
-          'LOI': 'Letter_of_Intent',
-          'POF': 'Proof_of_Funds',
-          'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
-          'MFPA': 'Master_Fee_Protection_Agreement',
-        };
-        const filename = `${documentNames[docType]}_Blank_Template.docx`;
-        downloadDocx(blob, filename);
-        Alert.alert('Success', `${docType} template downloaded successfully as editable Word document`);
+        try {
+          const blob = await generateBlankDocx(docType);
+          const documentNames: Record<string, string> = {
+            'CIS': 'Corporate_Information_Sheet',
+            'SCO': 'Soft_Corporate_Offer',
+            'ICPO': 'Irrevocable_Corporate_Purchase_Order',
+            'LOI': 'Letter_of_Intent',
+            'POF': 'Proof_of_Funds',
+            'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
+            'MFPA': 'Master_Fee_Protection_Agreement',
+          };
+          const filename = `${documentNames[docType]}_Blank_Template.docx`;
+          downloadDocx(blob, filename);
+          Alert.alert('Success', `${docType} template downloaded successfully as editable Word document`);
+        } catch (genError) {
+          console.error('[Documents] Error generating docx:', genError);
+          Alert.alert('Error', 'Failed to generate template. Please try again.');
+        }
       } else {
         Alert.alert(
           'Web Only Feature',
@@ -136,7 +141,7 @@ export default function DocumentsScreen() {
         );
       }
     } catch (error) {
-      console.error('Error generating template:', error);
+      console.error('[Documents] Error in handleDownloadBlankTemplate:', error);
       Alert.alert('Error', 'Failed to generate template. Please try again.');
     }
   };
@@ -220,10 +225,14 @@ export default function DocumentsScreen() {
   };
 
   const uploadDocument = async (uri: string, fileName: string, mimeType: string) => {
-    if (!uploadTarget) return;
+    if (!uploadTarget) {
+      console.log('[Documents] No upload target set');
+      return;
+    }
 
     setIsUploading(true);
     try {
+      console.log('[Documents] Uploading document:', fileName);
       const fileExt = fileName.split('.').pop() || 'jpg';
       const timestamp = Date.now();
       const filePath = `${uploadTarget.type}s/${uploadTarget.id}/${timestamp}.${fileExt}`;
@@ -277,11 +286,12 @@ export default function DocumentsScreen() {
         }
       }
 
+      console.log('[Documents] Document uploaded successfully');
       Alert.alert('Success', 'Document uploaded successfully');
       setShowUploadModal(false);
       setUploadTarget(null);
     } catch (error) {
-      console.error('Error uploading document:', error);
+      console.error('[Documents] Error uploading document:', error);
       Alert.alert('Error', 'Failed to upload document. Please try again.');
     } finally {
       setIsUploading(false);
