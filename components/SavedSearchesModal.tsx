@@ -146,7 +146,7 @@ export default function SavedSearchesModal({ visible, onClose, currentSearch, on
                 </Text>
                 {currentSearch.searchQuery && (
                   <Text style={styles.previewText}>
-                    Query: &quot;{currentSearch.searchQuery}&quot;
+                    {`Query: "${currentSearch.searchQuery}"`}
                   </Text>
                 )}
               </View>
