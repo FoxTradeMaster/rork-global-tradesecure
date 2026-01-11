@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
-import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut } from 'lucide-react-native';
+import { useAIMarketUpdater } from '@/contexts/AIMarketUpdaterContext';
+import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -12,7 +13,18 @@ export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
   const { currentUser, clearUser } = useTrading();
   const metrics = usePortfolioMetrics();
+  const { 
+    settings, 
+    updateLogs, 
+    isUpdating, 
+    currentCommodity, 
+    toggleEnabled, 
+    togglePaused, 
+    manualUpdate, 
+    getTimeUntilNextUpdate 
+  } = useAIMarketUpdater();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showUpdateLogs, setShowUpdateLogs] = useState(false);
   const router = useRouter();
 
   const handleManageSubscription = () => {
@@ -184,6 +196,155 @@ export default function SettingsScreen() {
                   </TouchableOpacity>
                 </>
               )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>AI Market Updater</Text>
+            <View style={styles.aiUpdaterCard}>
+              <View style={styles.aiUpdaterHeader}>
+                <View style={styles.aiUpdaterIconContainer}>
+                  <Zap size={24} color="#F59E0B" fill="#F59E0B" />
+                </View>
+                <View style={styles.aiUpdaterInfo}>
+                  <Text style={styles.aiUpdaterTitle}>Autonomous Market Updates</Text>
+                  <Text style={styles.aiUpdaterDescription}>
+                    AI adds new buyers & sellers daily for each commodity sector
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.statusRow}>
+                <View style={styles.statusItem}>
+                  <View style={[styles.statusDot, { backgroundColor: settings.isEnabled ? '#10B981' : '#6B7280' }]} />
+                  <Text style={styles.statusText}>
+                    {settings.isEnabled ? 'Enabled' : 'Disabled'}
+                  </Text>
+                </View>
+                {settings.isEnabled && (
+                  <View style={styles.statusItem}>
+                    <View style={[styles.statusDot, { backgroundColor: settings.isPaused ? '#F59E0B' : '#10B981' }]} />
+                    <Text style={styles.statusText}>
+                      {settings.isPaused ? 'Paused' : 'Active'}
+                    </Text>
+                  </View>
+                )}
+                {isUpdating && (
+                  <View style={styles.statusItem}>
+                    <Activity size={14} color="#3B82F6" />
+                    <Text style={[styles.statusText, { color: '#3B82F6' }]}>Updating...</Text>
+                  </View>
+                )}
+              </View>
+
+              {currentCommodity && (
+                <View style={styles.currentUpdateBanner}>
+                  <Activity size={16} color="#3B82F6" />
+                  <Text style={styles.currentUpdateText}>
+                    Generating companies for {currentCommodity}
+                  </Text>
+                </View>
+              )}
+
+              {settings.isEnabled && getTimeUntilNextUpdate() && (
+                <View style={styles.nextUpdateRow}>
+                  <Clock size={14} color="#6B7280" />
+                  <Text style={styles.nextUpdateText}>
+                    Next update in {getTimeUntilNextUpdate()}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.aiUpdaterControls}>
+                <TouchableOpacity
+                  style={[styles.controlButton, settings.isEnabled && styles.controlButtonActive]}
+                  onPress={toggleEnabled}
+                >
+                  <Text style={[styles.controlButtonText, settings.isEnabled && styles.controlButtonTextActive]}>
+                    {settings.isEnabled ? 'Disable' : 'Enable'}
+                  </Text>
+                </TouchableOpacity>
+
+                {settings.isEnabled && (
+                  <TouchableOpacity
+                    style={[styles.controlButton, styles.pauseButton]}
+                    onPress={togglePaused}
+                    disabled={isUpdating}
+                  >
+                    {settings.isPaused ? (
+                      <Play size={16} color="#FFFFFF" />
+                    ) : (
+                      <Pause size={16} color="#FFFFFF" />
+                    )}
+                    <Text style={styles.controlButtonText}>
+                      {settings.isPaused ? 'Resume' : 'Pause'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.controlButton, styles.manualButton]}
+                  onPress={manualUpdate}
+                  disabled={isUpdating || settings.isPaused}
+                >
+                  <Zap size={16} color="#FFFFFF" />
+                  <Text style={styles.controlButtonText}>Update Now</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.updaterStats}>
+                <View style={styles.updaterStatItem}>
+                  <Text style={styles.updaterStatValue}>{settings.companiesPerUpdate}</Text>
+                  <Text style={styles.updaterStatLabel}>Companies/Update</Text>
+                </View>
+                <View style={styles.updaterStatItem}>
+                  <Text style={styles.updaterStatValue}>{settings.updateIntervalHours}h</Text>
+                  <Text style={styles.updaterStatLabel}>Interval</Text>
+                </View>
+                <View style={styles.updaterStatItem}>
+                  <Text style={styles.updaterStatValue}>{settings.selectedCommodities.length}</Text>
+                  <Text style={styles.updaterStatLabel}>Commodities</Text>
+                </View>
+              </View>
+
+              {updateLogs.length > 0 && (
+                <TouchableOpacity
+                  style={styles.logsButton}
+                  onPress={() => setShowUpdateLogs(!showUpdateLogs)}
+                >
+                  <Text style={styles.logsButtonText}>View Recent Updates</Text>
+                  <ChevronRight size={16} color="#3B82F6" />
+                </TouchableOpacity>
+              )}
+
+              {showUpdateLogs && updateLogs.slice(0, 5).map((log) => (
+                <View key={log.id} style={styles.logItem}>
+                  <View style={styles.logHeader}>
+                    {log.success ? (
+                      <CheckCircle size={14} color="#10B981" />
+                    ) : (
+                      <XCircle size={14} color="#EF4444" />
+                    )}
+                    <Text style={styles.logCommodity}>{log.commodity}</Text>
+                    <Text style={styles.logTime}>
+                      {new Date(log.timestamp).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  {log.success ? (
+                    <Text style={styles.logText}>
+                      Added {log.companiesAdded} companies
+                    </Text>
+                  ) : (
+                    <Text style={[styles.logText, { color: '#EF4444' }]}>
+                      Error: {log.error}
+                    </Text>
+                  )}
+                </View>
+              ))}
+
+              <Text style={styles.aiUpdaterWarning}>
+                ⚠️ AI updates consume API credits. Use pause feature to control costs.
+              </Text>
             </View>
           </View>
 
@@ -599,6 +760,190 @@ const styles = StyleSheet.create({
   feeNote: {
     fontSize: 12,
     color: '#64748B',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic' as const,
+  },
+  aiUpdaterCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  aiUpdaterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  aiUpdaterIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiUpdaterInfo: {
+    flex: 1,
+  },
+  aiUpdaterTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  aiUpdaterDescription: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+    flexWrap: 'wrap',
+  },
+  statusItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#0F172A',
+  },
+  currentUpdateBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#E0F2FE',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  currentUpdateText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#3B82F6',
+  },
+  nextUpdateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 16,
+  },
+  nextUpdateText: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  aiUpdaterControls: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  controlButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+  },
+  controlButtonActive: {
+    backgroundColor: '#10B981',
+  },
+  pauseButton: {
+    backgroundColor: '#F59E0B',
+  },
+  manualButton: {
+    backgroundColor: '#3B82F6',
+  },
+  controlButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#64748B',
+  },
+  controlButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  updaterStats: {
+    flexDirection: 'row',
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
+    marginBottom: 12,
+  },
+  updaterStatItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  updaterStatValue: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#0284C7',
+    marginBottom: 2,
+  },
+  updaterStatLabel: {
+    fontSize: 10,
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  logsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  logsButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#3B82F6',
+  },
+  logItem: {
+    backgroundColor: '#F8FAFC',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  logHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  logCommodity: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: '#0F172A',
+    flex: 1,
+  },
+  logTime: {
+    fontSize: 11,
+    color: '#6B7280',
+  },
+  logText: {
+    fontSize: 11,
+    color: '#64748B',
+    marginLeft: 22,
+  },
+  aiUpdaterWarning: {
+    fontSize: 11,
+    color: '#F59E0B',
     textAlign: 'center',
     marginTop: 12,
     fontStyle: 'italic' as const,

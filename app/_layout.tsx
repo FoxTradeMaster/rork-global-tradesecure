@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
+import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -111,9 +112,11 @@ export default function RootLayout() {
         <SubscriptionProvider>
           <TradingProvider>
             <MarketProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
+              <AIMarketUpdaterProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </AIMarketUpdaterProvider>
             </MarketProvider>
           </TradingProvider>
         </SubscriptionProvider>
