@@ -5,6 +5,12 @@ import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { MarketParticipant, TradingHouse, CommodityType } from '@/types';
 import { addMarketParticipants } from '@/mocks/market-participants';
+import {
+  searchCompanies,
+  getSearchQueriesForCommodity,
+  formatCompanyLocation,
+  generateCompanyDescription,
+} from '@/lib/opencorporates';
 
 const CompanySchema = z.object({
   name: z.string().describe('Company name'),
@@ -115,40 +121,66 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
   }, [updateLogs]);
 
   const updateMarketForCommodity = useCallback(async (commodity: CommodityType) => {
-    console.log(`[AIMarketUpdater] Updating market for ${commodity}`);
+    console.log(`[AIMarketUpdater] Updating market for ${commodity} using OpenCorporates API`);
     setCurrentCommodity(commodity);
 
     try {
-      const prompt = `Generate ${settings.companiesPerUpdate} real, verified companies that trade in ${commodity}. 
+      const searchQueries = getSearchQueriesForCommodity(commodity);
+      const randomQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
       
-Include a mix of buyers and sellers from different regions globally. 
-Focus on legitimate companies with actual market presence.
-For edible_oils, include food manufacturers, retailers, distributors, and trading companies.
-For fuel_oil, include energy traders, refiners, and logistics companies.
-For gold, include bullion dealers, refiners, and trading houses.
-For coal, include mining companies, power utilities, and traders.
+      console.log(`[AIMarketUpdater] Searching OpenCorporates for: ${randomQuery}`);
+      
+      const searchResults = await searchCompanies(randomQuery, 1, settings.companiesPerUpdate);
+      
+      if (!searchResults.companies || searchResults.companies.length === 0) {
+        console.log(`[AIMarketUpdater] No companies found, trying different query`);
+        addLog({
+          commodity,
+          companiesAdded: 0,
+          success: false,
+          error: 'No companies found in OpenCorporates',
+        });
+        return 0;
+      }
 
-Provide accurate headquarters locations with city and country.
-Write professional descriptions that explain their role in the market.`;
+      const companiesData = searchResults.companies.slice(0, settings.companiesPerUpdate);
+      
+      console.log(`[AIMarketUpdater] Enriching ${companiesData.length} companies with AI`);
+      
+      const enrichmentPrompt = `Analyze these real companies from OpenCorporates and classify their business type (buyer, seller, or both) in the ${commodity} market. Also provide a brief specialization description.
 
-      const result = await generateObject({
+Companies:
+${companiesData.map((c, i) => `${i + 1}. ${c.company.name} - ${c.company.company_type || 'Company'}`).join('\n')}
+
+For each company, determine if they are likely a buyer, seller, or both in the ${commodity} commodity market based on their name and type. Also provide a short specialization.`;
+
+      const enrichmentResult = await generateObject({
         messages: [
           {
             role: 'user',
-            content: prompt,
+            content: enrichmentPrompt,
           },
         ],
         schema: MarketUpdateSchema,
       });
 
-      const newParticipants: MarketParticipant[] = result.companies.map((company, index) => {
+      const newParticipants: MarketParticipant[] = companiesData.map((item, index) => {
+        const ocCompany = item.company;
+        const aiEnrichment = enrichmentResult.companies[index] || {
+          businessType: 'both' as const,
+          specialization: `${commodity.replace(/_/g, ' ')} trading and distribution`,
+        };
+        
+        const location = formatCompanyLocation(ocCompany);
+        const description = generateCompanyDescription(ocCompany, commodity);
+        
         const baseParticipant = {
-          id: `ai_generated_${commodity}_${Date.now()}_${index}`,
-          name: company.name,
-          headquarters: company.headquarters,
-          description: company.description,
-          verified: false,
-          website: company.website,
+          id: `opencorporates_${ocCompany.jurisdiction_code}_${ocCompany.company_number}_${Date.now()}`,
+          name: ocCompany.name,
+          headquarters: location,
+          description: description,
+          verified: true,
+          website: ocCompany.registry_url,
           commodities: [commodity] as CommodityType[],
         };
 
@@ -156,10 +188,10 @@ Write professional descriptions that explain their role in the market.`;
           ...baseParticipant,
           type: 'trading_house' as const,
           category: ['diversified' as const],
-          offices: [company.headquarters],
-          licenses: [],
-          specialization: company.specialization,
-          businessType: company.businessType,
+          offices: [location],
+          licenses: [`${ocCompany.jurisdiction_code.toUpperCase()}: ${ocCompany.company_number}`],
+          specialization: aiEnrichment.specialization,
+          businessType: aiEnrichment.businessType,
         } as TradingHouse;
       });
 
@@ -171,7 +203,7 @@ Write professional descriptions that explain their role in the market.`;
         success: true,
       });
 
-      console.log(`[AIMarketUpdater] Successfully added ${newParticipants.length} companies for ${commodity}`);
+      console.log(`[AIMarketUpdater] Successfully added ${newParticipants.length} real companies for ${commodity}`);
       return newParticipants.length;
     } catch (error) {
       console.error(`[AIMarketUpdater] Error updating ${commodity}:`, error);
@@ -207,7 +239,7 @@ Write professional descriptions that explain their role in the market.`;
       const added = await updateMarketForCommodity(commodity);
       totalAdded += added;
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     await saveSettings({
