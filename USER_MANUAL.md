@@ -564,7 +564,7 @@ Tap filter chips to view trades by status:
 ### Creating a New Trade
 1. Tap the **+** button in Dashboard or Trades screen
 2. Fill in the following information:
-   - **Commodity Type** - Select from gold, fuel oil, steam coal, anthracite coal, or urea
+   - **Commodity Type** - Select from gold, fuel oil, steam coal, anthracite coal, urea, or edible oils
    - **Counterparty** - Choose from approved counterparties
    - **Quantity** - Enter amount and unit (MT, BBL, oz)
    - **Price Per Unit** - Enter price in USD
