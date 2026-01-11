@@ -110,13 +110,14 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO') => {
+  const handleDownloadBlankTemplate = async (docType: 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO' | 'QC') => {
     try {
       console.log('[Documents] Generating blank', docType, 'template');
       
       if (Platform.OS === 'web') {
         try {
-          const blob = await generateBlankDocx(docType);
+          const mappedDocType = docType === 'QC' ? 'QUALITY_CERT' : docType;
+          const blob = await generateBlankDocx(mappedDocType as any);
           const documentNames: Record<string, string> = {
             'CIS': 'Corporate_Information_Sheet',
             'SCO': 'Soft_Corporate_Offer',
@@ -134,6 +135,7 @@ export default function DocumentsScreen() {
             'POP': '2_Percent_Performance_Bond',
             'BOL': 'Bill_of_Lading',
             'COO': 'Certificate_of_Origin',
+            'QC': 'Quality_Certificate',
           };
           const filename = `${documentNames[docType]}_Blank_Template.docx`;
           downloadDocx(blob, filename);
@@ -592,11 +594,12 @@ export default function DocumentsScreen() {
                   { type: 'POP', name: '2% POP', desc: 'Performance bond' },
                   { type: 'BOL', name: 'Bill of Lading', desc: 'Shipping document' },
                   { type: 'COO', name: 'Certificate of Origin', desc: 'Origin certification' },
+                  { type: 'QC', name: 'Quality Certificate', desc: 'Product quality verification' },
                 ].map(template => (
                   <TouchableOpacity
                     key={template.type}
                     style={styles.templateCard}
-                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO')}
+                    onPress={() => handleDownloadBlankTemplate(template.type as 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO' | 'QC')}
                     activeOpacity={0.7}
                   >
                     <View style={styles.templateIconContainer}>
