@@ -9,7 +9,7 @@ import {
   Packer
 } from 'docx';
 
-type DocumentType = 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO';
+type DocumentType = 'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO' | 'QUALITY_CERT';
 
 const MIDNIGHT_BLUE = "1E3A5F";
 const LIGHT_GRAY = "F5F5F5";
@@ -3117,6 +3117,301 @@ function generateASWPDocument(): Document {
   });
 }
 
+function generateQualityCertDocument(): Document {
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        ...createDocumentHeader(
+          "QUALITY CERTIFICATE",
+          "Product Quality Verification Certificate"
+        ),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Certificate Number: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "___________________________________________",
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("INSPECTION COMPANY"),
+        createBlankLine("Company Name:"),
+        createBlankLine("License/Accreditation Number:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Phone:"),
+        createBlankLine("Email:"),
+        createBlankLine("Website:"),
+        
+        createSectionTitle("SHIPPER/SELLER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Contact Person:"),
+        
+        createSectionTitle("CONSIGNEE/BUYER"),
+        createBlankLine("Company Name:"),
+        createBlankLine("Address:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        
+        createSectionTitle("PRODUCT INFORMATION"),
+        createBlankLine("Product Name/Description:"),
+        createBlankLine("HS Code:"),
+        createBlankLine("Country of Origin:"),
+        createBlankLine("Manufacturer:"),
+        createBlankLine("Brand Name:"),
+        createBlankLine("Batch/Lot Number:"),
+        createBlankLine("Manufacturing Date:"),
+        createBlankLine("Expiry Date:"),
+        
+        createSectionTitle("SHIPMENT DETAILS"),
+        createBlankLine("Contract/Purchase Order Number:"),
+        createBlankLine("Invoice Number:"),
+        createBlankLine("Bill of Lading Number:"),
+        createBlankLine("Container Numbers:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Number of Packages:"),
+        createBlankLine("Gross Weight:"),
+        createBlankLine("Net Weight:"),
+        createBlankLine("Loading Port:"),
+        createBlankLine("Destination Port:"),
+        
+        createSectionTitle("INSPECTION DETAILS"),
+        createBlankLine("Inspection Location:"),
+        createBlankLine("Inspection Date:"),
+        createBlankLine("Inspection Method/Standard:"),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 100 },
+        }),
+        createBlankLine("Inspector Name:"),
+        createBlankLine("Inspector License Number:"),
+        
+        createSectionTitle("QUALITY SPECIFICATIONS & TEST RESULTS"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Parameter 1: ",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 50 },
+        }),
+        createBlankLine("Specification: _______________  Actual Result: _______________  ☐ Pass  ☐ Fail"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Parameter 2: ",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 100, after: 50 },
+        }),
+        createBlankLine("Specification: _______________  Actual Result: _______________  ☐ Pass  ☐ Fail"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Parameter 3: ",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 100, after: 50 },
+        }),
+        createBlankLine("Specification: _______________  Actual Result: _______________  ☐ Pass  ☐ Fail"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Parameter 4: ",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 100, after: 50 },
+        }),
+        createBlankLine("Specification: _______________  Actual Result: _______________  ☐ Pass  ☐ Fail"),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Parameter 5: ",
+              bold: true,
+            }),
+          ],
+          spacing: { before: 100, after: 50 },
+        }),
+        createBlankLine("Specification: _______________  Actual Result: _______________  ☐ Pass  ☐ Fail"),
+        
+        new Paragraph({
+          text: "Additional Parameters:",
+          spacing: { before: 200, after: 100 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("OVERALL QUALITY ASSESSMENT"),
+        new Paragraph({
+          text: "☐ PASSED - Product meets all quality specifications",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ PASSED WITH REMARKS - See notes below",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ FAILED - Product does not meet specifications",
+          spacing: { after: 200 },
+        }),
+        
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Remarks/Comments:",
+              bold: true,
+            }),
+          ],
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 50 },
+        }),
+        new Paragraph({
+          text: "_____________________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("COMPLIANCE STANDARDS"),
+        new Paragraph({
+          text: "This inspection was conducted in accordance with:",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ ISO Standards: _____________________________",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ ASTM Standards: _____________________________",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Contract Specifications",
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: "☐ Other: _____________________________________",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("CERTIFICATION"),
+        new Paragraph({
+          text: "We hereby certify that the above information is true and accurate based on our inspection and testing. The product has been inspected and tested in accordance with the specified standards and contract requirements.",
+          spacing: { after: 300 },
+        }),
+        
+        createSectionTitle("VALIDITY"),
+        createBlankLine("Issue Date:"),
+        createBlankLine("Valid Until:"),
+        
+        new Paragraph({
+          text: "",
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("INSPECTOR SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Inspector Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Inspector Name:"),
+        createBlankLine("Inspector ID/License:"),
+        createBlankLine("Date:"),
+        
+        new Paragraph({
+          text: "",
+          spacing: { after: 200 },
+        }),
+        
+        createSectionTitle("AUTHORIZED OFFICER SIGNATURE"),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Authorized Signature: ",
+              bold: true,
+            }),
+            new TextRun({
+              text: "_______________________________",
+              underline: { type: UnderlineType.SINGLE },
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+        createBlankLine("Officer Name:"),
+        createBlankLine("Title:"),
+        createBlankLine("Date:"),
+        new Paragraph({
+          text: "[COMPANY OFFICIAL STAMP/SEAL]",
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200 },
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
+          },
+        }),
+      ],
+    }],
+  });
+}
+
 function generatePOPDocument(): Document {
   return new Document({
     sections: [{
@@ -3379,6 +3674,9 @@ export async function generateBlankDocx(documentType: DocumentType): Promise<Blo
       break;
     case 'COO':
       doc = generateCOODocument();
+      break;
+    case 'QUALITY_CERT':
+      doc = generateQualityCertDocument();
       break;
     default:
       throw new Error(`Unknown document type: ${documentType}`);

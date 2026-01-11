@@ -1760,9 +1760,9 @@ At any approval stage, authorized users can reject a trade:
 
 ## Document Types
 
-Fox Trade Master™ supports 16 standard commodity trading documents. All documents are available as downloadable blank templates (editable Word .docx format) in the Documents tab.
+Fox Trade Master™ supports 17 standard commodity trading documents. All documents are available as downloadable blank templates (editable Word .docx format) in the Documents tab.
 
-### Available Document Templates (16 Total)
+### Available Document Templates (17 Total)
 
 #### Pre-Trade Documents (10)
 
@@ -1873,6 +1873,13 @@ Fox Trade Master™ supports 16 standard commodity trading documents. All docume
 - May affect import tariffs and trade preferences
 - Issued by chamber of commerce or authorized trade authority
 - Essential for preferential trade agreements (FTA benefits)
+
+**17. Quality Certificate**
+- Verifies product specifications and quality standards
+- Issued by independent inspection companies (SGS, Bureau Veritas, Intertek)
+- Documents test results against contract specifications
+- Essential for buyer acceptance and payment release
+- Required for most commodity transactions
 
 ---
 
