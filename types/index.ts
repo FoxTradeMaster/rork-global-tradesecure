@@ -134,6 +134,8 @@ export interface TradingHouse {
   founded?: number;
   specialization: string;
   businessType?: 'buyer' | 'seller' | 'both';
+  logo?: string | null;
+  brandColor?: string | null;
 }
 
 export interface Broker {

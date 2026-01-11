@@ -5,6 +5,7 @@ import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { MarketParticipant, TradingHouse, CommodityType } from '@/types';
 import { addMarketParticipants } from '@/mocks/market-participants';
+import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
   name: z.string().describe('Real company name - must be an actual existing company'),
@@ -174,27 +175,45 @@ For each company provide:
         return 0;
       }
 
-      const newParticipants: MarketParticipant[] = generationResult.companies.map((company, index) => {
-        const baseParticipant = {
-          id: `ai_generated_${commodity}_${Date.now()}_${index}`,
-          name: company.name,
-          headquarters: company.headquarters,
-          description: company.description,
-          verified: true,
-          website: company.website,
-          commodities: [commodity] as CommodityType[],
-        };
+      const newParticipants: MarketParticipant[] = await Promise.all(
+        generationResult.companies.map(async (company, index) => {
+          const baseParticipant = {
+            id: `ai_generated_${commodity}_${Date.now()}_${index}`,
+            name: company.name,
+            headquarters: company.headquarters,
+            description: company.description,
+            verified: true,
+            website: company.website,
+            commodities: [commodity] as CommodityType[],
+          };
 
-        return {
-          ...baseParticipant,
-          type: 'trading_house' as const,
-          category: ['diversified' as const],
-          offices: [company.headquarters],
-          licenses: [`${company.jurisdiction.toUpperCase()}: ${company.companyType}`],
-          specialization: company.specialization,
-          businessType: company.businessType,
-        } as TradingHouse;
-      });
+          let enrichedData = null;
+          try {
+            if (company.website) {
+              console.log(`[AIMarketUpdater] Enriching ${company.name} with BrandFetch`);
+              enrichedData = await trpcClient.brandfetch.enrichCompany.query({
+                name: company.name,
+                website: company.website,
+              });
+            }
+          } catch {
+            console.log(`[AIMarketUpdater] BrandFetch enrichment failed for ${company.name}, continuing without enrichment`);
+          }
+
+          return {
+            ...baseParticipant,
+            type: 'trading_house' as const,
+            category: ['diversified' as const],
+            offices: [company.headquarters],
+            licenses: [`${company.jurisdiction.toUpperCase()}: ${company.companyType}`],
+            specialization: company.specialization,
+            businessType: company.businessType,
+            logo: enrichedData?.logo,
+            brandColor: enrichedData?.primaryColor,
+            verified: enrichedData?.verified || true,
+          } as TradingHouse;
+        })
+      );
 
       addMarketParticipants(newParticipants);
 
