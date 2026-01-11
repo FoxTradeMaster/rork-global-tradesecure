@@ -564,7 +564,7 @@ Tap filter chips to view trades by status:
 ### Creating a New Trade
 1. Tap the **+** button in Dashboard or Trades screen
 2. Fill in the following information:
-   - **Commodity Type** - Select from gold, fuel oil, steam coal, anthracite coal, urea, or edible oils
+   - **Commodity Type** - Select from Gold, Fuel Oil, Steam Coal, Anthracite Coal, Urea, or Edible Oils
    - **Counterparty** - Choose from approved counterparties
    - **Quantity** - Enter amount and unit (MT, BBL, oz)
    - **Price Per Unit** - Enter price in USD
@@ -801,6 +801,7 @@ Filter to see only participants dealing in specific commodities:
 - Steam Coal
 - Anthracite Coal
 - Urea
+- Edible Oils
 
 ### Viewing Participant Details
 1. Tap any participant card
@@ -2133,6 +2134,14 @@ For regulatory or compliance questions:
 - Uses: Fertilizer, industrial
 - Common origins: Middle East, China
 - Typical incoterm: FOB, CFR, DAP
+
+### Edible Oils
+- Unit: Metric Tons (MT)
+- Types: Palm oil, soybean oil, sunflower oil, canola oil, olive oil
+- Specifications: Free fatty acid content, moisture, impurities, peroxide value
+- Uses: Food industry, cooking oil, industrial applications
+- Common origins: Indonesia, Malaysia, Argentina, Brazil, Ukraine
+- Typical incoterm: FOB, CFR, CIF
 
 ---
 
