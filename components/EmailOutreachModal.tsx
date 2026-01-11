@@ -231,7 +231,7 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                 value={customSubject}
                 onChangeText={setCustomSubject}
               />
-              <Text style={styles.hint}>Variables: {'{company}'}, {'{commodity}'}, {'{sender}'}</Text>
+              <Text style={styles.hint}>Variables: {'{company}, {commodity}, {sender}'}</Text>
             </View>
 
             <View style={styles.section}>
@@ -247,7 +247,7 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                 textAlignVertical="top"
               />
               <Text style={styles.hint}>
-                Variables: {'{recipient}'}, {'{company}'}, {'{commodity}'}, {'{sender}'}, {'{quantity}'}, {'{delivery}'}
+                Variables: {'{recipient}, {company}, {commodity}, {sender}, {quantity}, {delivery}'}
               </Text>
             </View>
 
