@@ -193,6 +193,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: '90%',
     paddingBottom: 40,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 20,
   },
   title: {
     fontSize: 28,
