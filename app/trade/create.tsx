@@ -13,7 +13,8 @@ const COMMODITIES: { value: CommodityType; label: string }[] = [
   { value: 'fuel_oil', label: 'Fuel Oil' },
   { value: 'steam_coal', label: 'Steam Coal' },
   { value: 'anthracite_coal', label: 'Anthracite Coal' },
-  { value: 'urea', label: 'Urea' }
+  { value: 'urea', label: 'Urea' },
+  { value: 'edible_oils', label: 'Edible Oils' }
 ];
 
 const INCOTERMS = ['CIF', 'FOB', 'CFR', 'DDP', 'EXW', 'FCA', 'DAP'];
