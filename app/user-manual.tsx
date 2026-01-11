@@ -243,66 +243,126 @@ Tap filter chips to view trades by status:
 
 ## Document Types
 
-### Pre-Trade Documents
+Fox Trade Master™ supports 17 standard commodity trading documents. All documents are available as downloadable blank templates (editable Word .docx format) in the Documents tab.
 
-**Letter of Intent (LOI)**
+### Available Document Templates (17 Total)
+
+#### Pre-Trade Documents (10)
+
+**1. Corporate Information Sheet (CIS)**
+- Company details and credentials
+- Business registration information
+- Contact information and representatives
+- Banking details
+- Foundation document for establishing trade relationships
+
+**2. Letter of Intent (LOI)**
 - Buyer's preliminary interest in purchasing
 - Non-binding expression of intent
+- Includes approximate quantities and terms
+- Starts negotiation process
 
-**Soft Corporate Offer (SCO)**
+**3. Soft Corporate Offer (SCO)**
 - Seller's preliminary offer
+- Outlines basic terms of sale
 - Subject to final negotiation
+- Non-binding commercial proposal
 
-**Irrevocable Corporate Purchase Order (ICPO)**
+**4. Full Corporate Offer (FCO)**
+- Seller's complete binding offer
+- Detailed terms, specifications, and pricing
+- Legally binding commercial offer
+- More comprehensive and formal than SCO
+
+**5. Irrevocable Corporate Purchase Order (ICPO)**
 - Buyer's binding commitment to purchase
-- Legally binding once accepted
+- Specific quantities, prices, and delivery terms
+- Legally binding once accepted by seller
+- Typically requires accompanying Proof of Funds
 
-**Proof of Funds (POF)**
-- Bank document verifying buyer has funds
+**6. Proof of Funds (POF)**
+- Bank document verifying buyer has available funds
 - Required for large transactions
+- Shows financial capability to complete purchase
+- Issued by buyer's bank to seller
 
-**Non-Circumvention Non-Disclosure Agreement (NCNDA)**
+**7. Ready, Willing, and Able Letter (RWA)**
+- Bank confirmation of party's readiness to proceed
+- Demonstrates willingness to transact
+- Shows financial ability to fulfill obligations
+- Often required before negotiations advance to contract stage
+
+**8. Bank Comfort Letter (BCL)**
+- Bank confirmation of client's financial standing
+- Indicates bank's support for the transaction
+- Provides financial assurance to counterparty
+- Not a payment guarantee but shows creditworthiness
+
+**9. Non-Circumvention Non-Disclosure Agreement (NCNDA)**
 - Protects parties from being circumvented in multi-party transactions
 - Ensures confidentiality of business information
 - Prevents direct contact between principals bypassing intermediaries
 - Standard protection agreement in commodity trading
+- Must be signed by all parties involved in transaction chain
 
-**Irrevocable Master Fee Protection Agreement (IMFPA)**
-- Legally guarantees payment of fees (commissions) to intermediaries (brokers)
-- Ensures intermediaries are paid once the transaction closes
+**10. Irrevocable Master Fee Protection Agreement (IMFPA)**
+- Legally guarantees payment of fees/commissions to intermediaries (brokers)
+- Ensures intermediaries are paid once transaction closes
 - Prevents intermediaries from being bypassed
-- Crucial contract in international trade, especially for bulk commodities
+- Crucial contract in international trade, especially bulk commodities
 - Protects all parties and ensures transparent fee distribution
+- Legally binding and irrevocable fee protection structure
 
-### Contract Documents
+#### Contract Documents (3)
 
-**Master Service Agreement (MSA)**
-- Framework agreement for ongoing relationship
-- Covers multiple transactions
+**11. Transaction Support Agreement (TSA)**
+- Supporting agreement for complex multi-party transactions
+- Defines roles and responsibilities of each party
+- Coordinates logistics, documentation, and payments
+- Ensures smooth transaction execution
 
-**Sales Purchase Agreement (SPA)**
-- Specific contract for individual trade
-- Legally binding contract
+**12. Sales and Purchase Agreement (SPA)**
+- Primary binding contract for individual trade
+- Detailed terms, quantities, quality specifications
+- Delivery schedule and location
+- Payment terms and conditions
+- Legally enforceable sales contract
 
-### Financial Documents
+**13. Assignment of Sale with Product (ASWP)**
+- Transfer of sales rights and obligations to third party
+- Assigns product delivery rights
+- Common in commodity trading chains with multiple intermediaries
+- Legally transfers seller's contractual position
 
-**Letter of Credit (LC)**
-- Bank guarantee of payment
-- Payment upon presentation of documents
+#### Financial & Shipping Documents (4)
 
-### Shipping Documents
+**14. 2% Performance Bond (POP)**
+- Performance guarantee equal to 2% of contract value
+- Ensures seller fulfills contractual obligations
+- Provides buyer security against non-performance or default
+- Typically issued by bank or insurance company
+- Released upon successful delivery and acceptance
 
-**Bill of Lading (BOL)**
-- Issued by shipping carrier
-- Receipt for goods and title document
+**15. Bill of Lading (BOL)**
+- Issued by shipping carrier/freight forwarder
+- Serves as receipt for goods shipped
+- Acts as title document for cargo ownership
+- Required for customs clearance at destination
+- Types: Ocean BOL, Master BOL, House BOL, Negotiable BOL
 
-**Certificate of Origin**
-- Certifies country where goods were produced
-- Required for customs
+**16. Certificate of Origin (COO)**
+- Certifies country where goods were produced/manufactured
+- Required for customs clearance and duty calculation
+- May affect import tariffs and trade preferences
+- Issued by chamber of commerce or authorized trade authority
+- Essential for preferential trade agreements (FTA benefits)
 
-**Quality Certificate**
-- Verifies product specifications
-- Issued by inspection company
+**17. Quality Certificate**
+- Verifies product specifications and quality standards
+- Issued by independent inspection companies (SGS, Bureau Veritas, Intertek)
+- Documents test results against contract specifications
+- Essential for buyer acceptance and payment release
+- Required for most commodity transactions
 
 ---
 
