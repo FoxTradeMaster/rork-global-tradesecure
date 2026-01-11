@@ -1,4 +1,6 @@
-interface OpenCorporatesCompany {
+import { trpcClient } from '@/lib/trpc';
+
+export interface OpenCorporatesCompany {
   name: string;
   company_number: string;
   jurisdiction_code: string;
@@ -16,7 +18,7 @@ interface OpenCorporatesCompany {
   } | null;
 }
 
-interface OpenCorporatesSearchResult {
+export interface OpenCorporatesSearchResult {
   companies: {
     company: OpenCorporatesCompany;
   }[];
@@ -25,43 +27,24 @@ interface OpenCorporatesSearchResult {
   per_page: number;
 }
 
-interface OpenCorporatesResponse {
-  results: OpenCorporatesSearchResult;
-}
-
-const BASE_URL = 'https://api.opencorporates.com/v0.4';
-
 export async function searchCompanies(
   query: string,
   page: number = 1,
   perPage: number = 30
 ): Promise<OpenCorporatesSearchResult> {
-  console.log(`[OpenCorporates] Searching for: ${query} (page ${page})`);
+  console.log(`[OpenCorporates Client] Searching for: ${query} (page ${page})`);
   
-  const url = new URL(`${BASE_URL}/companies/search`);
-  url.searchParams.append('q', query);
-  url.searchParams.append('page', page.toString());
-  url.searchParams.append('per_page', perPage.toString());
-  url.searchParams.append('inactive', 'false');
-  url.searchParams.append('branch', 'false');
-
   try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        'Accept': 'application/json',
-      },
+    const result = await trpcClient.opencorporates.searchCompanies.query({
+      query,
+      page,
+      perPage,
     });
-
-    if (!response.ok) {
-      throw new Error(`OpenCorporates API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data: OpenCorporatesResponse = await response.json();
-    console.log(`[OpenCorporates] Found ${data.results.total_count} companies`);
     
-    return data.results;
+    console.log(`[OpenCorporates Client] Found ${result.total_count} companies`);
+    return result;
   } catch (error) {
-    console.error('[OpenCorporates] Search error:', error);
+    console.error('[OpenCorporates Client] Search error:', error);
     throw error;
   }
 }
@@ -70,25 +53,17 @@ export async function getCompanyDetails(
   jurisdictionCode: string,
   companyNumber: string
 ): Promise<OpenCorporatesCompany> {
-  console.log(`[OpenCorporates] Getting details for: ${jurisdictionCode}/${companyNumber}`);
+  console.log(`[OpenCorporates Client] Getting details for: ${jurisdictionCode}/${companyNumber}`);
   
-  const url = `${BASE_URL}/companies/${jurisdictionCode}/${companyNumber}`;
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-      },
+    const result = await trpcClient.opencorporates.getCompanyDetails.query({
+      jurisdictionCode,
+      companyNumber,
     });
-
-    if (!response.ok) {
-      throw new Error(`OpenCorporates API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.results.company;
+    
+    return result;
   } catch (error) {
-    console.error('[OpenCorporates] Details error:', error);
+    console.error('[OpenCorporates Client] Details error:', error);
     throw error;
   }
 }
