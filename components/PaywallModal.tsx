@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: '90%',
     paddingBottom: 40,
-    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
