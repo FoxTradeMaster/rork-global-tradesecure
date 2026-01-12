@@ -45,7 +45,7 @@ const DEFAULT_SETTINGS: UpdaterSettings = {
   isPaused: false,
   updateIntervalHours: 24,
   companiesPerUpdate: 5,
-  selectedCommodities: ['edible_oils', 'fuel_oil', 'gold', 'steam_coal'],
+  selectedCommodities: ['edible_oils', 'fuel_oil', 'gold', 'steam_coal', 'anthracite_coal', 'urea'],
 };
 
 export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook(() => {
