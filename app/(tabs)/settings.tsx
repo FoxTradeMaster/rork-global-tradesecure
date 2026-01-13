@@ -246,7 +246,7 @@ export default function SettingsScreen() {
                 </View>
               )}
 
-              {settings.isEnabled && getTimeUntilNextUpdate() && (
+              {settings.isEnabled && getTimeUntilNextUpdate() != null && (
                 <View style={styles.nextUpdateRow}>
                   <Clock size={14} color="#6B7280" />
                   <Text style={styles.nextUpdateText}>
