@@ -35,9 +35,14 @@ export const [AdminAuthProvider, useAdminAuth] = createContextHook<AdminAuthStat
   }, []);
 
   const authenticate = useCallback(async (password: string): Promise<boolean> => {
-    const adminPassword = process.env.EXPO_PUBLIC_ADMIN_PASSWORD || 'admin123';
+    const adminPassword = (process.env.EXPO_PUBLIC_ADMIN_PASSWORD || 'admin123').trim();
+    const inputPassword = password.trim();
+    console.log('Authenticating...');
+    console.log('Input password:', inputPassword);
+    console.log('Expected password:', adminPassword);
+    console.log('Passwords match:', inputPassword === adminPassword);
     
-    if (password === adminPassword) {
+    if (inputPassword === adminPassword) {
       setIsAuthenticated(true);
       try {
         await AsyncStorage.setItem(
