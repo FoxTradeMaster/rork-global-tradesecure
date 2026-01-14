@@ -73,7 +73,13 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
       try {
         console.log('[Subscription] Loading subscription status...');
         
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        const storagePromise = AsyncStorage.getItem(STORAGE_KEY);
+        const timeoutPromise = new Promise<null>((resolve) => 
+          setTimeout(() => resolve(null), 3000)
+        );
+        
+        const stored = await Promise.race([storagePromise, timeoutPromise]);
+        
         if (stored) {
           const parsed = JSON.parse(stored);
           const status: SubscriptionStatus = {
@@ -83,7 +89,13 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
           
           if (status.paypalSubscriptionId) {
             try {
-              const paypalSub = await getPayPalSubscription(status.paypalSubscriptionId);
+              const paypalCheckPromise = getPayPalSubscription(status.paypalSubscriptionId);
+              const paypalTimeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('PayPal check timeout')), 3000)
+              );
+              
+              const paypalSub = await Promise.race([paypalCheckPromise, paypalTimeout]) as any;
+              
               if (paypalSub.status === 'ACTIVE') {
                 setSubscriptionStatus(status);
                 console.log('[Subscription] Active PayPal subscription loaded');
@@ -103,6 +115,7 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
         console.error('[Subscription] Error loading subscription:', error);
       } finally {
         setIsLoading(false);
+        console.log('[Subscription] Initialization complete');
       }
     };
     init();

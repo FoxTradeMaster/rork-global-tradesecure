@@ -183,7 +183,19 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.log('[TradingContext] Starting to load data...');
       
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+        );
+        
+        let session;
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          session = result.data?.session;
+        } catch (error) {
+          console.error('[TradingContext] Session check failed or timed out:', error);
+          session = null;
+        }
         
         if (session?.user) {
           console.log('[TradingContext] Found existing Supabase session');
@@ -202,10 +214,18 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           setCurrentUser(null);
         }
 
-        const { data: counterpartiesData, error: counterpartiesError } = await supabase
-          .from('counterparties')
-          .select('*')
-          .order('onboarded_at', { ascending: false });
+        let counterpartiesData, counterpartiesError;
+        try {
+          const result = await Promise.race([
+            supabase.from('counterparties').select('*').order('onboarded_at', { ascending: false }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Counterparties query timeout')), 5000))
+          ]) as any;
+          counterpartiesData = result.data;
+          counterpartiesError = result.error;
+        } catch (error) {
+          console.error('[TradingContext] Error or timeout loading counterparties:', error);
+          counterpartiesError = error;
+        }
 
         if (counterpartiesError) {
           console.error('[TradingContext] Error loading counterparties:', counterpartiesError);
@@ -231,10 +251,18 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           console.log('[TradingContext] No counterparties in DB, using mock data');
         }
 
-        const { data: tradesData, error: tradesError } = await supabase
-          .from('trades')
-          .select('*')
-          .order('created_at', { ascending: false });
+        let tradesData, tradesError;
+        try {
+          const result = await Promise.race([
+            supabase.from('trades').select('*').order('created_at', { ascending: false }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Trades query timeout')), 5000))
+          ]) as any;
+          tradesData = result.data;
+          tradesError = result.error;
+        } catch (error) {
+          console.error('[TradingContext] Error or timeout loading trades:', error);
+          tradesError = error;
+        }
 
         if (tradesError) {
           console.error('[TradingContext] Error loading trades:', tradesError);
