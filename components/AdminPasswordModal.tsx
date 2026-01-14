@@ -26,6 +26,7 @@ export default function AdminPasswordModal({
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSettingNewPassword, setIsSettingNewPassword] = useState<boolean>(false);
+  const [currentPassword, setCurrentPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const { authenticate, setNewPassword: saveNewPassword, hasCustomPassword } = useAdminAuth();
@@ -55,6 +56,11 @@ export default function AdminPasswordModal({
   };
 
   const handleSetNewPassword = async () => {
+    if (hasCustomPassword && !currentPassword.trim()) {
+      Alert.alert('Error', 'Please enter your current password');
+      return;
+    }
+
     if (!newPassword.trim() || !confirmPassword.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -72,8 +78,19 @@ export default function AdminPasswordModal({
 
     setIsLoading(true);
     try {
+      if (hasCustomPassword) {
+        const isValid = await authenticate(currentPassword);
+        if (!isValid) {
+          Alert.alert('Error', 'Current password is incorrect');
+          setCurrentPassword('');
+          setIsLoading(false);
+          return;
+        }
+      }
+
       await saveNewPassword(newPassword);
       Alert.alert('Success', 'New password saved! Please use it to login.');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setIsSettingNewPassword(false);
@@ -87,6 +104,7 @@ export default function AdminPasswordModal({
 
   const handleClose = () => {
     setPassword('');
+    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setIsSettingNewPassword(false);
@@ -116,10 +134,29 @@ export default function AdminPasswordModal({
 
           {isSettingNewPassword ? (
             <>
-              <Text style={styles.title}>Set New Password</Text>
-              <Text style={styles.subtitle}>
-                Create a new admin password for wallet access
+              <Text style={styles.title}>
+                {hasCustomPassword ? 'Change Password' : 'Set New Password'}
               </Text>
+              <Text style={styles.subtitle}>
+                {hasCustomPassword
+                  ? 'Enter your current password to set a new one'
+                  : 'Create a new admin password for wallet access'}
+              </Text>
+
+              {hasCustomPassword && (
+                <TextInput
+                  style={styles.input}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  placeholder="Current password"
+                  placeholderTextColor="#6B7280"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!isLoading}
+                  returnKeyType="next"
+                />
+              )}
 
               <TextInput
                 style={styles.input}
