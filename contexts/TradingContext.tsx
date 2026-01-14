@@ -329,7 +329,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     console.log('[TradingContext] Adding', newCounterparties.length, 'counterparties');
     
     for (const counterparty of newCounterparties) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('counterparties')
         .insert({
           user_id: 'anonymous',
@@ -354,7 +354,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addCounterparty = async (counterparty: Counterparty) => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('counterparties')
       .insert({
         user_id: 'anonymous',
@@ -392,7 +392,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     if (updates.status) dbUpdates.status = updates.status;
     if (updates.approvalConditions) dbUpdates.approval_conditions = updates.approvalConditions;
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('counterparties')
       .update(dbUpdates)
       .eq('id', id);
@@ -409,7 +409,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     console.log('[TradingContext] Adding', newTrades.length, 'trades');
     
     for (const trade of newTrades) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('trades')
         .insert({
           user_id: 'anonymous',
@@ -439,7 +439,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addTrade = async (trade: Trade) => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('trades')
       .insert({
         user_id: 'anonymous',
@@ -483,7 +483,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     if (updates.commissionPaid !== undefined) dbUpdates.commission_paid = updates.commissionPaid;
     if (updates.paypalOrderId) dbUpdates.paypal_order_id = updates.paypalOrderId;
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('trades')
       .update(dbUpdates)
       .eq('id', id);

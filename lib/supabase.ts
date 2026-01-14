@@ -11,20 +11,27 @@ if (!supabaseUrl || !supabaseAnonKey) {
   });
 }
 
-if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10) {
-  throw new Error('EXPO_PUBLIC_SUPABASE_URL is not configured. Please set it in your environment variables.');
+let supabase: ReturnType<typeof createClient>;
+
+if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
+    !supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey === 'null' || supabaseAnonKey.length < 10) {
+  console.warn('[Supabase] Configuration missing or invalid. App will run with mock data only.');
+  supabase = createClient('https://placeholder.supabase.co', 'placeholder-key', {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+} else {
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
 }
 
-if (!supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey === 'null' || supabaseAnonKey.length < 10) {
-  throw new Error('EXPO_PUBLIC_SUPABASE_ANON_KEY is not configured. Please set it in your environment variables.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+export { supabase };
 
 export interface Database {
   public: {
