@@ -1,11 +1,34 @@
 import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
-import { Wallet, ArrowUpCircle, ArrowDownCircle, DollarSign } from 'lucide-react-native';
+import { Wallet, ArrowUpCircle, ArrowDownCircle, DollarSign, Lock } from 'lucide-react-native';
 import { useTrading } from '@/contexts/TradingContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import AdminPasswordModal from '@/components/AdminPasswordModal';
+import { useState, useEffect } from 'react';
 
 export default function WalletScreen() {
   const { walletBalance, transactions } = useTrading();
+  const { isAuthenticated, checkSession } = useAdminAuth();
+  const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowPasswordModal(true);
+    }
+  }, [isAuthenticated]);
+
+  const handleAuthenticated = () => {
+    setShowPasswordModal(false);
+  };
+
+  const handleModalClose = () => {
+    setShowPasswordModal(false);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -42,8 +65,22 @@ export default function WalletScreen() {
         }}
       />
       <StatusBar barStyle="light-content" />
-      <SafeAreaView edges={['bottom']} style={styles.safeArea}>
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <AdminPasswordModal
+        visible={showPasswordModal}
+        onClose={handleModalClose}
+        onAuthenticated={handleAuthenticated}
+      />
+      {!isAuthenticated ? (
+        <View style={styles.lockedContainer}>
+          <Lock size={64} color="#6B7280" />
+          <Text style={styles.lockedTitle}>Admin Access Required</Text>
+          <Text style={styles.lockedSubtitle}>
+            Please authenticate to view wallet data
+          </Text>
+        </View>
+      ) : (
+        <SafeAreaView edges={['bottom']} style={styles.safeArea}>
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.balanceCard}>
             <Wallet size={40} color="#3B82F6" />
             <Text style={styles.balanceLabel}>Balance</Text>
@@ -86,8 +123,9 @@ export default function WalletScreen() {
               ))}
             </View>
           )}
-        </ScrollView>
-      </SafeAreaView>
+          </ScrollView>
+        </SafeAreaView>
+      )}
     </View>
   );
 }
@@ -181,5 +219,25 @@ const styles = StyleSheet.create({
   },
   transactionAmountNegative: {
     color: '#EF4444',
+  },
+  lockedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  lockedTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 24,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  lockedSubtitle: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });

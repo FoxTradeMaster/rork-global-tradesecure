@@ -8,6 +8,7 @@ import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
 import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
+import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -109,17 +110,19 @@ export default function RootLayout() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <SubscriptionProvider>
-          <TradingProvider>
-            <MarketProvider>
-              <AIMarketUpdaterProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </AIMarketUpdaterProvider>
-            </MarketProvider>
-          </TradingProvider>
-        </SubscriptionProvider>
+        <AdminAuthProvider>
+          <SubscriptionProvider>
+            <TradingProvider>
+              <MarketProvider>
+                <AIMarketUpdaterProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </AIMarketUpdaterProvider>
+              </MarketProvider>
+            </TradingProvider>
+          </SubscriptionProvider>
+        </AdminAuthProvider>
       </QueryClientProvider>
     </trpc.Provider>
   );
