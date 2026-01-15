@@ -844,11 +844,11 @@ export default function MarketDirectoryScreen() {
             >
               <Mail size={20} color="#3B82F6" />
               <Text style={styles.actionsMenuText}>Email Outreach</Text>
-              {selectedCompanies.length > 0 && (
+              {selectedCompanies.length > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{selectedCompanies.length}</Text>
                 </View>
-              )}
+              ) : null}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -871,11 +871,11 @@ export default function MarketDirectoryScreen() {
             >
               <FileText size={20} color="#10B981" />
               <Text style={styles.actionsMenuText}>Generate Report</Text>
-              {selectedCompanies.length > 0 && (
+              {selectedCompanies.length > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{selectedCompanies.length}</Text>
                 </View>
-              )}
+              ) : null}
             </TouchableOpacity>
 
             {selectedCompanies.length > 0 && (
