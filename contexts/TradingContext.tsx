@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, Counterparty, Trade, WalletBalance, Transaction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal';
-import { getCommodityPrice } from '@/lib/polygon';
+import { getMultipleCommodityPrices } from '@/lib/polygon';
 
 const MOCK_COUNTERPARTIES: Counterparty[] = [
   {
@@ -326,21 +326,26 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.log('[TradingContext] Updating live prices...');
       const activeTrades = trades.filter(t => ['active', 'in_transit', 'financing_pending'].includes(t.status));
       
-      if (activeTrades.length === 0) return;
+      if (activeTrades.length === 0) {
+        console.log('[TradingContext] No active trades to update');
+        return;
+      }
 
-      const uniqueCommodities = [...new Set(activeTrades.map(t => t.commodity))];
+      const uniqueCommodities = [...new Set(activeTrades.map(t => t.commodity))] as any[];
       
-      for (const commodity of uniqueCommodities) {
-        try {
-          const priceData = await getCommodityPrice(commodity);
+      try {
+        console.log(`[TradingContext] Fetching prices for ${uniqueCommodities.length} commodities`);
+        const pricesData = await getMultipleCommodityPrices(uniqueCommodities);
+        
+        const updatedTrades: Partial<Trade>[] = [];
+        
+        for (const [commodity, priceData] of Object.entries(pricesData)) {
           if (priceData) {
             setLivePrices(prev => ({ ...prev, [commodity]: priceData.price }));
             
             const tradesForCommodity = activeTrades.filter(t => t.commodity === commodity && t.entryPrice);
             
             if (tradesForCommodity.length > 0) {
-              const updatedTrades: Partial<Trade>[] = [];
-              
               tradesForCommodity.forEach(trade => {
                 const profitLoss = (priceData.price - trade.entryPrice!) * trade.quantity;
                 const profitLossPercent = ((priceData.price - trade.entryPrice!) / trade.entryPrice!) * 100;
@@ -362,23 +367,26 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
                   if (error) console.error('Error updating trade prices:', error);
                 }).catch((err: any) => console.error('Error in price update:', err));
               });
-
-              setTrades(prevTrades => prevTrades.map(trade => {
-                const update = updatedTrades.find(u => u.id === trade.id);
-                if (update) {
-                  return { ...trade, ...update };
-                }
-                return trade;
-              }));
             }
           }
-        } catch (error) {
-          console.error(`Error fetching price for ${commodity}:`, error);
         }
+
+        if (updatedTrades.length > 0) {
+          setTrades(prevTrades => prevTrades.map(trade => {
+            const update = updatedTrades.find(u => u.id === trade.id);
+            if (update) {
+              return { ...trade, ...update };
+            }
+            return trade;
+          }));
+          console.log(`[TradingContext] Updated ${updatedTrades.length} trades with live prices`);
+        }
+      } catch (error) {
+        console.error('[TradingContext] Error fetching live prices:', error);
       }
     };
 
-    const interval = setInterval(updateLivePrices, 30000);
+    const interval = setInterval(updateLivePrices, 300000);
     updateLivePrices();
 
     return () => clearInterval(interval);
