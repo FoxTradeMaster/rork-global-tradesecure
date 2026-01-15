@@ -82,6 +82,8 @@ export interface Trade {
   pricePerUnit: number;
   entryPrice?: number;
   currentPrice?: number;
+  marketPrice?: number;
+  discountPercent?: number;
   totalValue: number;
   currency: string;
   incoterm: string;

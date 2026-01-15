@@ -32,6 +32,9 @@ export default function CreateTradeScreen() {
   const [commissionRate, setCommissionRate] = useState(1.0);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [useMarketPrice, setUseMarketPrice] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState('5');
+  const { livePrices } = useTrading();
 
   const approvedCounterparties = counterparties.filter(cp => cp.approved);
   const filteredCounterparties = approvedCounterparties.filter(cp =>
@@ -57,7 +60,16 @@ export default function CreateTradeScreen() {
     if (!counterparty) return;
 
     const quantityNum = parseFloat(quantity);
-    const priceNum = parseFloat(pricePerUnit);
+    let priceNum = parseFloat(pricePerUnit);
+    let marketPriceNum: number | undefined = undefined;
+    let discountPercentNum: number | undefined = undefined;
+
+    if (useMarketPrice && livePrices[commodity]) {
+      marketPriceNum = livePrices[commodity];
+      discountPercentNum = parseFloat(discountPercent) || 0;
+      priceNum = marketPriceNum * (1 - discountPercentNum / 100);
+    }
+
     const totalValue = quantityNum * priceNum;
     const commissionAmount = totalValue * (commissionRate / 100);
 
@@ -72,6 +84,8 @@ export default function CreateTradeScreen() {
       unit: commodity === 'gold' ? 'kg' : 'MT',
       pricePerUnit: priceNum,
       entryPrice: entryPriceNum,
+      marketPrice: marketPriceNum,
+      discountPercent: discountPercentNum,
       totalValue,
       currency: 'USD',
       incoterm: `${incoterm} ${counterparty.country}`,
@@ -176,16 +190,68 @@ export default function CreateTradeScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Price per Unit (USD)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter price"
-                  placeholderTextColor="#6B7280"
-                  keyboardType="numeric"
-                  value={pricePerUnit}
-                  onChangeText={setPricePerUnit}
-                />
+                <View style={styles.labelRow}>
+                  <Text style={styles.inputLabel}>Pricing Method</Text>
+                </View>
+                <View style={styles.pricingToggle}>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, !useMarketPrice && styles.toggleOptionActive]}
+                    onPress={() => setUseMarketPrice(false)}
+                  >
+                    <Text style={[styles.toggleText, !useMarketPrice && styles.toggleTextActive]}>Fixed Price</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.toggleOption, useMarketPrice && styles.toggleOptionActive]}
+                    onPress={() => setUseMarketPrice(true)}
+                  >
+                    <Text style={[styles.toggleText, useMarketPrice && styles.toggleTextActive]}>Market Price w/ Discount</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
+
+              {!useMarketPrice ? (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Price per Unit (USD)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter price"
+                    placeholderTextColor="#6B7280"
+                    keyboardType="numeric"
+                    value={pricePerUnit}
+                    onChangeText={setPricePerUnit}
+                  />
+                </View>
+              ) : (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Discount from Market Price (%)</Text>
+                  {livePrices[commodity] && (
+                    <View style={styles.marketPriceInfo}>
+                      <Text style={styles.marketPriceLabel}>Current Market Price:</Text>
+                      <Text style={styles.marketPriceValue}>${livePrices[commodity].toLocaleString()} USD</Text>
+                    </View>
+                  )}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter discount percentage"
+                    placeholderTextColor="#6B7280"
+                    keyboardType="numeric"
+                    value={discountPercent}
+                    onChangeText={setDiscountPercent}
+                  />
+                  {livePrices[commodity] && discountPercent && (
+                    <View style={styles.calculatedPriceBox}>
+                      <Text style={styles.calculatedLabel}>Your Trade Price:</Text>
+                      <Text style={styles.calculatedValue}>
+                        ${(livePrices[commodity] * (1 - parseFloat(discountPercent) / 100)).toLocaleString()} USD
+                      </Text>
+                      <Text style={styles.savingsText}>Save ${(livePrices[commodity] * parseFloat(discountPercent) / 100).toLocaleString()} per unit</Text>
+                    </View>
+                  )}
+                  {!livePrices[commodity] && (
+                    <Text style={styles.warningText}>⚠️ Market price unavailable for this commodity</Text>
+                  )}
+                </View>
+              )}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Entry Price (USD) - Optional</Text>
@@ -236,18 +302,36 @@ export default function CreateTradeScreen() {
               </View>
             </View>
 
-            {quantity && pricePerUnit && (
+            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) && (
               <View style={styles.summarySection}>
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryLabel}>Total Trade Value</Text>
                   <Text style={styles.summaryValue}>
-                    ${(parseFloat(quantity) * parseFloat(pricePerUnit)).toLocaleString()} USD
+                    ${(() => {
+                      const qty = parseFloat(quantity);
+                      if (useMarketPrice && livePrices[commodity]) {
+                        const marketPrice = livePrices[commodity];
+                        const discount = parseFloat(discountPercent) || 0;
+                        const price = marketPrice * (1 - discount / 100);
+                        return (qty * price).toLocaleString();
+                      }
+                      return (qty * parseFloat(pricePerUnit || '0')).toLocaleString();
+                    })()} USD
                   </Text>
                 </View>
                 <View style={styles.commissionCard}>
                   <Text style={styles.commissionLabel}>Your Commission ({commissionRate}%)</Text>
                   <Text style={styles.commissionValue}>
-                    ${((parseFloat(quantity) * parseFloat(pricePerUnit) * commissionRate) / 100).toLocaleString()} USD
+                    ${(() => {
+                      const qty = parseFloat(quantity);
+                      if (useMarketPrice && livePrices[commodity]) {
+                        const marketPrice = livePrices[commodity];
+                        const discount = parseFloat(discountPercent) || 0;
+                        const price = marketPrice * (1 - discount / 100);
+                        return ((qty * price * commissionRate) / 100).toLocaleString();
+                      }
+                      return ((qty * parseFloat(pricePerUnit || '0') * commissionRate) / 100).toLocaleString();
+                    })()} USD
                   </Text>
                 </View>
               </View>
@@ -263,9 +347,9 @@ export default function CreateTradeScreen() {
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.createButton, (!selectedCounterparty || !quantity || !pricePerUnit) && styles.createButtonDisabled]}
+            style={[styles.createButton, (!selectedCounterparty || !quantity || (!pricePerUnit && !useMarketPrice)) && styles.createButtonDisabled]}
             onPress={handleCreate}
-            disabled={!selectedCounterparty || !quantity || !pricePerUnit}
+            disabled={!selectedCounterparty || !quantity || (!pricePerUnit && !useMarketPrice)}
           >
             <Text style={styles.createButtonText}>Create Trade</Text>
           </TouchableOpacity>
@@ -526,5 +610,85 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pricingToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#1F2937',
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
+  },
+  toggleOption: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  toggleOptionActive: {
+    backgroundColor: '#3B82F6',
+  },
+  toggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  toggleTextActive: {
+    color: '#FFFFFF',
+  },
+  marketPriceInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#10B98110',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  marketPriceLabel: {
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+  marketPriceValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  calculatedPriceBox: {
+    backgroundColor: '#3B82F610',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  calculatedLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginBottom: 4,
+  },
+  calculatedValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#3B82F6',
+    marginBottom: 8,
+  },
+  savingsText: {
+    fontSize: 13,
+    color: '#10B981',
+    fontWeight: '600',
+  },
+  warningText: {
+    fontSize: 13,
+    color: '#F59E0B',
+    marginTop: 8,
+    fontStyle: 'italic' as const,
   },
 });
