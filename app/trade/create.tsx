@@ -146,7 +146,7 @@ export default function CreateTradeScreen() {
                   onChangeText={setSearchQuery}
                 />
               </View>
-              {filteredCounterparties.map(cp => (
+              {filteredCounterparties.length > 0 ? filteredCounterparties.map(cp => (
                 <TouchableOpacity
                   key={cp.id}
                   style={[styles.counterpartyItem, selectedCounterparty === cp.id && styles.counterpartyItemActive]}
@@ -176,7 +176,11 @@ export default function CreateTradeScreen() {
                     </Text>
                   </View>
                 </TouchableOpacity>
-              ))}
+              )) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>No approved counterparties found</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.section}>
@@ -709,5 +713,15 @@ const styles = StyleSheet.create({
     color: '#F59E0B',
     marginTop: 8,
     fontStyle: 'italic' as const,
+  },
+  emptyState: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
   },
 });
