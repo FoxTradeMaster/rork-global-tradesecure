@@ -43,7 +43,14 @@ function RootLayoutNav() {
         options={{ 
           presentation: "modal",
           headerShown: true,
-          title: "New Trade"
+          title: "New Trade",
+          headerStyle: {
+            backgroundColor: '#0A0E27',
+          },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: {
+            color: '#FFFFFF',
+          },
         }} 
       />
       <Stack.Screen 
