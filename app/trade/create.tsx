@@ -146,7 +146,7 @@ export default function CreateTradeScreen() {
                   onChangeText={setSearchQuery}
                 />
               </View>
-              {filteredCounterparties.length > 0 ? filteredCounterparties.map(cp => (
+              {filteredCounterparties.map(cp => (
                 <TouchableOpacity
                   key={cp.id}
                   style={[styles.counterpartyItem, selectedCounterparty === cp.id && styles.counterpartyItemActive]}
@@ -174,7 +174,7 @@ export default function CreateTradeScreen() {
                     ]}>{cp.riskScore.level.toUpperCase()}</Text>
                   </View>
                 </TouchableOpacity>
-              )) : null}
+              ))}
             </View>
 
             <View style={styles.section}>
@@ -241,7 +241,7 @@ export default function CreateTradeScreen() {
                     value={discountPercent}
                     onChangeText={setDiscountPercent}
                   />
-                  {livePrices[commodity] && discountPercent && (
+                  {livePrices[commodity] && discountPercent && discountPercent.length > 0 && (
                     <View style={styles.calculatedPriceBox}>
                       <Text style={styles.calculatedLabel}>Your Trade Price:</Text>
                       <Text style={styles.calculatedValue}>
@@ -305,7 +305,7 @@ export default function CreateTradeScreen() {
               </View>
             </View>
 
-            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) ? (
+            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) && (
               <View style={styles.summarySection}>
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryLabel}>Total Trade Value</Text>
@@ -338,7 +338,7 @@ export default function CreateTradeScreen() {
                   </Text>
                 </View>
               </View>
-            ) : null}
+            )}
           </View>
         </ScrollView>
 
