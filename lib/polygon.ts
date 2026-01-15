@@ -31,12 +31,12 @@ export async function getCommodityPrice(commodity: CommodityType): Promise<Polyg
       `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${apiKey}`
     );
 
+    const data = await response.json();
+
     if (!response.ok) {
-      console.error('Polygon API error:', response.statusText);
+      console.error('Polygon API error:', response.status, response.statusText, data);
       return null;
     }
-
-    const data = await response.json();
     
     if (data.results && data.results.length > 0) {
       const result = data.results[0];
