@@ -227,7 +227,7 @@ export default function CreateTradeScreen() {
                   {livePrices[commodity] && (
                     <View style={styles.marketPriceInfo}>
                       <Text style={styles.marketPriceLabel}>Current Market Price:</Text>
-                      <Text style={styles.marketPriceValue}>${livePrices[commodity].toLocaleString()} USD</Text>
+                      <Text style={styles.marketPriceValue}>${(livePrices[commodity] || 0).toLocaleString()} USD</Text>
                     </View>
                   )}
                   <TextInput
@@ -242,9 +242,9 @@ export default function CreateTradeScreen() {
                     <View style={styles.calculatedPriceBox}>
                       <Text style={styles.calculatedLabel}>Your Trade Price:</Text>
                       <Text style={styles.calculatedValue}>
-                        ${(livePrices[commodity] * (1 - parseFloat(discountPercent) / 100)).toLocaleString()} USD
+                        ${((livePrices[commodity] || 0) * (1 - (parseFloat(discountPercent) || 0) / 100)).toLocaleString()} USD
                       </Text>
-                      <Text style={styles.savingsText}>Save ${(livePrices[commodity] * parseFloat(discountPercent) / 100).toLocaleString()} per unit</Text>
+                      <Text style={styles.savingsText}>Save ${((livePrices[commodity] || 0) * (parseFloat(discountPercent) || 0) / 100).toLocaleString()} per unit</Text>
                     </View>
                   )}
                   {!livePrices[commodity] && (
@@ -308,9 +308,9 @@ export default function CreateTradeScreen() {
                   <Text style={styles.summaryLabel}>Total Trade Value</Text>
                   <Text style={styles.summaryValue}>
                     ${(() => {
-                      const qty = parseFloat(quantity);
+                      const qty = parseFloat(quantity) || 0;
                       if (useMarketPrice && livePrices[commodity]) {
-                        const marketPrice = livePrices[commodity];
+                        const marketPrice = livePrices[commodity] || 0;
                         const discount = parseFloat(discountPercent) || 0;
                         const price = marketPrice * (1 - discount / 100);
                         return (qty * price).toLocaleString();
@@ -323,9 +323,9 @@ export default function CreateTradeScreen() {
                   <Text style={styles.commissionLabel}>Your Commission ({commissionRate}%)</Text>
                   <Text style={styles.commissionValue}>
                     ${(() => {
-                      const qty = parseFloat(quantity);
+                      const qty = parseFloat(quantity) || 0;
                       if (useMarketPrice && livePrices[commodity]) {
-                        const marketPrice = livePrices[commodity];
+                        const marketPrice = livePrices[commodity] || 0;
                         const discount = parseFloat(discountPercent) || 0;
                         const price = marketPrice * (1 - discount / 100);
                         return ((qty * price * commissionRate) / 100).toLocaleString();
