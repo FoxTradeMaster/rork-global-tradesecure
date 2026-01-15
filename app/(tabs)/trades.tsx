@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
-import { Search, TrendingUp, AlertCircle, Plus, Upload } from 'lucide-react-native';
+import { Search, TrendingUp, AlertCircle, Plus, Upload, TrendingDown, Activity } from 'lucide-react-native';
 import ImportModal from '@/components/ImportModal';
 import { ParsedRow } from '@/lib/fileParser';
 import { Trade } from '@/types';
@@ -260,6 +260,45 @@ export default function TradesScreen() {
                     <Text style={styles.metricValue}>${trade.pricePerUnit.toLocaleString()}</Text>
                   </View>
                 </View>
+
+                {trade.entryPrice && trade.currentPrice && ['active', 'in_transit', 'financing_pending'].includes(trade.status) && (
+                  <View style={styles.profitSection}>
+                    <View style={styles.profitHeader}>
+                      <Activity size={14} color="#64748B" />
+                      <Text style={styles.profitLabel}>Real-Time P&L</Text>
+                    </View>
+                    <View style={styles.profitDetails}>
+                      <View style={styles.profitRow}>
+                        <Text style={styles.profitSubLabel}>Entry:</Text>
+                        <Text style={styles.profitSubValue}>${trade.entryPrice.toFixed(2)}</Text>
+                      </View>
+                      <View style={styles.profitRow}>
+                        <Text style={styles.profitSubLabel}>Current:</Text>
+                        <Text style={[styles.profitSubValue, { fontWeight: '700' }]}>${trade.currentPrice.toFixed(2)}</Text>
+                      </View>
+                      <View style={styles.profitDivider} />
+                      <View style={styles.profitMainRow}>
+                        {(trade.profitLoss || 0) >= 0 ? (
+                          <TrendingUp size={16} color="#10B981" />
+                        ) : (
+                          <TrendingDown size={16} color="#EF4444" />
+                        )}
+                        <Text style={[
+                          styles.profitMainValue,
+                          { color: (trade.profitLoss || 0) >= 0 ? '#10B981' : '#EF4444' }
+                        ]}>
+                          {(trade.profitLoss || 0) >= 0 ? '+' : ''}{((trade.profitLoss || 0) / 1000).toFixed(1)}K
+                        </Text>
+                        <Text style={[
+                          styles.profitPercent,
+                          { color: (trade.profitLoss || 0) >= 0 ? '#10B981' : '#EF4444' }
+                        ]}>
+                          ({(trade.profitLossPercent || 0) >= 0 ? '+' : ''}{(trade.profitLossPercent || 0).toFixed(2)}%)
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
 
                 <View style={styles.tradeFooter}>
                   <View style={[
@@ -559,5 +598,61 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#94A3B8',
     textAlign: 'center',
+  },
+  profitSection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    padding: 10,
+  },
+  profitHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  profitLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+    textTransform: 'uppercase',
+  },
+  profitDetails: {
+    gap: 4,
+  },
+  profitRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  profitSubLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  profitSubValue: {
+    fontSize: 12,
+    color: '#0F172A',
+    fontWeight: '500',
+  },
+  profitDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 6,
+  },
+  profitMainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  profitMainValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  profitPercent: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, Counterparty, Trade, WalletBalance, Transaction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal';
+import { getCommodityPrice } from '@/lib/polygon';
 
 const MOCK_COUNTERPARTIES: Counterparty[] = [
   {
@@ -177,6 +178,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const [walletBalance, setWalletBalance] = useState<WalletBalance>({ available: 0, pending: 0, total: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -291,6 +293,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
             commissionPaid: t.commission_paid || false,
             commissionPaidAt: t.commission_paid_at ? new Date(t.commission_paid_at) : undefined,
             paypalOrderId: t.paypal_order_id,
+            entryPrice: t.entry_price,
+            currentPrice: t.current_price,
+            profitLoss: t.profit_loss,
+            profitLossPercent: t.profit_loss_percent,
           }));
           setTrades(mappedTrades);
           console.log('[TradingContext] Loaded', mappedTrades.length, 'trades from Supabase');
@@ -312,6 +318,69 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
 
     loadData();
   }, []);
+
+  useEffect(() => {
+    const updateLivePrices = async () => {
+      console.log('[TradingContext] Updating live prices...');
+      const activeTrades = trades.filter(t => ['active', 'in_transit', 'financing_pending'].includes(t.status));
+      
+      if (activeTrades.length === 0) return;
+
+      const uniqueCommodities = [...new Set(activeTrades.map(t => t.commodity))];
+      
+      for (const commodity of uniqueCommodities) {
+        try {
+          const priceData = await getCommodityPrice(commodity);
+          if (priceData) {
+            setLivePrices(prev => ({ ...prev, [commodity]: priceData.price }));
+            
+            const tradesForCommodity = activeTrades.filter(t => t.commodity === commodity && t.entryPrice);
+            
+            if (tradesForCommodity.length > 0) {
+              const updatedTrades: Partial<Trade>[] = [];
+              
+              tradesForCommodity.forEach(trade => {
+                const profitLoss = (priceData.price - trade.entryPrice!) * trade.quantity;
+                const profitLossPercent = ((priceData.price - trade.entryPrice!) / trade.entryPrice!) * 100;
+                
+                updatedTrades.push({
+                  id: trade.id,
+                  currentPrice: priceData.price,
+                  profitLoss,
+                  profitLossPercent,
+                });
+
+                const dbUpdates: any = {
+                  current_price: priceData.price,
+                  profit_loss: profitLoss,
+                  profit_loss_percent: profitLossPercent,
+                };
+
+                (supabase as any).from('trades').update(dbUpdates).eq('id', trade.id).then(({ error }: any) => {
+                  if (error) console.error('Error updating trade prices:', error);
+                }).catch((err: any) => console.error('Error in price update:', err));
+              });
+
+              setTrades(prevTrades => prevTrades.map(trade => {
+                const update = updatedTrades.find(u => u.id === trade.id);
+                if (update) {
+                  return { ...trade, ...update };
+                }
+                return trade;
+              }));
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching price for ${commodity}:`, error);
+        }
+      }
+    };
+
+    const interval = setInterval(updateLivePrices, 30000);
+    updateLivePrices();
+
+    return () => clearInterval(interval);
+  }, [trades]);
 
   const setUser = async (user: User) => {
     setCurrentUser(user);
@@ -419,6 +488,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           quantity: trade.quantity,
           unit: trade.unit,
           price_per_unit: trade.pricePerUnit,
+          entry_price: trade.entryPrice,
           total_value: trade.totalValue,
           currency: trade.currency,
           incoterm: trade.incoterm,
@@ -449,6 +519,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
         quantity: trade.quantity,
         unit: trade.unit,
         price_per_unit: trade.pricePerUnit,
+        entry_price: trade.entryPrice,
         total_value: trade.totalValue,
         currency: trade.currency,
         incoterm: trade.incoterm,
@@ -482,6 +553,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     if (updates.totalValue) dbUpdates.total_value = updates.totalValue;
     if (updates.commissionPaid !== undefined) dbUpdates.commission_paid = updates.commissionPaid;
     if (updates.paypalOrderId) dbUpdates.paypal_order_id = updates.paypalOrderId;
+    if (updates.entryPrice) dbUpdates.entry_price = updates.entryPrice;
+    if (updates.currentPrice) dbUpdates.current_price = updates.currentPrice;
+    if (updates.profitLoss !== undefined) dbUpdates.profit_loss = updates.profitLoss;
+    if (updates.profitLossPercent !== undefined) dbUpdates.profit_loss_percent = updates.profitLossPercent;
 
     const { error } = await (supabase as any)
       .from('trades')
@@ -618,6 +693,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     walletBalance,
     transactions,
     isLoading,
+    livePrices,
     addCounterparty,
     addCounterparties,
     updateCounterparty,

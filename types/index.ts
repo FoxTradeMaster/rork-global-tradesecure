@@ -80,6 +80,8 @@ export interface Trade {
   quantity: number;
   unit: string;
   pricePerUnit: number;
+  entryPrice?: number;
+  currentPrice?: number;
   totalValue: number;
   currency: string;
   incoterm: string;
@@ -95,6 +97,8 @@ export interface Trade {
   commissionPaid?: boolean;
   commissionPaidAt?: Date;
   paypalOrderId?: string;
+  profitLoss?: number;
+  profitLossPercent?: number;
 }
 
 export interface Alert {

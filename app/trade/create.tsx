@@ -27,6 +27,7 @@ export default function CreateTradeScreen() {
   const [commodity, setCommodity] = useState<CommodityType>('gold');
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [entryPrice, setEntryPrice] = useState('');
   const [incoterm, setIncoterm] = useState('CIF');
   const [commissionRate, setCommissionRate] = useState(1.0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +61,8 @@ export default function CreateTradeScreen() {
     const totalValue = quantityNum * priceNum;
     const commissionAmount = totalValue * (commissionRate / 100);
 
+    const entryPriceNum = entryPrice ? parseFloat(entryPrice) : priceNum;
+
     const newTrade: Trade = {
       id: `t${Date.now()}`,
       commodity,
@@ -68,6 +71,7 @@ export default function CreateTradeScreen() {
       quantity: quantityNum,
       unit: commodity === 'gold' ? 'kg' : 'MT',
       pricePerUnit: priceNum,
+      entryPrice: entryPriceNum,
       totalValue,
       currency: 'USD',
       incoterm: `${incoterm} ${counterparty.country}`,
@@ -180,6 +184,19 @@ export default function CreateTradeScreen() {
                   keyboardType="numeric"
                   value={pricePerUnit}
                   onChangeText={setPricePerUnit}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Entry Price (USD) - Optional</Text>
+                <Text style={styles.helperText}>Track P&L from this price point. Defaults to price per unit.</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter entry price for P&L tracking"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="numeric"
+                  value={entryPrice}
+                  onChangeText={setEntryPrice}
                 />
               </View>
 
