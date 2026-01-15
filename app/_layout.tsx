@@ -103,10 +103,6 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  if (!isReady) {
-    return null;
-  }
-
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
@@ -116,7 +112,7 @@ export default function RootLayout() {
               <MarketProvider>
                 <AIMarketUpdaterProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    <RootLayoutNav />
+                    {isReady ? <RootLayoutNav /> : null}
                   </GestureHandlerRootView>
                 </AIMarketUpdaterProvider>
               </MarketProvider>
