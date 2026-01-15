@@ -20,7 +20,7 @@ const COMMODITY_SYMBOL_MAP: Record<CommodityType, string> = {
 export async function getCommodityPrice(commodity: CommodityType): Promise<PolygonPriceData | null> {
   try {
     const symbol = COMMODITY_SYMBOL_MAP[commodity];
-    const apiKey = process.env.POLYGON_API_KEY;
+    const apiKey = process.env.EXPO_PUBLIC_POLYGON_API_KEY;
     
     if (!apiKey) {
       console.error('Polygon API key not found');
