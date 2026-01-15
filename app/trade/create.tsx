@@ -146,7 +146,7 @@ export default function CreateTradeScreen() {
                   onChangeText={setSearchQuery}
                 />
               </View>
-              {filteredCounterparties.length > 0 ? filteredCounterparties.map(cp => (
+              {filteredCounterparties.length > 0 && filteredCounterparties.map(cp => (
                 <TouchableOpacity
                   key={cp.id}
                   style={[styles.counterpartyItem, selectedCounterparty === cp.id && styles.counterpartyItemActive]}
@@ -174,7 +174,7 @@ export default function CreateTradeScreen() {
                     ]}>{cp.riskScore.level.toUpperCase()}</Text>
                   </View>
                 </TouchableOpacity>
-              )) : null}
+              ))}
             </View>
 
             <View style={styles.section}>
@@ -227,12 +227,12 @@ export default function CreateTradeScreen() {
               ) : (
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Discount from Market Price (%)</Text>
-                  {livePrices[commodity] ? (
+                  {livePrices[commodity] && (
                     <View style={styles.marketPriceInfo}>
                       <Text style={styles.marketPriceLabel}>Current Market Price:</Text>
                       <Text style={styles.marketPriceValue}>${(livePrices[commodity] || 0).toLocaleString()} USD</Text>
                     </View>
-                  ) : null}
+                  )}
                   <TextInput
                     style={styles.input}
                     placeholder="Enter discount percentage"
@@ -241,7 +241,7 @@ export default function CreateTradeScreen() {
                     value={discountPercent}
                     onChangeText={setDiscountPercent}
                   />
-                  {livePrices[commodity] && discountPercent ? (
+                  {livePrices[commodity] && discountPercent && (
                     <View style={styles.calculatedPriceBox}>
                       <Text style={styles.calculatedLabel}>Your Trade Price:</Text>
                       <Text style={styles.calculatedValue}>
@@ -249,10 +249,10 @@ export default function CreateTradeScreen() {
                       </Text>
                       <Text style={styles.savingsText}>Save ${((livePrices[commodity] || 0) * (parseFloat(discountPercent) || 0) / 100).toLocaleString()} per unit</Text>
                     </View>
-                  ) : null}
-                  {!livePrices[commodity] ? (
+                  )}
+                  {!livePrices[commodity] && (
                     <Text style={styles.warningText}>⚠️ Market price unavailable for this commodity</Text>
-                  ) : null}
+                  )}
                 </View>
               )}
 
@@ -305,7 +305,7 @@ export default function CreateTradeScreen() {
               </View>
             </View>
 
-            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) ? (
+            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) && (
               <View style={styles.summarySection}>
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryLabel}>Total Trade Value</Text>
@@ -338,7 +338,7 @@ export default function CreateTradeScreen() {
                   </Text>
                 </View>
               </View>
-            ) : null}
+            )}
           </View>
         </ScrollView>
 
