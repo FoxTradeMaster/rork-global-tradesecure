@@ -16,13 +16,10 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { currentUser, trades } = useTrading();
   const metrics = usePortfolioMetrics();
-  const tradesByStatus = useTradesByStatus();
-
-  if (!currentUser) {
-    return null;
-  }
+  const tradesByStatus = useTradesByStatus()
 
   const getRoleSpecificTrades = () => {
+    if (!currentUser) return [];
     switch (currentUser.role) {
       case 'compliance_officer':
         return trades.filter(t => t.status === 'compliance_check' || t.alerts.some(a => !a.resolved));
@@ -40,6 +37,10 @@ export default function DashboardScreen() {
 
   const roleSpecificTrades = getRoleSpecificTrades();
   const recentTrades = roleSpecificTrades.slice(0, 3);
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
