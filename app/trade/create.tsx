@@ -171,7 +171,9 @@ export default function CreateTradeScreen() {
                         cp.riskScore.level === 'amber' ? '#F59E0B' : 
                         '#EF4444'
                       }
-                    ]}>{cp.riskScore.level.toUpperCase()}</Text>
+                    ]}>
+                      {cp.riskScore.level.toUpperCase()}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -201,13 +203,17 @@ export default function CreateTradeScreen() {
                     style={[styles.toggleOption, !useMarketPrice && styles.toggleOptionActive]}
                     onPress={() => setUseMarketPrice(false)}
                   >
-                    <Text style={[styles.toggleText, !useMarketPrice && styles.toggleTextActive]}>Fixed Price</Text>
+                    <Text style={[styles.toggleText, !useMarketPrice && styles.toggleTextActive]}>
+                      Fixed Price
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.toggleOption, useMarketPrice && styles.toggleOptionActive]}
                     onPress={() => setUseMarketPrice(true)}
                   >
-                    <Text style={[styles.toggleText, useMarketPrice && styles.toggleTextActive]}>Market Price w/ Discount</Text>
+                    <Text style={[styles.toggleText, useMarketPrice && styles.toggleTextActive]}>
+                      Market Price w/ Discount
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -227,12 +233,14 @@ export default function CreateTradeScreen() {
               ) : (
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Discount from Market Price (%)</Text>
-                  {livePrices[commodity] && (
+                  {livePrices[commodity] ? (
                     <View style={styles.marketPriceInfo}>
                       <Text style={styles.marketPriceLabel}>Current Market Price:</Text>
-                      <Text style={styles.marketPriceValue}>${(livePrices[commodity] || 0).toLocaleString()} USD</Text>
+                      <Text style={styles.marketPriceValue}>
+                        ${(livePrices[commodity] || 0).toLocaleString()} USD
+                      </Text>
                     </View>
-                  )}
+                  ) : null}
                   <TextInput
                     style={styles.input}
                     placeholder="Enter discount percentage"
@@ -241,24 +249,30 @@ export default function CreateTradeScreen() {
                     value={discountPercent}
                     onChangeText={setDiscountPercent}
                   />
-                  {livePrices[commodity] && discountPercent && discountPercent.length > 0 && (
+                  {livePrices[commodity] && discountPercent && discountPercent.length > 0 ? (
                     <View style={styles.calculatedPriceBox}>
                       <Text style={styles.calculatedLabel}>Your Trade Price:</Text>
                       <Text style={styles.calculatedValue}>
                         ${((livePrices[commodity] || 0) * (1 - (parseFloat(discountPercent) || 0) / 100)).toLocaleString()} USD
                       </Text>
-                      <Text style={styles.savingsText}>Save ${((livePrices[commodity] || 0) * (parseFloat(discountPercent) || 0) / 100).toLocaleString()} per unit</Text>
+                      <Text style={styles.savingsText}>
+                        Save ${((livePrices[commodity] || 0) * (parseFloat(discountPercent) || 0) / 100).toLocaleString()} per unit
+                      </Text>
                     </View>
-                  )}
-                  {!livePrices[commodity] && (
-                    <Text style={styles.warningText}>⚠️ Market price unavailable for this commodity</Text>
-                  )}
+                  ) : null}
+                  {!livePrices[commodity] ? (
+                    <Text style={styles.warningText}>
+                      ⚠️ Market price unavailable for this commodity
+                    </Text>
+                  ) : null}
                 </View>
               )}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Entry Price (USD) - Optional</Text>
-                <Text style={styles.helperText}>Track P&L from this price point. Defaults to price per unit.</Text>
+                <Text style={styles.helperText}>
+                  Track P&L from this price point. Defaults to price per unit.
+                </Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Enter entry price for P&L tracking"
@@ -288,7 +302,9 @@ export default function CreateTradeScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Facilitation Commission Rate (%)</Text>
-                <Text style={styles.helperText}>Masters Energy Inc. USA commission as intermediary</Text>
+                <Text style={styles.helperText}>
+                  Masters Energy Inc. USA commission as intermediary
+                </Text>
                 <View style={styles.commissionOptions}>
                   {[0.5, 1.0, 1.5, 2.0].map(rate => (
                     <TouchableOpacity
@@ -305,7 +321,7 @@ export default function CreateTradeScreen() {
               </View>
             </View>
 
-            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) && (
+            {quantity && ((!useMarketPrice && pricePerUnit) || (useMarketPrice && livePrices[commodity])) ? (
               <View style={styles.summarySection}>
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryLabel}>Total Trade Value</Text>
@@ -338,7 +354,7 @@ export default function CreateTradeScreen() {
                   </Text>
                 </View>
               </View>
-            )}
+            ) : null}
           </View>
         </ScrollView>
 
