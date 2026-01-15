@@ -18,8 +18,10 @@ const COMMODITY_SYMBOL_MAP: Record<CommodityType, string> = {
 };
 
 const priceCache: Record<string, { data: PolygonPriceData | null; timestamp: number }> = {};
-const CACHE_DURATION = 5 * 60 * 1000;
-const RATE_LIMIT_DELAY = 250;
+const CACHE_DURATION = 10 * 60 * 1000;
+const RATE_LIMIT_DELAY = 500;
+let lastRateLimitTime = 0;
+const RATE_LIMIT_COOLDOWN = 60 * 1000;
 
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -34,6 +36,11 @@ export async function getCommodityPrice(
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       console.log(`[Polygon] Using cached price for ${commodity}`);
       return cached.data;
+    }
+
+    if (Date.now() - lastRateLimitTime < RATE_LIMIT_COOLDOWN) {
+      console.log(`[Polygon] In rate limit cooldown, using cached data for ${commodity}`);
+      return cached?.data || null;
     }
 
     const symbol = COMMODITY_SYMBOL_MAP[commodity];
@@ -52,15 +59,16 @@ export async function getCommodityPrice(
     const data = await response.json();
 
     if (response.status === 429) {
+      lastRateLimitTime = Date.now();
       console.warn(`[Polygon] Rate limit hit for ${commodity}, attempt ${retryCount + 1}`);
       
-      if (retryCount < 3) {
-        const backoffDelay = Math.pow(2, retryCount) * 1000;
+      if (retryCount < 5) {
+        const backoffDelay = Math.pow(2, retryCount) * 2000;
         console.log(`[Polygon] Retrying in ${backoffDelay}ms...`);
         await delay(backoffDelay);
         return getCommodityPrice(commodity, retryCount + 1);
       } else {
-        console.error('[Polygon] Max retries reached for rate limit');
+        console.warn('[Polygon] Max retries reached, using cached data');
         return cached?.data || null;
       }
     }
@@ -110,6 +118,15 @@ export async function getMultipleCommodityPrices(
     
     if (commodities.indexOf(commodity) < commodities.length - 1) {
       await delay(RATE_LIMIT_DELAY);
+    }
+    
+    if (Date.now() - lastRateLimitTime < RATE_LIMIT_COOLDOWN) {
+      console.log('[Polygon] Rate limit detected, stopping batch requests');
+      for (let i = commodities.indexOf(commodity) + 1; i < commodities.length; i++) {
+        const cached = priceCache[commodities[i]];
+        results[commodities[i]] = cached?.data || null;
+      }
+      break;
     }
   }
 
