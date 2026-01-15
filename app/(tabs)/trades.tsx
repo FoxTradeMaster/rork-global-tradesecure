@@ -134,7 +134,7 @@ export default function TradesScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Trade Portfolio</Text>
           <View style={styles.headerButtons}>
-            {(currentUser?.role === 'trade_originator' || currentUser?.role === 'senior_management') && (
+            {(currentUser?.role === 'trade_originator' || currentUser?.role === 'senior_management') ? (
               <>
                 <TouchableOpacity 
                   style={styles.importButton}
@@ -150,7 +150,7 @@ export default function TradesScreen() {
                   <Plus size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </>
-            )}
+            ) : null}
           </View>
         </View>
 
