@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -40,6 +40,10 @@ export const [AdminAuthProvider, useAdminAuth] = createContextHook<AdminAuthStat
       setIsAuthenticated(false);
     }
   }, []);
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
   const authenticate = useCallback(async (password: string): Promise<boolean> => {
     const inputPassword = password.trim();

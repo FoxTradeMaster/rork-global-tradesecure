@@ -114,8 +114,8 @@ export default function RootLayout() {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <AdminAuthProvider>
-          <SubscriptionProvider>
-            <TradingProvider>
+          <TradingProvider>
+            <SubscriptionProvider>
               <MarketProvider>
                 <AIMarketUpdaterProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
@@ -123,8 +123,8 @@ export default function RootLayout() {
                   </GestureHandlerRootView>
                 </AIMarketUpdaterProvider>
               </MarketProvider>
-            </TradingProvider>
-          </SubscriptionProvider>
+            </SubscriptionProvider>
+          </TradingProvider>
         </AdminAuthProvider>
       </QueryClientProvider>
     </trpc.Provider>
