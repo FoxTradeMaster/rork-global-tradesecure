@@ -47,7 +47,7 @@ const ROLES = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { setUser, currentUser, isLoading } = useTrading();
+  const { setUser, setDemoUser, currentUser, isLoading } = useTrading();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -83,6 +83,16 @@ export default function WelcomeScreen() {
   const handleRoleSelect = (roleId: string) => {
     setSelectedRole(roleId);
     setShowAuthModal(true);
+  };
+
+  const handleDemoMode = async () => {
+    try {
+      await setDemoUser();
+      router.replace('/(tabs)/dashboard');
+    } catch (error) {
+      console.error('[WelcomeScreen] Error entering demo mode:', error);
+      Alert.alert('Error', 'Failed to start demo mode');
+    }
   };
 
   const handleAuth = async () => {
@@ -252,6 +262,11 @@ export default function WelcomeScreen() {
               );
             })}
           </View>
+
+          <TouchableOpacity style={styles.demoButton} onPress={handleDemoMode}>
+            <Text style={styles.demoButtonText}>Try Demo Mode</Text>
+            <Text style={styles.demoButtonSubtext}>No account required • Full access</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
 
@@ -532,5 +547,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#3B82F6',
+  },
+  demoButton: {
+    marginTop: 32,
+    backgroundColor: '#10B981',
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  demoButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  demoButtonSubtext: {
+    fontSize: 13,
+    color: '#D1FAE5',
   },
 });

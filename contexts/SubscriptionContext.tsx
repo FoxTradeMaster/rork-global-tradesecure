@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SUBSCRIPTION_PLANS, PayPalSubscriptionPlan, createPayPalSubscription, getPayPalSubscription, cancelPayPalSubscription } from '@/lib/paypal';
+import { useTrading } from './TradingContext';
 
 export type SubscriptionTier = 'free' | 'premium';
 
@@ -59,6 +60,7 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
 const STORAGE_KEY = 'subscription_status';
 
 export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
+  const { isDemoMode } = useTrading();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     tier: 'free',
     features: FREE_FEATURES,
@@ -72,6 +74,18 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     const init = async () => {
       try {
         console.log('[Subscription] Loading subscription status...');
+        
+        if (isDemoMode) {
+          console.log('[Subscription] Demo mode detected, granting premium features');
+          setSubscriptionStatus({
+            tier: 'premium',
+            features: PREMIUM_FEATURES,
+            expiresAt: null,
+            isActive: true,
+          });
+          setIsLoading(false);
+          return;
+        }
         
         const storagePromise = AsyncStorage.getItem(STORAGE_KEY);
         const timeoutPromise = new Promise<null>((resolve) => 
@@ -119,7 +133,7 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
       }
     };
     init();
-  }, []);
+  }, [isDemoMode]);
 
   const saveSubscriptionStatus = async (status: SubscriptionStatus) => {
     try {
@@ -232,7 +246,7 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   return {
     subscriptionStatus,
     isLoading,
-    isPremium: subscriptionStatus.tier === 'premium',
+    isPremium: subscriptionStatus.tier === 'premium' || isDemoMode,
     plans,
     purchaseSubscription,
     confirmSubscription,

@@ -179,12 +179,31 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       console.log('[TradingContext] Starting to load data...');
       
       try {
+        const demoMode = await AsyncStorage.getItem('demo_mode');
+        
+        if (demoMode === 'true') {
+          console.log('[TradingContext] Demo mode detected, loading demo data');
+          const storedUser = await AsyncStorage.getItem('current_user');
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            setCurrentUser(user);
+            setIsDemoMode(true);
+            setCounterparties(MOCK_COUNTERPARTIES);
+            setTrades(MOCK_TRADES);
+            setWalletBalance({ available: 50000, pending: 10000, total: 60000 });
+            console.log('[TradingContext] Demo mode loaded');
+          }
+          setIsLoading(false);
+          return;
+        }
+
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Session check timeout')), 5000)
@@ -397,35 +416,58 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     await AsyncStorage.setItem('current_user', JSON.stringify(user));
   };
 
+  const setDemoUser = async () => {
+    const demoUser: User = {
+      id: 'demo-user',
+      name: 'Demo User',
+      role: 'trade_originator',
+      email: 'demo@foxtrademaster.app',
+    };
+    setCurrentUser(demoUser);
+    setIsDemoMode(true);
+    setCounterparties(MOCK_COUNTERPARTIES);
+    setTrades(MOCK_TRADES);
+    setWalletBalance({ available: 50000, pending: 10000, total: 60000 });
+    await AsyncStorage.setItem('demo_mode', 'true');
+    await AsyncStorage.setItem('current_user', JSON.stringify(demoUser));
+    console.log('[TradingContext] Demo mode activated');
+  };
+
   const clearUser = async () => {
     setCurrentUser(null);
+    setIsDemoMode(false);
     await AsyncStorage.removeItem('current_user');
-    await supabase.auth.signOut();
+    await AsyncStorage.removeItem('demo_mode');
+    if (!isDemoMode) {
+      await supabase.auth.signOut();
+    }
     console.log('[TradingContext] User logged out and session cleared');
   };
 
   const addCounterparties = async (newCounterparties: Counterparty[]) => {
     console.log('[TradingContext] Adding', newCounterparties.length, 'counterparties');
     
-    for (const counterparty of newCounterparties) {
-      const { error } = await (supabase as any)
-        .from('counterparties')
-        .insert({
-          user_id: 'anonymous',
-          name: counterparty.name,
-          country: counterparty.country,
-          type: counterparty.type,
-          email: '',
-          onboarded_at: counterparty.onboardedAt.toISOString(),
-          risk_score: counterparty.riskScore,
-          documents: counterparty.documents,
-          approved: counterparty.approved,
-          approval_conditions: counterparty.approvalConditions,
-          status: counterparty.status,
-        });
+    if (!isDemoMode) {
+      for (const counterparty of newCounterparties) {
+        const { error } = await (supabase as any)
+          .from('counterparties')
+          .insert({
+            user_id: 'anonymous',
+            name: counterparty.name,
+            country: counterparty.country,
+            type: counterparty.type,
+            email: '',
+            onboarded_at: counterparty.onboardedAt.toISOString(),
+            risk_score: counterparty.riskScore,
+            documents: counterparty.documents,
+            approved: counterparty.approved,
+            approval_conditions: counterparty.approvalConditions,
+            status: counterparty.status,
+          });
 
-      if (error) {
-        console.error('Error adding counterparty:', error);
+        if (error) {
+          console.error('Error adding counterparty:', error);
+        }
       }
     }
     
@@ -433,6 +475,12 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addCounterparty = async (counterparty: Counterparty) => {
+    if (isDemoMode) {
+      const updated = [...counterparties, counterparty];
+      setCounterparties(updated);
+      return;
+    }
+
     const { data, error } = await (supabase as any)
       .from('counterparties')
       .insert({
@@ -462,22 +510,24 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const updateCounterparty = async (id: string, updates: Partial<Counterparty>) => {
-    const dbUpdates: any = {};
-    if (updates.name) dbUpdates.name = updates.name;
-    if (updates.country) dbUpdates.country = updates.country;
-    if (updates.riskScore) dbUpdates.risk_score = updates.riskScore;
-    if (updates.documents) dbUpdates.documents = updates.documents;
-    if (updates.approved !== undefined) dbUpdates.approved = updates.approved;
-    if (updates.status) dbUpdates.status = updates.status;
-    if (updates.approvalConditions) dbUpdates.approval_conditions = updates.approvalConditions;
+    if (!isDemoMode) {
+      const dbUpdates: any = {};
+      if (updates.name) dbUpdates.name = updates.name;
+      if (updates.country) dbUpdates.country = updates.country;
+      if (updates.riskScore) dbUpdates.risk_score = updates.riskScore;
+      if (updates.documents) dbUpdates.documents = updates.documents;
+      if (updates.approved !== undefined) dbUpdates.approved = updates.approved;
+      if (updates.status) dbUpdates.status = updates.status;
+      if (updates.approvalConditions) dbUpdates.approval_conditions = updates.approvalConditions;
 
-    const { error } = await (supabase as any)
-      .from('counterparties')
-      .update(dbUpdates)
-      .eq('id', id);
+      const { error } = await (supabase as any)
+        .from('counterparties')
+        .update(dbUpdates)
+        .eq('id', id);
 
-    if (error) {
-      console.error('Error updating counterparty:', error);
+      if (error) {
+        console.error('Error updating counterparty:', error);
+      }
     }
 
     const updated = counterparties.map(cp => cp.id === id ? { ...cp, ...updates } : cp);
@@ -487,33 +537,35 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const addTrades = async (newTrades: Trade[]) => {
     console.log('[TradingContext] Adding', newTrades.length, 'trades');
     
-    for (const trade of newTrades) {
-      const { error } = await (supabase as any)
-        .from('trades')
-        .insert({
-          user_id: 'anonymous',
-          commodity: trade.commodity,
-          counterparty_id: trade.counterpartyId,
-          counterparty_name: trade.counterpartyName,
-          quantity: trade.quantity,
-          unit: trade.unit,
-          price_per_unit: trade.pricePerUnit,
-          entry_price: trade.entryPrice,
-          market_price: trade.marketPrice,
-          discount_percent: trade.discountPercent,
-          total_value: trade.totalValue,
-          currency: trade.currency,
-          incoterm: trade.incoterm,
-          delivery_window: trade.deliveryWindow,
-          status: trade.status,
-          created_by: trade.createdBy,
-          documents: trade.documents,
-          risk_level: trade.riskLevel,
-          alerts: trade.alerts,
-        });
+    if (!isDemoMode) {
+      for (const trade of newTrades) {
+        const { error } = await (supabase as any)
+          .from('trades')
+          .insert({
+            user_id: 'anonymous',
+            commodity: trade.commodity,
+            counterparty_id: trade.counterpartyId,
+            counterparty_name: trade.counterpartyName,
+            quantity: trade.quantity,
+            unit: trade.unit,
+            price_per_unit: trade.pricePerUnit,
+            entry_price: trade.entryPrice,
+            market_price: trade.marketPrice,
+            discount_percent: trade.discountPercent,
+            total_value: trade.totalValue,
+            currency: trade.currency,
+            incoterm: trade.incoterm,
+            delivery_window: trade.deliveryWindow,
+            status: trade.status,
+            created_by: trade.createdBy,
+            documents: trade.documents,
+            risk_level: trade.riskLevel,
+            alerts: trade.alerts,
+          });
 
-      if (error) {
-        console.error('Error adding trade:', error);
+        if (error) {
+          console.error('Error adding trade:', error);
+        }
       }
     }
     
@@ -521,6 +573,12 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const addTrade = async (trade: Trade) => {
+    if (isDemoMode) {
+      const updated = [...trades, trade];
+      setTrades(updated);
+      return;
+    }
+
     const { data, error } = await (supabase as any)
       .from('trades')
       .insert({
@@ -558,27 +616,29 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   };
 
   const updateTrade = async (id: string, updates: Partial<Trade>) => {
-    const dbUpdates: any = {};
-    if (updates.status) dbUpdates.status = updates.status;
-    if (updates.documents) dbUpdates.documents = updates.documents;
-    if (updates.riskLevel) dbUpdates.risk_level = updates.riskLevel;
-    if (updates.alerts) dbUpdates.alerts = updates.alerts;
-    if (updates.pricePerUnit) dbUpdates.price_per_unit = updates.pricePerUnit;
-    if (updates.totalValue) dbUpdates.total_value = updates.totalValue;
-    if (updates.commissionPaid !== undefined) dbUpdates.commission_paid = updates.commissionPaid;
-    if (updates.paypalOrderId) dbUpdates.paypal_order_id = updates.paypalOrderId;
-    if (updates.entryPrice) dbUpdates.entry_price = updates.entryPrice;
-    if (updates.currentPrice) dbUpdates.current_price = updates.currentPrice;
-    if (updates.profitLoss !== undefined) dbUpdates.profit_loss = updates.profitLoss;
-    if (updates.profitLossPercent !== undefined) dbUpdates.profit_loss_percent = updates.profitLossPercent;
+    if (!isDemoMode) {
+      const dbUpdates: any = {};
+      if (updates.status) dbUpdates.status = updates.status;
+      if (updates.documents) dbUpdates.documents = updates.documents;
+      if (updates.riskLevel) dbUpdates.risk_level = updates.riskLevel;
+      if (updates.alerts) dbUpdates.alerts = updates.alerts;
+      if (updates.pricePerUnit) dbUpdates.price_per_unit = updates.pricePerUnit;
+      if (updates.totalValue) dbUpdates.total_value = updates.totalValue;
+      if (updates.commissionPaid !== undefined) dbUpdates.commission_paid = updates.commissionPaid;
+      if (updates.paypalOrderId) dbUpdates.paypal_order_id = updates.paypalOrderId;
+      if (updates.entryPrice) dbUpdates.entry_price = updates.entryPrice;
+      if (updates.currentPrice) dbUpdates.current_price = updates.currentPrice;
+      if (updates.profitLoss !== undefined) dbUpdates.profit_loss = updates.profitLoss;
+      if (updates.profitLossPercent !== undefined) dbUpdates.profit_loss_percent = updates.profitLossPercent;
 
-    const { error } = await (supabase as any)
-      .from('trades')
-      .update(dbUpdates)
-      .eq('id', id);
+      const { error } = await (supabase as any)
+        .from('trades')
+        .update(dbUpdates)
+        .eq('id', id);
 
-    if (error) {
-      console.error('Error updating trade:', error);
+      if (error) {
+        console.error('Error updating trade:', error);
+      }
     }
 
     const updated = trades.map(t => t.id === id ? { ...t, ...updates } : t);
@@ -701,6 +761,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   return {
     currentUser,
     setUser,
+    setDemoUser,
     clearUser,
     counterparties,
     trades,
@@ -708,6 +769,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     transactions,
     isLoading,
     livePrices,
+    isDemoMode,
     addCounterparty,
     addCounterparties,
     updateCounterparty,

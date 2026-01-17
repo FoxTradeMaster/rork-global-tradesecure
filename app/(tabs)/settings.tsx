@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
 import { useAIMarketUpdater } from '@/contexts/AIMarketUpdaterContext';
-import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle } from 'lucide-react-native';
+import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle, TestTube2 } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
-  const { currentUser, clearUser } = useTrading();
+  const { currentUser, clearUser, isDemoMode } = useTrading();
   const metrics = usePortfolioMetrics();
   const { 
     settings, 
@@ -59,6 +59,28 @@ export default function SettingsScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
           </View>
+
+          {isDemoMode && (
+            <View style={styles.section}>
+              <View style={styles.demoBanner}>
+                <View style={styles.demoIconContainer}>
+                  <TestTube2 size={24} color="#10B981" />
+                </View>
+                <View style={styles.demoContent}>
+                  <Text style={styles.demoTitle}>Demo Mode Active</Text>
+                  <Text style={styles.demoDescription}>
+                    You&apos;re exploring with full access. All features unlocked. Data won&apos;t be saved permanently.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.createAccountButton}
+                    onPress={handleChangeRole}
+                  >
+                    <Text style={styles.createAccountButtonText}>Create Real Account</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
 
           <View style={styles.section}>
             <View style={styles.profileCard}>
@@ -947,5 +969,54 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 12,
     fontStyle: 'italic' as const,
+  },
+  demoBanner: {
+    backgroundColor: '#D1FAE5',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#10B981',
+    flexDirection: 'row',
+    gap: 16,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  demoIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  demoContent: {
+    flex: 1,
+  },
+  demoTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#065F46',
+    marginBottom: 6,
+  },
+  demoDescription: {
+    fontSize: 13,
+    color: '#047857',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  createAccountButton: {
+    backgroundColor: '#10B981',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  createAccountButtonText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
   },
 });
