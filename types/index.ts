@@ -7,7 +7,7 @@ export type UserRole =
   | 'operations_manager' 
   | 'admin';
 
-export type CommodityType = 'gold' | 'fuel_oil' | 'steam_coal' | 'anthracite_coal' | 'urea' | 'edible_oils';
+export type CommodityType = 'gold' | 'fuel_oil' | 'steam_coal' | 'anthracite_coal' | 'urea' | 'edible_oils' | 'bio_fuels' | 'iron_ore';
 
 export type RiskLevel = 'green' | 'amber' | 'red';
 

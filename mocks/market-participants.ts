@@ -810,6 +810,8 @@ export const getCommodityLabel = (commodity: string): string => {
     anthracite_coal: 'Anthracite Coal',
     urea: 'Urea',
     edible_oils: 'Edible Oils',
+    bio_fuels: 'Bio-Fuels',
+    iron_ore: 'Iron Ore',
   };
   return labels[commodity] || commodity;
 };

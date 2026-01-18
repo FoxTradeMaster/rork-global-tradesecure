@@ -64,7 +64,7 @@ export default function MarketDirectoryScreen() {
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
 
-  const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
+  const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
   const allParticipants = useMemo(() => {
     const aiGeneratedParticipants = getImportedParticipants();

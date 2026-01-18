@@ -30,6 +30,7 @@ interface UpdateLog {
   success: boolean;
   error?: string;
   isSummary?: boolean;
+  details?: { name: string; count: number }[];
 }
 
 interface UpdaterSettings {
@@ -44,9 +45,9 @@ interface UpdaterSettings {
 const DEFAULT_SETTINGS: UpdaterSettings = {
   isEnabled: false,
   isPaused: false,
-  updateIntervalHours: 24,
-  companiesPerUpdate: 5,
-  selectedCommodities: ['edible_oils', 'fuel_oil', 'gold', 'steam_coal', 'anthracite_coal', 'urea'],
+  updateIntervalHours: 1,
+  companiesPerUpdate: 10,
+  selectedCommodities: ['edible_oils', 'fuel_oil', 'gold', 'steam_coal', 'anthracite_coal', 'urea', 'bio_fuels', 'iron_ore'],
 };
 
 export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook(() => {
@@ -126,6 +127,8 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
       steam_coal: 'Steam Coal',
       anthracite_coal: 'Anthracite Coal',
       urea: 'Urea',
+      bio_fuels: 'Bio-Fuels',
+      iron_ore: 'Iron Ore',
     };
     return commodityLabels[commodity] || commodity.replace(/_/g, ' ');
   };
@@ -138,6 +141,8 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
       steam_coal: 'steam coal and thermal coal',
       anthracite_coal: 'anthracite coal',
       urea: 'urea and fertilizers',
+      bio_fuels: 'bio-fuels (biodiesel, ethanol, renewable fuels)',
+      iron_ore: 'iron ore and steel raw materials',
     };
     return commodityDescriptions[commodity] || commodity.replace(/_/g, ' ');
   };
@@ -293,6 +298,7 @@ For each company provide:
         companiesAdded: totalAdded,
         success: true,
         isSummary: true,
+        details: commodityResults,
       });
     }
 

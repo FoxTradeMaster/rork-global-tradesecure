@@ -15,6 +15,8 @@ const COMMODITY_SYMBOL_MAP: Record<CommodityType, string> = {
   anthracite_coal: 'C:MTUSD',
   urea: 'C:NGUSD',
   edible_oils: 'C:ZLOUSD',
+  bio_fuels: 'C:ZLOUSD',
+  iron_ore: 'C:HGUSD',
 };
 
 const priceCache: Record<string, { data: PolygonPriceData | null; timestamp: number }> = {};

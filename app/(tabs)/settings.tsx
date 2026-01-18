@@ -353,9 +353,22 @@ export default function SettingsScreen() {
                     </Text>
                   </View>
                   {log.success ? (
-                    <Text style={styles.logText}>
-                      Added {log.companiesAdded} companies
-                    </Text>
+                    <>
+                      <Text style={styles.logText}>
+                        Added {log.companiesAdded} companies total
+                      </Text>
+                      {log.isSummary && log.details && log.details.length > 0 && (
+                        <View style={styles.logDetailsContainer}>
+                          <Text style={styles.logDetailsTitle}>Breakdown by commodity:</Text>
+                          {log.details.map((detail, idx) => (
+                            <View key={idx} style={styles.logDetailRow}>
+                              <Text style={styles.logDetailCommodity}>• {detail.name}</Text>
+                              <Text style={styles.logDetailCount}>{detail.count} companies</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </>
                   ) : (
                     <Text style={[styles.logText, { color: '#EF4444' }]}>
                       Error: {log.error}
@@ -962,6 +975,35 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#64748B',
     marginLeft: 22,
+  },
+  logDetailsContainer: {
+    marginTop: 8,
+    marginLeft: 22,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  logDetailsTitle: {
+    fontSize: 10,
+    fontWeight: '600' as const,
+    color: '#64748B',
+    marginBottom: 6,
+  },
+  logDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  logDetailCommodity: {
+    fontSize: 10,
+    color: '#64748B',
+    flex: 1,
+  },
+  logDetailCount: {
+    fontSize: 10,
+    fontWeight: '600' as const,
+    color: '#10B981',
   },
   aiUpdaterWarning: {
     fontSize: 11,
