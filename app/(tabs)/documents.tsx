@@ -10,6 +10,7 @@ import { generateBlankDocx, downloadDocx } from '@/lib/docxGenerator';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '@/lib/supabase';
+import * as Sharing from 'expo-sharing';
 
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
@@ -114,42 +115,60 @@ export default function DocumentsScreen() {
     try {
       console.log('[Documents] Generating blank', docType, 'template');
       
-      if (Platform.OS === 'web') {
-        try {
-          const mappedDocType = docType === 'QC' ? 'QUALITY_CERT' : docType;
-          const blob = await generateBlankDocx(mappedDocType as any);
-          const documentNames: Record<string, string> = {
-            'CIS': 'Corporate_Information_Sheet',
-            'SCO': 'Soft_Corporate_Offer',
-            'FCO': 'Full_Corporate_Offer',
-            'ICPO': 'Irrevocable_Corporate_Purchase_Order',
-            'LOI': 'Letter_of_Intent',
-            'POF': 'Proof_of_Funds',
-            'RWA': 'Ready_Willing_and_Able',
-            'BCL': 'Bank_Comfort_Letter',
-            'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
-            'IMFPA': 'Irrevocable_Master_Fee_Protection_Agreement',
-            'TSA': 'Transaction_Support_Agreement',
-            'SPA': 'Sales_and_Purchase_Agreement',
-            'ASWP': 'Assignment_of_Sale_with_Product',
-            'POP': '2_Percent_Performance_Bond',
-            'BOL': 'Bill_of_Lading',
-            'COO': 'Certificate_of_Origin',
-            'QC': 'Quality_Certificate',
-          };
-          const filename = `${documentNames[docType]}_Blank_Template.docx`;
+      const mappedDocType = docType === 'QC' ? 'QUALITY_CERT' : docType;
+      const documentNames: Record<string, string> = {
+        'CIS': 'Corporate_Information_Sheet',
+        'SCO': 'Soft_Corporate_Offer',
+        'FCO': 'Full_Corporate_Offer',
+        'ICPO': 'Irrevocable_Corporate_Purchase_Order',
+        'LOI': 'Letter_of_Intent',
+        'POF': 'Proof_of_Funds',
+        'RWA': 'Ready_Willing_and_Able',
+        'BCL': 'Bank_Comfort_Letter',
+        'NCNDA': 'Non_Circumvention_Non_Disclosure_Agreement',
+        'IMFPA': 'Irrevocable_Master_Fee_Protection_Agreement',
+        'TSA': 'Transaction_Support_Agreement',
+        'SPA': 'Sales_and_Purchase_Agreement',
+        'ASWP': 'Assignment_of_Sale_with_Product',
+        'POP': '2_Percent_Performance_Bond',
+        'BOL': 'Bill_of_Lading',
+        'COO': 'Certificate_of_Origin',
+        'QC': 'Quality_Certificate',
+      };
+      const filename = `${documentNames[docType]}_Blank_Template.docx`;
+
+      try {
+        const blob = await generateBlankDocx(mappedDocType as any);
+        
+        if (Platform.OS === 'web') {
           downloadDocx(blob, filename);
-          Alert.alert('Success', `${docType} template downloaded successfully as editable Word document`);
-        } catch (genError) {
-          console.error('[Documents] Error generating docx:', genError);
-          Alert.alert('Error', 'Failed to generate template. Please try again.');
+          Alert.alert('Success', `${docType} template downloaded successfully`);
+        } else {
+          const canShare = await Sharing.isAvailableAsync();
+          if (!canShare) {
+            Alert.alert('Not Available', 'Sharing is not available on this device');
+            return;
+          }
+          
+          const fileReaderInstance = new FileReader();
+          fileReaderInstance.onload = async () => {
+            try {
+              const uri = fileReaderInstance.result as string;
+              await Sharing.shareAsync(uri, {
+                mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                dialogTitle: `Save ${docType} Template`,
+                UTI: 'com.microsoft.word.doc',
+              });
+            } catch (err) {
+              console.error('[Documents] Error sharing file:', err);
+              Alert.alert('Error', 'Failed to share template. Please try again.');
+            }
+          };
+          fileReaderInstance.readAsDataURL(blob);
         }
-      } else {
-        Alert.alert(
-          'Web Only Feature',
-          'Blank template download is only available on web. Please use the web version to download editable Word documents.',
-          [{ text: 'OK' }]
-        );
+      } catch (genError) {
+        console.error('[Documents] Error generating docx:', genError);
+        Alert.alert('Error', 'Failed to generate template. Please try again.');
       }
     } catch (error) {
       console.error('[Documents] Error in handleDownloadBlankTemplate:', error);
