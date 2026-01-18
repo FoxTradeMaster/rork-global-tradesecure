@@ -416,11 +416,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     await AsyncStorage.setItem('current_user', JSON.stringify(user));
   };
 
-  const setDemoUser = async () => {
+  const setDemoUser = async (role: User['role'] = 'trade_originator') => {
     const demoUser: User = {
       id: 'demo-user',
       name: 'Demo User',
-      role: 'trade_originator',
+      role: role,
       email: 'demo@foxtrademaster.app',
     };
     setCurrentUser(demoUser);

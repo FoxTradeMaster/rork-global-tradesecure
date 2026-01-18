@@ -55,6 +55,7 @@ export default function WelcomeScreen() {
   const [name, setName] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [showDemoRoleModal, setShowDemoRoleModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && currentUser) {
@@ -85,9 +86,14 @@ export default function WelcomeScreen() {
     setShowAuthModal(true);
   };
 
-  const handleDemoMode = async () => {
+  const handleDemoMode = () => {
+    setShowDemoRoleModal(true);
+  };
+
+  const handleDemoRoleSelect = async (roleId: string) => {
     try {
-      await setDemoUser();
+      setShowDemoRoleModal(false);
+      await setDemoUser(roleId as any);
       router.replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
@@ -269,6 +275,54 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+
+      <Modal
+        visible={showDemoRoleModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDemoRoleModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowDemoRoleModal(false)}
+            >
+              <X size={24} color="#94A3B8" />
+            </TouchableOpacity>
+
+            <Text style={styles.modalTitle}>Select Your Demo Role</Text>
+            <Text style={styles.modalSubtitle}>
+              Choose the role you want to explore in demo mode
+            </Text>
+
+            <View style={styles.demoRolesContainer}>
+              {ROLES.map((role) => {
+                const Icon = role.icon;
+                return (
+                  <TouchableOpacity
+                    key={role.id}
+                    style={[
+                      styles.demoRoleCard,
+                      { borderLeftColor: role.color, borderLeftWidth: 4 }
+                    ]}
+                    onPress={() => handleDemoRoleSelect(role.id)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.demoIconContainer, { backgroundColor: `${role.color}20` }]}>
+                      <Icon size={24} color={role.color} />
+                    </View>
+                    <View style={styles.demoRoleInfo}>
+                      <Text style={styles.demoRoleTitle}>{role.title}</Text>
+                      <Text style={styles.demoRoleDescription}>{role.description}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={showAuthModal}
@@ -570,5 +624,37 @@ const styles = StyleSheet.create({
   demoButtonSubtext: {
     fontSize: 13,
     color: '#D1FAE5',
+  },
+  demoRolesContainer: {
+    marginTop: 16,
+    gap: 12,
+  },
+  demoRoleCard: {
+    backgroundColor: '#0F172A',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  demoIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  demoRoleInfo: {
+    flex: 1,
+  },
+  demoRoleTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  demoRoleDescription: {
+    fontSize: 13,
+    color: '#94A3B8',
   },
 });
