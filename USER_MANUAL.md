@@ -85,7 +85,7 @@ Fox Trade Master™ uses secure email and password authentication integrated wit
 - Check your internet connection
 - Try closing and reopening the app
 - Ensure you're not behind a restrictive firewall
-- Contact support at support@foxtrademaster.com or +1-804-506-9939 if issues persist
+- Contact support at support@foxtrademaster.com or +1-804-825-9037 if issues persist
 
 ### First Launch & Role Selection
 
@@ -2046,7 +2046,7 @@ While not available as blank templates in the app, these documents are also comm
 
 For technical support or questions about the Fox Trade Master™ app:
 - Email: support@foxtrademaster.com
-- Phone: +1-804-506-9939
+- Phone: +1-804-825-9037
 - Hours: 24/7 for critical issues
 
 For regulatory or compliance questions:

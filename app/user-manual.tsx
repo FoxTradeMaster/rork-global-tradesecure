@@ -491,7 +491,7 @@ Fox Trade Master™ supports 17 standard commodity trading documents. All docume
 
 For technical support or questions about the Fox Trade Master™ app:
 - Email: support@foxtrademaster.com
-- Phone: +1-804-506-9939
+- Phone: +1-804-825-9037
 - Hours: 24/7 for critical issues
 
 ---
