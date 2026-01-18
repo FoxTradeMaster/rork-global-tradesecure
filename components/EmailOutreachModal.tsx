@@ -54,7 +54,11 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
   useEffect(() => {
     const initialEmails: { [key: string]: string } = {};
     selectedCompanies.forEach(company => {
-      initialEmails[company.id] = '';
+      if (company.type === 'trading_house' && company.email) {
+        initialEmails[company.id] = company.email;
+      } else {
+        initialEmails[company.id] = '';
+      }
     });
     setRecipientEmails(initialEmails);
   }, [selectedCompanies]);
@@ -149,6 +153,11 @@ export default function EmailOutreachModal({ visible, onClose, selectedCompanies
                   <View style={styles.recipientInfo}>
                     <Text style={styles.recipientName}>{company.name}</Text>
                     <Text style={styles.recipientLocation}>{company.headquarters}</Text>
+                    {company.type === 'trading_house' && company.email && (
+                      <View style={styles.autoFilledBadge}>
+                        <Text style={styles.autoFilledText}>Email auto-filled</Text>
+                      </View>
+                    )}
                   </View>
                   <View style={styles.emailInputContainer}>
                     <View style={styles.emailIcon}>
@@ -428,5 +437,18 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  autoFilledBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 6,
+    alignSelf: 'flex-start',
+  },
+  autoFilledText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

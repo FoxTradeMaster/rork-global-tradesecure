@@ -233,6 +233,8 @@ For each company provide:
             businessType: company.businessType,
             logo: enrichedData?.logo,
             brandColor: enrichedData?.primaryColor,
+            email: enrichedData?.email,
+            contactLinks: enrichedData?.links,
             verified: enrichedData?.verified || true,
           } as TradingHouse;
         })

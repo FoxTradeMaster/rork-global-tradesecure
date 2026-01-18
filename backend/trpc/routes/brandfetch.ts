@@ -71,11 +71,17 @@ export const brandfetchRouter = createTRPCRouter({
         }
 
         if (brandData) {
+          const email = brandData.links?.find(link => 
+            link.name.toLowerCase() === 'email' || 
+            link.url.startsWith('mailto:')
+          )?.url.replace('mailto:', '') || null;
+
           return {
             logo: client.getLogo(brandData),
             primaryColor: client.getPrimaryColor(brandData),
             description: brandData.description || brandData.longDescription,
             links: brandData.links,
+            email,
             verified: brandData.claimed,
           };
         }

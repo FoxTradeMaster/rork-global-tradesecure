@@ -142,6 +142,8 @@ export interface TradingHouse {
   businessType?: 'buyer' | 'seller' | 'both';
   logo?: string | null;
   brandColor?: string | null;
+  email?: string | null;
+  contactLinks?: { name: string; url: string }[];
 }
 
 export interface Broker {
