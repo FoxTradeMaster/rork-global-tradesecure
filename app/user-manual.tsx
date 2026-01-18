@@ -9,6 +9,9 @@ const MANUAL_CONTENT = `# Fox Trade Master™ Global Trading App
 
 ## Table of Contents
 1. [Getting Started](#getting-started)
+   - Demo Mode (Instant Access)
+   - Create Account (Full Access)
+   - Switching Between Modes
 2. [Role Selection](#role-selection)
 3. [Dashboard Overview](#dashboard-overview)
 4. [Managing Trades](#managing-trades)
@@ -25,18 +28,112 @@ const MANUAL_CONTENT = `# Fox Trade Master™ Global Trading App
 ## Getting Started
 
 ### First Launch
-1. Open the Fox Trade Master™ app
-2. You'll be greeted with the role selection screen
-3. Choose your role based on your responsibilities in the organization
-4. Once selected, you'll be taken to the main dashboard
+
+When you first open Fox Trade Master™, you'll see the welcome screen with:
+- **Fox Trade Master™ Logo** - Circular logo at the top
+- **Role Selection Cards** - Five professional roles to choose from
+- **Try Demo Mode Button** - Green button at the bottom for instant access without sign-up
+
+### Two Ways to Get Started
+
+#### Option 1: Demo Mode (Instant Access)
+**Perfect for:** Apple reviewers, evaluating the app, or exploring features without commitment
+
+1. On the welcome screen, scroll down and tap **"Try Demo Mode"** (green button)
+2. A modal appears with all available roles
+3. Select the role you want to explore (e.g., Trade Originator, Compliance Officer, Risk Manager, Legal Reviewer, or Senior Management)
+4. You'll instantly access the app with sample data
+5. **Full functionality** - All features work in demo mode
+6. **No account required** - Start using immediately
+7. **No authentication** - Skip email/password setup
+
+**Demo Mode Features:**
+- ✅ Complete access to all role-specific features
+- ✅ Pre-loaded sample trades, counterparties, and documents
+- ✅ Test all workflows and approvals
+- ✅ Experience the full app without creating an account
+- ✅ Switch between roles anytime via Settings
+- ⚠️ Data is not persisted across sessions
+- ⚠️ Cannot connect to real bank accounts or external systems
+
+#### Option 2: Create Account (Full Access)
+**Perfect for:** Production use, real trading operations, persistent data storage
+
+1. On the welcome screen, tap any **role card** that matches your position
+2. An authentication modal appears
+3. Choose **Sign Up** to create a new account:
+   - Enter your full name
+   - Enter your email address
+   - Create a password
+   - Tap **Sign Up**
+4. Or choose **Sign In** if you already have an account:
+   - Enter your email
+   - Enter your password
+   - Tap **Sign In**
+5. You'll be authenticated and taken to your dashboard
+
+**Authenticated Mode Features:**
+- ✅ All demo mode features PLUS:
+- ✅ Persistent data storage (your trades, documents, counterparties are saved)
+- ✅ Multi-device sync via cloud
+- ✅ Real email notifications and document sending
+- ✅ Team collaboration with other users
+- ✅ Data backup and recovery
+- ✅ Production-ready workflows
+
+### Demo Mode vs. Authenticated Mode
+
+**When to Use Demo Mode:**
+- ✅ Evaluating the app for the first time
+- ✅ Apple App Store review process
+- ✅ Testing features before committing
+- ✅ Training new team members
+- ✅ Quick demonstrations or presentations
+- ✅ No need for persistent data
+
+**When to Use Authenticated Mode:**
+- ✅ Production trading operations
+- ✅ Need to save and access data across sessions
+- ✅ Team collaboration with multiple users
+- ✅ Real document sending and notifications
+- ✅ Compliance and audit trail requirements
+- ✅ Long-term trade tracking and reporting
+
+### Returning to Role Selection
+
+If you need to switch roles or return to the welcome screen:
+
+**From Demo Mode or Authenticated Mode:**
+1. Tap the **Settings** tab in the bottom navigation
+2. Scroll to the "General" section
+3. Tap **"Change Role"** (red button with logout icon)
+4. You'll return to the welcome screen with all role options
+5. Select a different role or choose Demo Mode again
+
+**Note:** 
+- In Demo Mode: Changing roles resets to new sample data for that role
+- In Authenticated Mode: Changing roles preserves your data but shows role-specific views
+- You remain signed in when changing roles (doesn't log you out)
+
+### Switching from Demo to Authenticated
+
+1. While in Demo Mode, tap **Settings**
+2. Tap **"Change Role"** to return to welcome screen
+3. Select any role card to open authentication
+4. Choose **Sign Up** to create your account
+5. Your demo session data won't transfer (demo data is temporary)
+6. Start fresh with your authenticated account
 
 ### Navigation
-The app uses a tab-based navigation system with 5 main sections:
+
+The app uses a tab-based navigation system with up to 7 main sections (varies by role):
 - **Dashboard** - Overview of your portfolio and recent activity
 - **Trades** - Manage all trading activities
-- **Counterparties** - Manage business relationships
-- **Documents** - Upload, view, and send documents
-- **Market** - Directory of verified market participants
+- **Counterparties** - Manage business relationships (not available for Legal Reviewer)
+- **Documents** - Upload, view, and send documents (not available for Risk Manager or Senior Management)
+- **Market** - Directory of verified market participants (Trade Originator and Senior Management only)
+- **Wallet** - Commission tracking and payments (Trade Originator and Senior Management only)
+- **Settings** - Account settings, subscription, and app preferences (available to all roles)
 
 ---
 
