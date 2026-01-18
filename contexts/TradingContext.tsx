@@ -204,6 +204,34 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           return;
         }
 
+        const cachedCounterparties = await AsyncStorage.getItem('cached_counterparties');
+        const cachedTrades = await AsyncStorage.getItem('cached_trades');
+        
+        if (cachedCounterparties) {
+          const parsed = JSON.parse(cachedCounterparties);
+          const mapped = parsed.map((cp: any) => ({
+            ...cp,
+            onboardedAt: new Date(cp.onboardedAt)
+          }));
+          setCounterparties(mapped);
+          console.log('[TradingContext] Loaded', mapped.length, 'counterparties from cache');
+        }
+        
+        if (cachedTrades) {
+          const parsed = JSON.parse(cachedTrades);
+          const mapped = parsed.map((t: any) => ({
+            ...t,
+            createdAt: new Date(t.createdAt),
+            deliveryWindow: t.deliveryWindow ? {
+              start: new Date(t.deliveryWindow.start),
+              end: new Date(t.deliveryWindow.end)
+            } : undefined,
+            commissionPaidAt: t.commissionPaidAt ? new Date(t.commissionPaidAt) : undefined
+          }));
+          setTrades(mapped);
+          console.log('[TradingContext] Loaded', mapped.length, 'trades from cache');
+        }
+
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Session check timeout')), 5000)
@@ -250,7 +278,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
 
         if (counterpartiesError) {
           console.error('[TradingContext] Error loading counterparties:', counterpartiesError);
-          setCounterparties(MOCK_COUNTERPARTIES);
+          if (!cachedCounterparties) {
+            setCounterparties(MOCK_COUNTERPARTIES);
+            console.log('[TradingContext] No cache available, using mock data');
+          }
         } else if (counterpartiesData && counterpartiesData.length > 0) {
           const mappedCounterparties: Counterparty[] = counterpartiesData.map((cp: any) => ({
             id: cp.id,
@@ -266,10 +297,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
             status: cp.status,
           }));
           setCounterparties(mappedCounterparties);
-          console.log('[TradingContext] Loaded', mappedCounterparties.length, 'counterparties from Supabase');
-        } else {
+          await AsyncStorage.setItem('cached_counterparties', JSON.stringify(mappedCounterparties));
+          console.log('[TradingContext] Loaded', mappedCounterparties.length, 'counterparties from Supabase and cached');
+        } else if (!cachedCounterparties) {
           setCounterparties(MOCK_COUNTERPARTIES);
-          console.log('[TradingContext] No counterparties in DB, using mock data');
+          console.log('[TradingContext] No counterparties in DB and no cache, using mock data');
         }
 
         let tradesData, tradesError;
@@ -287,7 +319,10 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
 
         if (tradesError) {
           console.error('[TradingContext] Error loading trades:', tradesError);
-          setTrades(MOCK_TRADES);
+          if (!cachedTrades) {
+            setTrades(MOCK_TRADES);
+            console.log('[TradingContext] No cache available, using mock data');
+          }
         } else if (tradesData && tradesData.length > 0) {
           const mappedTrades: Trade[] = tradesData.map((t: any) => ({
             id: t.id,
@@ -320,17 +355,16 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
             profitLossPercent: t.profit_loss_percent,
           }));
           setTrades(mappedTrades);
-          console.log('[TradingContext] Loaded', mappedTrades.length, 'trades from Supabase');
-        } else {
+          await AsyncStorage.setItem('cached_trades', JSON.stringify(mappedTrades));
+          console.log('[TradingContext] Loaded', mappedTrades.length, 'trades from Supabase and cached');
+        } else if (!cachedTrades) {
           setTrades(MOCK_TRADES);
-          console.log('[TradingContext] No trades in DB, using mock data');
+          console.log('[TradingContext] No trades in DB and no cache, using mock data');
         }
 
         console.log('[TradingContext] Finished loading all data');
       } catch (error) {
         console.error('[TradingContext] Error loading data:', error);
-        setCounterparties(MOCK_COUNTERPARTIES);
-        setTrades(MOCK_TRADES);
       } finally {
         setIsLoading(false);
         console.log('[TradingContext] Loading complete');
@@ -471,7 +505,9 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       }
     }
     
-    setCounterparties(prev => [...prev, ...newCounterparties]);
+    const updated = [...counterparties, ...newCounterparties];
+    setCounterparties(updated);
+    await AsyncStorage.setItem('cached_counterparties', JSON.stringify(updated));
   };
 
   const addCounterparty = async (counterparty: Counterparty) => {
@@ -503,9 +539,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.error('Error adding counterparty:', error);
       const updated = [...counterparties, counterparty];
       setCounterparties(updated);
+      await AsyncStorage.setItem('cached_counterparties', JSON.stringify(updated));
     } else if (data) {
       const updated = [...counterparties, { ...counterparty, id: data.id }];
       setCounterparties(updated);
+      await AsyncStorage.setItem('cached_counterparties', JSON.stringify(updated));
     }
   };
 
@@ -532,6 +570,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
 
     const updated = counterparties.map(cp => cp.id === id ? { ...cp, ...updates } : cp);
     setCounterparties(updated);
+    await AsyncStorage.setItem('cached_counterparties', JSON.stringify(updated));
   };
 
   const addTrades = async (newTrades: Trade[]) => {
@@ -569,7 +608,9 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       }
     }
     
-    setTrades(prev => [...prev, ...newTrades]);
+    const updated = [...trades, ...newTrades];
+    setTrades(updated);
+    await AsyncStorage.setItem('cached_trades', JSON.stringify(updated));
   };
 
   const addTrade = async (trade: Trade) => {
@@ -609,9 +650,11 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
       console.error('Error adding trade:', error);
       const updated = [...trades, trade];
       setTrades(updated);
+      await AsyncStorage.setItem('cached_trades', JSON.stringify(updated));
     } else if (data) {
       const updated = [...trades, { ...trade, id: data.id }];
       setTrades(updated);
+      await AsyncStorage.setItem('cached_trades', JSON.stringify(updated));
     }
   };
 
@@ -643,6 +686,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
 
     const updated = trades.map(t => t.id === id ? { ...t, ...updates } : t);
     setTrades(updated);
+    await AsyncStorage.setItem('cached_trades', JSON.stringify(updated));
   };
 
   const payPlatformFee = async (tradeId: string, amount: number): Promise<{ approvalUrl: string; orderId: string }> => {
