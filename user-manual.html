@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fox Trade Master™ - User Manual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #E5E7EB;
+            background-color: #0A0E27;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #1a1f3a;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #FFFFFF;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #3B82F6;
+            padding-bottom: 16px;
+        }
+
+        h2 {
+            color: #FFFFFF;
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #374151;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+
+        h4 {
+            color: #3B82F6;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #D1D5DB;
+            font-size: 15px;
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            color: #D1D5DB;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        strong {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #374151;
+            margin: 32px 0;
+        }
+
+        .subtitle {
+            color: #9CA3AF;
+            font-size: 20px;
+            margin-bottom: 32px;
+        }
+
+        .toc {
+            background-color: #0f1629;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+        }
+
+        .toc h2 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 6px;
+        }
+
+        .toc a {
+            color: #3B82F6;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: #60A5FA;
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .badge-green {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+        }
+
+        .badge-amber {
+            background-color: rgba(251, 191, 36, 0.2);
+            color: #FBBF24;
+        }
+
+        .badge-red {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid #374151;
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+            .container {
+                background-color: white;
+                box-shadow: none;
+            }
+            h1, h2, h3, strong {
+                color: black;
+            }
+            p, li {
+                color: #333;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 26px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fox Trade Master™ Global Trading App</h1>
+        <p class="subtitle">User Manual</p>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#getting-started">1. Getting Started</a></li>
+                <li><a href="#role-selection">2. Role Selection</a></li>
+                <li><a href="#dashboard">3. Dashboard Overview</a></li>
+                <li><a href="#managing-trades">4. Managing Trades</a></li>
+                <li><a href="#managing-counterparties">5. Managing Counterparties</a></li>
+                <li><a href="#document-management">6. Document Management</a></li>
+                <li><a href="#market-directory">7. Market Directory</a></li>
+                <li><a href="#risk-levels">8. Understanding Risk Levels</a></li>
+                <li><a href="#trade-workflow">9. Trade Workflow</a></li>
+                <li><a href="#document-types">10. Document Types</a></li>
+                <li><a href="#support">11. Support & Contact</a></li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2 id="getting-started">Getting Started</h2>
+
+        <h3>First Launch</h3>
+        <p>When you first open Fox Trade Master™, you'll see the welcome screen with:</p>
+        <ul>
+            <li><strong>Fox Trade Master™ Logo</strong> - Circular logo at the top</li>
+            <li><strong>Role Selection Cards</strong> - Five professional roles to choose from</li>
+            <li><strong>Try Demo Mode Button</strong> - Green button at the bottom for instant access without sign-up</li>
+        </ul>
+
+        <h3>Two Ways to Get Started</h3>
+
+        <h4>Option 1: Demo Mode (Instant Access)</h4>
+        <p><strong>Perfect for:</strong> Apple reviewers, evaluating the app, or exploring features without commitment</p>
+        <ol>
+            <li>On the welcome screen, scroll down and tap <strong>"Try Demo Mode"</strong> (green button)</li>
+            <li>A modal appears with all available roles</li>
+            <li>Select the role you want to explore (e.g., Trade Originator, Compliance Officer, Risk Manager, Legal Reviewer, or Senior Management)</li>
+            <li>You'll instantly access the app with sample data</li>
+            <li><strong>Full functionality</strong> - All features work in demo mode</li>
+            <li><strong>No account required</strong> - Start using immediately</li>
+            <li><strong>No authentication</strong> - Skip email/password setup</li>
+        </ol>
+
+        <p><strong>Demo Mode Features:</strong></p>
+        <ul>
+            <li>✅ Complete access to all role-specific features</li>
+            <li>✅ Pre-loaded sample trades, counterparties, and documents</li>
+            <li>✅ Test all workflows and approvals</li>
+            <li>✅ Experience the full app without creating an account</li>
+            <li>✅ Switch between roles anytime via Settings</li>
+            <li>⚠️ Data is not persisted across sessions</li>
+            <li>⚠️ Cannot connect to real bank accounts or external systems</li>
+        </ul>
+
+        <h4>Option 2: Create Account (Full Access)</h4>
+        <p><strong>Perfect for:</strong> Production use, real trading operations, persistent data storage</p>
+        <ol>
+            <li>On the welcome screen, tap any <strong>role card</strong> that matches your position</li>
+            <li>An authentication modal appears</li>
+            <li>Choose <strong>Sign Up</strong> to create a new account:
+                <ul>
+                    <li>Enter your full name</li>
+                    <li>Enter your email address</li>
+                    <li>Create a password</li>
+                    <li>Tap <strong>Sign Up</strong></li>
+                </ul>
+            </li>
+            <li>Or choose <strong>Sign In</strong> if you already have an account:
+                <ul>
+                    <li>Enter your email</li>
+                    <li>Enter your password</li>
+                    <li>Tap <strong>Sign In</strong></li>
+                </ul>
+            </li>
+            <li>You'll be authenticated and taken to your dashboard</li>
+        </ol>
+
+        <p><strong>Authenticated Mode Features:</strong></p>
+        <ul>
+            <li>✅ All demo mode features PLUS:</li>
+            <li>✅ Persistent data storage (your trades, documents, counterparties are saved)</li>
+            <li>✅ Multi-device sync via cloud</li>
+            <li>✅ Real email notifications and document sending</li>
+            <li>✅ Team collaboration with other users</li>
+            <li>✅ Data backup and recovery</li>
+            <li>✅ Production-ready workflows</li>
+        </ul>
+
+        <h3>Demo Mode vs. Authenticated Mode</h3>
+        <p><strong>When to Use Demo Mode:</strong></p>
+        <ul>
+            <li>✅ Evaluating the app for the first time</li>
+            <li>✅ Apple App Store review process</li>
+            <li>✅ Testing features before committing</li>
+            <li>✅ Training new team members</li>
+            <li>✅ Quick demonstrations or presentations</li>
+            <li>✅ No need for persistent data</li>
+        </ul>
+
+        <p><strong>When to Use Authenticated Mode:</strong></p>
+        <ul>
+            <li>✅ Production trading operations</li>
+            <li>✅ Need to save and access data across sessions</li>
+            <li>✅ Team collaboration with multiple users</li>
+            <li>✅ Real document sending and notifications</li>
+            <li>✅ Compliance and audit trail requirements</li>
+            <li>✅ Long-term trade tracking and reporting</li>
+        </ul>
+
+        <h3>Returning to Role Selection</h3>
+        <p>If you need to switch roles or return to the welcome screen:</p>
+        <p><strong>From Demo Mode or Authenticated Mode:</strong></p>
+        <ol>
+            <li>Tap the <strong>Settings</strong> tab in the bottom navigation</li>
+            <li>Scroll to the "General" section</li>
+            <li>Tap <strong>"Change Role"</strong> (red button with logout icon)</li>
+            <li>You'll return to the welcome screen with all role options</li>
+            <li>Select a different role or choose Demo Mode again</li>
+        </ol>
+
+        <p><strong>Note:</strong></p>
+        <ul>
+            <li>In Demo Mode: Changing roles resets to new sample data for that role</li>
+            <li>In Authenticated Mode: Changing roles preserves your data but shows role-specific views</li>
+            <li>You remain signed in when changing roles (doesn't log you out)</li>
+        </ul>
+
+        <h3>Switching from Demo to Authenticated</h3>
+        <ol>
+            <li>While in Demo Mode, tap <strong>Settings</strong></li>
+            <li>Tap <strong>"Change Role"</strong> to return to welcome screen</li>
+            <li>Select any role card to open authentication</li>
+            <li>Choose <strong>Sign Up</strong> to create your account</li>
+            <li>Your demo session data won't transfer (demo data is temporary)</li>
+            <li>Start fresh with your authenticated account</li>
+        </ol>
+
+        <h3>Navigation</h3>
+        <p>The app uses a tab-based navigation system with up to 7 main sections (varies by role):</p>
+        <ul>
+            <li><strong>Dashboard</strong> - Overview of your portfolio and recent activity</li>
+            <li><strong>Trades</strong> - Manage all trading activities</li>
+            <li><strong>Counterparties</strong> - Manage business relationships (not available for Legal Reviewer)</li>
+            <li><strong>Documents</strong> - Upload, view, and send documents (not available for Risk Manager or Senior Management)</li>
+            <li><strong>Market</strong> - Directory of verified market participants (Trade Originator and Senior Management only)</li>
+            <li><strong>Wallet</strong> - Commission tracking and payments (Trade Originator and Senior Management only)</li>
+            <li><strong>Settings</strong> - Account settings, subscription, and app preferences (available to all roles)</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="role-selection">Role Selection</h2>
+
+        <h3>Available Roles</h3>
+
+        <h4>1. Trade Originator</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>Create and manage trades</li>
+            <li>Negotiate with counterparties</li>
+            <li>Submit trades for approval</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Create new trades</li>
+            <li>View trade pipeline</li>
+            <li>Track trade status</li>
+            <li>Access market directory</li>
+        </ul>
+
+        <h4>2. Compliance Officer</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>Ensure regulatory compliance</li>
+            <li>Review counterparty sanctions</li>
+            <li>Approve compliance checks</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Review counterparty risk scores</li>
+            <li>Access compliance documents</li>
+            <li>Monitor sanctions compliance</li>
+            <li>Approve/reject trades at compliance stage</li>
+        </ul>
+
+        <h4>3. Risk Manager</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>Assess counterparty risk</li>
+            <li>Monitor portfolio exposure</li>
+            <li>Set risk limits</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>View detailed risk scores</li>
+            <li>Analyze portfolio metrics</li>
+            <li>Review counterparty financials</li>
+            <li>Approve/reject based on risk assessment</li>
+        </ul>
+
+        <h4>4. Legal Reviewer</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>Review contracts and agreements</li>
+            <li>Ensure legal compliance</li>
+            <li>Draft and negotiate terms</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Review Master Service Agreements (MSA)</li>
+            <li>Review Sales Purchase Agreements (SPA)</li>
+            <li>Approve/reject legal documentation</li>
+            <li>Access contract templates</li>
+        </ul>
+
+        <h4>5. Operations Manager</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>Track logistics and delivery</li>
+            <li>Coordinate shipments</li>
+            <li>Manage documentation</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Monitor trade transit status</li>
+            <li>Track delivery windows</li>
+            <li>Manage shipping documents</li>
+            <li>Coordinate with logistics providers</li>
+        </ul>
+
+        <h4>6. System Admin</h4>
+        <p><strong>Responsibilities:</strong></p>
+        <ul>
+            <li>System administration</li>
+            <li>User management</li>
+            <li>Full oversight</li>
+        </ul>
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Access to all features</li>
+            <li>System configuration</li>
+            <li>User role management</li>
+            <li>Complete data access</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="dashboard">Dashboard Overview</h2>
+
+        <h3>Key Metrics Displayed</h3>
+
+        <h4>Total Portfolio Value</h4>
+        <p>Shows the aggregate value of all active trades in your portfolio in USD millions.</p>
+
+        <h4>Active Trades</h4>
+        <p>Number of trades currently in progress (from financing pending to in transit).</p>
+
+        <h4>Pending Approvals</h4>
+        <p>Trades awaiting approval from compliance, risk, legal, or operations teams.</p>
+
+        <h4>Critical Alerts</h4>
+        <p>High-priority issues requiring immediate attention (sanctions hits, expired documents, delivery delays).</p>
+
+        <h4>Approved Counterparties</h4>
+        <p>Number of counterparties that have passed due diligence and risk assessment.</p>
+
+        <h3>Trade Pipeline</h3>
+        <p>Visual representation of trades by status:</p>
+        <ul>
+            <li><strong>Draft</strong> - Initial trade creation</li>
+            <li><strong>Counterparty Review</strong> - Under counterparty evaluation</li>
+            <li><strong>Risk Approval</strong> - Awaiting risk manager approval</li>
+            <li><strong>Legal Review</strong> - Under legal team review</li>
+            <li><strong>Compliance Check</strong> - Compliance verification</li>
+            <li><strong>Financing Pending</strong> - Awaiting financial arrangements</li>
+            <li><strong>Active</strong> - Trade is live and executing</li>
+            <li><strong>In Transit</strong> - Goods are being shipped</li>
+            <li><strong>Delivered</strong> - Goods received by counterparty</li>
+            <li><strong>Settled</strong> - Financial settlement complete</li>
+        </ul>
+
+        <h3>Recent Trades</h3>
+        <p>Quick access to your 3 most recent trades with key information:</p>
+        <ul>
+            <li>Commodity type</li>
+            <li>Counterparty name</li>
+            <li>Quantity and value</li>
+            <li>Current status</li>
+            <li>Risk level</li>
+            <li>Active alerts</li>
+        </ul>
+
+        <h3>Quick Actions</h3>
+        <ul>
+            <li><strong>+ Button (Top Right)</strong> - Create a new trade instantly</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="managing-trades">Managing Trades</h2>
+
+        <h3>Viewing All Trades</h3>
+        <ol>
+            <li>Tap the <strong>Trades</strong> tab in the bottom navigation</li>
+            <li>View all trades in a scrollable list</li>
+            <li>Each trade card displays:
+                <ul>
+                    <li>Commodity icon and name</li>
+                    <li>Counterparty name</li>
+                    <li>Quantity, value, and price per unit</li>
+                    <li>Current status</li>
+                    <li>Risk level badge</li>
+                    <li>Alert count (if any)</li>
+                    <li>Incoterm</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Searching Trades</h3>
+        <ol>
+            <li>Use the search bar at the top of the Trades screen</li>
+            <li>Search by:
+                <ul>
+                    <li>Counterparty name</li>
+                    <li>Commodity type</li>
+                    <li>Trade ID</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Filtering Trades</h3>
+        <p>Tap filter chips to view trades by status:</p>
+        <ul>
+            <li>All</li>
+            <li>Active</li>
+            <li>Financing Pending</li>
+            <li>Legal Review</li>
+            <li>In Transit</li>
+        </ul>
+
+        <h3>Creating a New Trade</h3>
+        <ol>
+            <li>Tap the <strong>+</strong> button in Dashboard or Trades screen</li>
+            <li>Fill in the following information:
+                <ul>
+                    <li><strong>Commodity Type</strong> - Select from Gold, Fuel Oil, Steam Coal, Anthracite Coal, Urea, or Edible Oils</li>
+                    <li><strong>Counterparty</strong> - Choose from approved counterparties</li>
+                    <li><strong>Quantity</strong> - Enter amount and unit (MT, BBL, oz)</li>
+                    <li><strong>Price Per Unit</strong> - Enter price in USD</li>
+                    <li><strong>Incoterm</strong> - Select delivery terms (FOB, CIF, CFR, etc.)</li>
+                    <li><strong>Delivery Window</strong> - Set start and end dates</li>
+                </ul>
+            </li>
+            <li>Review the calculated total value</li>
+            <li>Submit for approval</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="managing-counterparties">Managing Counterparties</h2>
+
+        <h3>Viewing Counterparties</h3>
+        <ol>
+            <li>Tap the <strong>Counterparties</strong> tab</li>
+            <li>Browse all your business relationships</li>
+            <li>Each card shows:
+                <ul>
+                    <li>Company name and logo</li>
+                    <li>Location (country)</li>
+                    <li>Risk score and level</li>
+                    <li>Number of active trades</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Searching Counterparties</h3>
+        <p>Use the search bar to find counterparties by name or location.</p>
+
+        <h3>Filtering by Risk Level</h3>
+        <p>Filter counterparties by:</p>
+        <ul>
+            <li>All</li>
+            <li><span class="badge badge-green">Low Risk</span></li>
+            <li><span class="badge badge-amber">Medium Risk</span></li>
+            <li><span class="badge badge-red">High Risk</span></li>
+        </ul>
+
+        <h3>Viewing Counterparty Details</h3>
+        <ol>
+            <li>Tap any counterparty card</li>
+            <li>View detailed information:
+                <ul>
+                    <li>Company profile and contact details</li>
+                    <li>Financial metrics</li>
+                    <li>Risk assessment breakdown</li>
+                    <li>Trade history</li>
+                    <li>Compliance status</li>
+                </ul>
+            </li>
+        </ol>
+
+        <hr>
+
+        <h2 id="document-management">Document Management</h2>
+
+        <h3>Accessing Documents</h3>
+        <ol>
+            <li>Tap the <strong>Documents</strong> tab</li>
+            <li>Browse all uploaded documents</li>
+            <li>Filter by document type or counterparty</li>
+        </ol>
+
+        <h3>Downloading Blank Templates</h3>
+        <p>Fox Trade Master™ provides 17 standard blank document templates:</p>
+        <ol>
+            <li>Go to Documents tab</li>
+            <li>Tap <strong>"Download Templates"</strong></li>
+            <li>Select the template you need</li>
+            <li>Download as editable Word (.docx) file</li>
+            <li>Fill in your specific information</li>
+            <li>Upload completed document back to the app</li>
+        </ol>
+
+        <h3>Uploading Documents</h3>
+        <ol>
+            <li>Tap the <strong>+</strong> button on Documents screen</li>
+            <li>Select document type</li>
+            <li>Choose file from your device</li>
+            <li>Associate with trade/counterparty</li>
+            <li>Upload</li>
+        </ol>
+
+        <h3>Sending Documents via Email</h3>
+        <ol>
+            <li>Open a document</li>
+            <li>Tap <strong>"Send via Email"</strong></li>
+            <li>Enter recipient's email address</li>
+            <li>Add optional message</li>
+            <li>Send</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="market-directory">Market Directory</h2>
+
+        <h3>Accessing the Market</h3>
+        <ol>
+            <li>Tap the <strong>Market</strong> tab (Trade Originator and Senior Management only)</li>
+            <li>Browse verified market participants</li>
+            <li>Each listing shows:
+                <ul>
+                    <li>Company name and logo</li>
+                    <li>Verified status</li>
+                    <li>Location</li>
+                    <li>Commodities traded</li>
+                    <li>Rating score</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Searching the Market</h3>
+        <p>Use the search bar to find companies by:</p>
+        <ul>
+            <li>Company name</li>
+            <li>Location</li>
+            <li>Commodity type</li>
+        </ul>
+
+        <h3>Filtering Market Participants</h3>
+        <ul>
+            <li>Filter by commodity (Gold, Coal, Oil, etc.)</li>
+            <li>Filter by location/country</li>
+            <li>Filter by role (Buyer, Seller, Broker)</li>
+            <li>Filter by verification status</li>
+        </ul>
+
+        <h3>Contacting Companies</h3>
+        <ol>
+            <li>Tap on any company listing</li>
+            <li>View detailed company profile</li>
+            <li>Tap <strong>"Contact"</strong></li>
+            <li>Send introduction email</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="risk-levels">Understanding Risk Levels</h2>
+
+        <h3><span class="badge badge-green">GREEN - Low Risk</span></h3>
+        <ul>
+            <li><strong>Score:</strong> 80-100</li>
+            <li><strong>Meaning:</strong> Counterparty is well-established, financially sound, and compliant</li>
+            <li><strong>Action:</strong> Approved for trading, minimal oversight needed</li>
+        </ul>
+
+        <h3><span class="badge badge-amber">AMBER - Medium Risk</span></h3>
+        <ul>
+            <li><strong>Score:</strong> 50-79</li>
+            <li><strong>Meaning:</strong> Some risk factors present, additional scrutiny required</li>
+            <li><strong>Action:</strong> Conditional approval, enhanced monitoring</li>
+        </ul>
+
+        <h3><span class="badge badge-red">RED - High Risk</span></h3>
+        <ul>
+            <li><strong>Score:</strong> 0-49</li>
+            <li><strong>Meaning:</strong> Significant risk factors, trading not recommended</li>
+            <li><strong>Action:</strong> Typically rejected, requires exceptional approval</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="trade-workflow">Trade Workflow</h2>
+
+        <h3>Standard Trade Lifecycle</h3>
+        <ol>
+            <li><strong>Draft</strong> - Trade Originator creates trade</li>
+            <li><strong>Counterparty Review</strong> - Internal review of counterparty suitability</li>
+            <li><strong>Risk Approval</strong> - Risk Manager reviews trade</li>
+            <li><strong>Legal Review</strong> - Legal team reviews contract terms</li>
+            <li><strong>Compliance Check</strong> - Compliance Officer performs final checks</li>
+            <li><strong>Financing Pending</strong> - Arrange Letter of Credit</li>
+            <li><strong>Active</strong> - Trade is live</li>
+            <li><strong>In Transit</strong> - Goods have been shipped</li>
+            <li><strong>Delivered</strong> - Goods received by counterparty</li>
+            <li><strong>Settled</strong> - Payment completed</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="document-types">Document Types</h2>
+
+        <p>Fox Trade Master™ supports 17 standard commodity trading documents. All documents are available as downloadable blank templates (editable Word .docx format) in the Documents tab.</p>
+
+        <h3>Available Document Templates (17 Total)</h3>
+
+        <h4>Pre-Trade Documents (10)</h4>
+
+        <p><strong>1. Corporate Information Sheet (CIS)</strong></p>
+        <ul>
+            <li>Company details and credentials</li>
+            <li>Business registration information</li>
+            <li>Contact information and representatives</li>
+            <li>Banking details</li>
+            <li>Foundation document for establishing trade relationships</li>
+        </ul>
+
+        <p><strong>2. Letter of Intent (LOI)</strong></p>
+        <ul>
+            <li>Buyer's preliminary interest in purchasing</li>
+            <li>Non-binding expression of intent</li>
+            <li>Includes approximate quantities and terms</li>
+            <li>Starts negotiation process</li>
+        </ul>
+
+        <p><strong>3. Soft Corporate Offer (SCO)</strong></p>
+        <ul>
+            <li>Seller's preliminary offer</li>
+            <li>Outlines basic terms of sale</li>
+            <li>Subject to final negotiation</li>
+            <li>Non-binding commercial proposal</li>
+        </ul>
+
+        <p><strong>4. Full Corporate Offer (FCO)</strong></p>
+        <ul>
+            <li>Seller's complete binding offer</li>
+            <li>Detailed terms, specifications, and pricing</li>
+            <li>Legally binding commercial offer</li>
+            <li>More comprehensive and formal than SCO</li>
+        </ul>
+
+        <p><strong>5. Irrevocable Corporate Purchase Order (ICPO)</strong></p>
+        <ul>
+            <li>Buyer's binding commitment to purchase</li>
+            <li>Specific quantities, prices, and delivery terms</li>
+            <li>Legally binding once accepted by seller</li>
+            <li>Typically requires accompanying Proof of Funds</li>
+        </ul>
+
+        <p><strong>6. Proof of Funds (POF)</strong></p>
+        <ul>
+            <li>Bank document verifying buyer has available funds</li>
+            <li>Required for large transactions</li>
+            <li>Shows financial capability to complete purchase</li>
+            <li>Issued by buyer's bank to seller</li>
+        </ul>
+
+        <p><strong>7. Ready, Willing, and Able Letter (RWA)</strong></p>
+        <ul>
+            <li>Bank confirmation of party's readiness to proceed</li>
+            <li>Demonstrates willingness to transact</li>
+            <li>Shows financial ability to fulfill obligations</li>
+            <li>Often required before negotiations advance to contract stage</li>
+        </ul>
+
+        <p><strong>8. Bank Comfort Letter (BCL)</strong></p>
+        <ul>
+            <li>Bank confirmation of client's financial standing</li>
+            <li>Indicates bank's support for the transaction</li>
+            <li>Provides financial assurance to counterparty</li>
+            <li>Not a payment guarantee but shows creditworthiness</li>
+        </ul>
+
+        <p><strong>9. Non-Circumvention Non-Disclosure Agreement (NCNDA)</strong></p>
+        <ul>
+            <li>Protects parties from being circumvented in multi-party transactions</li>
+            <li>Ensures confidentiality of business information</li>
+            <li>Prevents direct contact between principals bypassing intermediaries</li>
+            <li>Standard protection agreement in commodity trading</li>
+            <li>Must be signed by all parties involved in transaction chain</li>
+        </ul>
+
+        <p><strong>10. Irrevocable Master Fee Protection Agreement (IMFPA)</strong></p>
+        <ul>
+            <li>Legally guarantees payment of fees/commissions to intermediaries (brokers)</li>
+            <li>Ensures intermediaries are paid once transaction closes</li>
+            <li>Prevents intermediaries from being bypassed</li>
+            <li>Crucial contract in international trade, especially bulk commodities</li>
+            <li>Protects all parties and ensures transparent fee distribution</li>
+            <li>Legally binding and irrevocable fee protection structure</li>
+        </ul>
+
+        <h4>Contract Documents (3)</h4>
+
+        <p><strong>11. Transaction Support Agreement (TSA)</strong></p>
+        <ul>
+            <li>Supporting agreement for complex multi-party transactions</li>
+            <li>Defines roles and responsibilities of each party</li>
+            <li>Coordinates logistics, documentation, and payments</li>
+            <li>Ensures smooth transaction execution</li>
+        </ul>
+
+        <p><strong>12. Sales and Purchase Agreement (SPA)</strong></p>
+        <ul>
+            <li>Primary binding contract for individual trade</li>
+            <li>Detailed terms, quantities, quality specifications</li>
+            <li>Delivery schedule and location</li>
+            <li>Payment terms and conditions</li>
+            <li>Legally enforceable sales contract</li>
+        </ul>
+
+        <p><strong>13. Assignment of Sale with Product (ASWP)</strong></p>
+        <ul>
+            <li>Transfer of sales rights and obligations to third party</li>
+            <li>Assigns product delivery rights</li>
+            <li>Common in commodity trading chains with multiple intermediaries</li>
+            <li>Legally transfers seller's contractual position</li>
+        </ul>
+
+        <h4>Financial & Shipping Documents (4)</h4>
+
+        <p><strong>14. 2% Performance Bond (POP)</strong></p>
+        <ul>
+            <li>Performance guarantee equal to 2% of contract value</li>
+            <li>Ensures seller fulfills contractual obligations</li>
+            <li>Provides buyer security against non-performance or default</li>
+            <li>Typically issued by bank or insurance company</li>
+            <li>Released upon successful delivery and acceptance</li>
+        </ul>
+
+        <p><strong>15. Bill of Lading (BOL)</strong></p>
+        <ul>
+            <li>Issued by shipping carrier/freight forwarder</li>
+            <li>Serves as receipt for goods shipped</li>
+            <li>Acts as title document for cargo ownership</li>
+            <li>Required for customs clearance at destination</li>
+            <li>Types: Ocean BOL, Master BOL, House BOL, Negotiable BOL</li>
+        </ul>
+
+        <p><strong>16. Certificate of Origin (COO)</strong></p>
+        <ul>
+            <li>Certifies country where goods were produced/manufactured</li>
+            <li>Required for customs clearance and duty calculation</li>
+            <li>May affect import tariffs and trade preferences</li>
+            <li>Issued by chamber of commerce or authorized trade authority</li>
+            <li>Essential for preferential trade agreements (FTA benefits)</li>
+        </ul>
+
+        <p><strong>17. Quality Certificate</strong></p>
+        <ul>
+            <li>Verifies product specifications and quality standards</li>
+            <li>Issued by independent inspection companies (SGS, Bureau Veritas, Intertek)</li>
+            <li>Documents test results against contract specifications</li>
+            <li>Essential for buyer acceptance and payment release</li>
+            <li>Required for most commodity transactions</li>
+        </ul>
+
+        <hr>
+
+        <h2>Incoterms Reference</h2>
+
+        <p><strong>FOB (Free On Board)</strong></p>
+        <ul>
+            <li>Seller delivers goods on board vessel</li>
+            <li>Buyer pays freight and insurance</li>
+        </ul>
+
+        <p><strong>CIF (Cost, Insurance, and Freight)</strong></p>
+        <ul>
+            <li>Seller pays freight and insurance to destination</li>
+            <li>Popular for international sea freight</li>
+        </ul>
+
+        <p><strong>CFR (Cost and Freight)</strong></p>
+        <ul>
+            <li>Similar to CIF but without insurance</li>
+            <li>Seller pays freight, buyer arranges insurance</li>
+        </ul>
+
+        <p><strong>DAP (Delivered At Place)</strong></p>
+        <ul>
+            <li>Seller delivers to named place</li>
+            <li>Seller bears all risks until delivery</li>
+        </ul>
+
+        <p><strong>DDP (Delivered Duty Paid)</strong></p>
+        <ul>
+            <li>Seller delivers goods cleared for import</li>
+            <li>Maximum obligation for seller</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="support">Support & Contact</h2>
+
+        <p>For technical support or questions about the Fox Trade Master™ app:</p>
+        <ul>
+            <li><strong>Email:</strong> support@foxtrademaster.com</li>
+            <li><strong>Phone:</strong> +1-804-506-9939</li>
+            <li><strong>Hours:</strong> 24/7 for critical issues</li>
+        </ul>
+
+        <hr>
+
+        <div class="footer">
+            <p><strong>Fox Trade Master™</strong> - Professional Commodity Trading Platform</p>
+            <p>Streamlining global commodity trade with confidence and compliance</p>
+            <p style="margin-top: 16px; font-size: 12px;">© 2024 Fox Trade Master™. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
