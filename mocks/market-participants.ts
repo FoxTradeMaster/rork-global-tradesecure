@@ -1,5 +1,6 @@
 import { TradingHouse, Broker, MarketPlatform, MarketParticipant } from '@/types';
 import { edibleOilsBuyersExtended } from './edible-oils-buyers-extended';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const tradingHouses: TradingHouse[] = [
   {
@@ -784,6 +785,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
 ];
 
 let importedParticipants: MarketParticipant[] = [];
+let isLoaded = false;
 
 export const allMarketParticipants: MarketParticipant[] = [
   ...tradingHouses,
@@ -793,13 +795,45 @@ export const allMarketParticipants: MarketParticipant[] = [
   ...platforms,
 ];
 
-export const addMarketParticipants = (participants: MarketParticipant[]) => {
+export const loadImportedParticipants = async () => {
+  if (isLoaded) return;
+  
+  try {
+    const stored = await AsyncStorage.getItem('imported_market_participants');
+    if (stored) {
+      importedParticipants = JSON.parse(stored);
+      console.log('[MarketParticipants] Loaded', importedParticipants.length, 'persisted participants from storage');
+    }
+    isLoaded = true;
+  } catch (error) {
+    console.error('[MarketParticipants] Error loading participants:', error);
+  }
+};
+
+export const addMarketParticipants = async (participants: MarketParticipant[]) => {
   importedParticipants = [...importedParticipants, ...participants];
   console.log('[MarketParticipants] Added', participants.length, 'participants. Total imported:', importedParticipants.length);
+  
+  try {
+    await AsyncStorage.setItem('imported_market_participants', JSON.stringify(importedParticipants));
+    console.log('[MarketParticipants] Persisted', importedParticipants.length, 'participants to storage');
+  } catch (error) {
+    console.error('[MarketParticipants] Error saving participants:', error);
+  }
 };
 
 export const getImportedParticipants = (): MarketParticipant[] => {
   return importedParticipants;
+};
+
+export const clearImportedParticipants = async () => {
+  importedParticipants = [];
+  try {
+    await AsyncStorage.removeItem('imported_market_participants');
+    console.log('[MarketParticipants] Cleared all imported participants');
+  } catch (error) {
+    console.error('[MarketParticipants] Error clearing participants:', error);
+  }
 };
 
 export const getCommodityLabel = (commodity: string): string => {

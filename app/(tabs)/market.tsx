@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   Search, 
@@ -22,7 +22,7 @@ import {
   FileText,
   MoreVertical
 } from 'lucide-react-native';
-import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants } from '@/mocks/market-participants';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants, loadImportedParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
 import EmailOutreachModal from '@/components/EmailOutreachModal';
@@ -63,6 +63,12 @@ export default function MarketDirectoryScreen() {
   const [selectedCompanies, setSelectedCompanies] = useState<MarketParticipant[]>([]);
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
+
+  useEffect(() => {
+    loadImportedParticipants().then(() => {
+      console.log('[Market] Loaded persisted participants');
+    });
+  }, []);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
