@@ -22,7 +22,7 @@ import {
   FileText,
   MoreVertical
 } from 'lucide-react-native';
-import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants } from '@/mocks/market-participants';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
 import EmailOutreachModal from '@/components/EmailOutreachModal';
@@ -67,7 +67,8 @@ export default function MarketDirectoryScreen() {
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils'];
 
   const allParticipants = useMemo(() => {
-    return [...allMarketParticipants, ...importedParticipants];
+    const aiGeneratedParticipants = getImportedParticipants();
+    return [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
   }, [importedParticipants]);
 
   const filteredParticipants = useMemo(() => {
