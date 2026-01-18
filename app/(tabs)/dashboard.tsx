@@ -9,12 +9,13 @@ import {
   DollarSign, 
   Users,
   Plus,
-  HelpCircle
+  HelpCircle,
+  LogOut
 } from 'lucide-react-native';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { currentUser, trades } = useTrading();
+  const { currentUser, trades, isDemoMode, clearUser } = useTrading();
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus()
 
@@ -38,6 +39,11 @@ export default function DashboardScreen() {
   const roleSpecificTrades = getRoleSpecificTrades();
   const recentTrades = roleSpecificTrades.slice(0, 3);
 
+  const handleLogout = async () => {
+    await clearUser();
+    router.replace('/');
+  };
+
   if (!currentUser) {
     return null;
   }
@@ -48,10 +54,19 @@ export default function DashboardScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <View>
-              <Text style={styles.greeting}>Welcome back,</Text>
-              <Text style={styles.userName}>{currentUser.name}</Text>
-              <Text style={styles.userRole}>{currentUser.role.replace(/_/g, ' ').toUpperCase()}</Text>
+            <View style={styles.headerLeft}>
+              <View>
+                <Text style={styles.greeting}>Welcome back,</Text>
+                <Text style={styles.userName}>{currentUser.name}</Text>
+                <View style={styles.roleContainer}>
+                  <Text style={styles.userRole}>{currentUser.role.replace(/_/g, ' ').toUpperCase()}</Text>
+                  {isDemoMode && (
+                    <View style={styles.demoBadge}>
+                      <Text style={styles.demoBadgeText}>DEMO MODE</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
             </View>
             <View style={styles.headerButtons}>
               <TouchableOpacity 
@@ -68,6 +83,12 @@ export default function DashboardScreen() {
                   <Plus size={24} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
+              <TouchableOpacity 
+                style={styles.logoutButton}
+                onPress={handleLogout}
+              >
+                <LogOut size={20} color="#EF4444" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -400,6 +421,9 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 24,
   },
+  headerLeft: {
+    flex: 1,
+  },
   greeting: {
     fontSize: 14,
     color: '#64748B',
@@ -411,10 +435,27 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     marginBottom: 2,
   },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   userRole: {
     fontSize: 12,
     color: '#0284C7',
     fontWeight: '600',
+  },
+  demoBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  demoBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   headerButtons: {
     flexDirection: 'row',
@@ -445,6 +486,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
+  },
+  logoutButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   metricsGrid: {
     flexDirection: 'row',
