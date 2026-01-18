@@ -63,6 +63,14 @@ export default function MarketDirectoryScreen() {
   const [selectedCompanies, setSelectedCompanies] = useState<MarketParticipant[]>([]);
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
+  const refreshParticipants = useCallback(async () => {
+    await loadImportedParticipants();
+    const aiGenerated = getImportedParticipants();
+    console.log('[Market] Refreshed - AI generated:', aiGenerated.length, 'Local imported:', importedParticipants.length);
+    setRefreshKey(prev => prev + 1);
+  }, [importedParticipants.length]);
 
   useEffect(() => {
     loadImportedParticipants().then(() => {
@@ -70,12 +78,20 @@ export default function MarketDirectoryScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshParticipants();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [refreshParticipants]);
+
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
   const allParticipants = useMemo(() => {
     const aiGeneratedParticipants = getImportedParticipants();
     return [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
-  }, [importedParticipants]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedParticipants, refreshKey]);
 
   const filteredParticipants = useMemo(() => {
     return allParticipants.filter(participant => {
