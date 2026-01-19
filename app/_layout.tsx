@@ -96,6 +96,26 @@ function RootLayoutNav() {
   );
 }
 
+function RootProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <AdminAuthProvider>
+          <TradingProvider>
+            <SubscriptionProvider>
+              <MarketProvider>
+                <AIMarketUpdaterProvider>
+                  {children}
+                </AIMarketUpdaterProvider>
+              </MarketProvider>
+            </SubscriptionProvider>
+          </TradingProvider>
+        </AdminAuthProvider>
+      </trpc.Provider>
+    </QueryClientProvider>
+  );
+}
+
 export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
@@ -116,21 +136,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <AdminAuthProvider>
-            <TradingProvider>
-              <SubscriptionProvider>
-                <MarketProvider>
-                  <AIMarketUpdaterProvider>
-                    <RootLayoutNav />
-                  </AIMarketUpdaterProvider>
-                </MarketProvider>
-              </SubscriptionProvider>
-            </TradingProvider>
-          </AdminAuthProvider>
-        </trpc.Provider>
-      </QueryClientProvider>
+      <RootProviders>
+        <RootLayoutNav />
+      </RootProviders>
     </GestureHandlerRootView>
   );
 }
