@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { MarketParticipant, TradingHouse, CommodityType } from '@/types';
-import { addMarketParticipants } from '@/mocks/market-participants';
+import { addMarketParticipants, allMarketParticipants, getImportedParticipants } from '@/mocks/market-participants';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -240,6 +240,13 @@ For each company provide:
         return 0;
       }
 
+      const existingParticipants = [...allMarketParticipants, ...getImportedParticipants()];
+      const existingNames = new Set(
+        existingParticipants.map(p => p.name.toLowerCase().trim())
+      );
+      
+      console.log(`[AIMarketUpdater] Checking for duplicates against ${existingNames.size} existing companies`);
+
       const newParticipants: MarketParticipant[] = await Promise.all(
         generationResult.companies.map(async (company, index) => {
           const baseParticipant = {
@@ -282,16 +289,46 @@ For each company provide:
         })
       );
 
-      addMarketParticipants(newParticipants);
+      const uniqueParticipants = newParticipants.filter(p => {
+        const normalizedName = p.name.toLowerCase().trim();
+        if (existingNames.has(normalizedName)) {
+          console.log(`[AIMarketUpdater] 🚫 Duplicate detected: "${p.name}" - skipping`);
+          return false;
+        }
+        return true;
+      });
+
+      const duplicatesCount = newParticipants.length - uniqueParticipants.length;
+      if (duplicatesCount > 0) {
+        console.log(`[AIMarketUpdater] ⚠️ Filtered out ${duplicatesCount} duplicate companies`);
+      }
+
+      if (uniqueParticipants.length === 0) {
+        console.log(`[AIMarketUpdater] ⚠️ All ${newParticipants.length} companies were duplicates, nothing to add`);
+        addLog({
+          commodity: commodityLabel,
+          companiesAdded: 0,
+          success: true,
+          error: `All ${newParticipants.length} generated companies were duplicates`,
+        });
+        return 0;
+      }
+
+      addMarketParticipants(uniqueParticipants);
+
+      const logMessage = duplicatesCount > 0 
+        ? `Added ${uniqueParticipants.length}, skipped ${duplicatesCount} duplicates`
+        : undefined;
 
       addLog({
         commodity: commodityLabel,
-        companiesAdded: newParticipants.length,
+        companiesAdded: uniqueParticipants.length,
         success: true,
+        error: logMessage,
       });
 
-      console.log(`[AIMarketUpdater] Successfully added ${newParticipants.length} real companies for ${commodityLabel}`);
-      return newParticipants.length;
+      console.log(`[AIMarketUpdater] ✅ Successfully added ${uniqueParticipants.length} real companies for ${commodityLabel}${duplicatesCount > 0 ? ` (${duplicatesCount} duplicates filtered)` : ''}`);
+      return uniqueParticipants.length;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
