@@ -17,27 +17,24 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <AdminAuthProvider>
-          <TradingProvider>
-            <SubscriptionProvider>
-              <MarketProvider>
-                <AIMarketUpdaterProvider>
-                  {children}
-                </AIMarketUpdaterProvider>
-              </MarketProvider>
-            </SubscriptionProvider>
-          </TradingProvider>
-        </AdminAuthProvider>
-      </trpc.Provider>
-    </QueryClientProvider>
-  );
-}
-
 function RootLayoutNav() {
+  useEffect(() => {
+    const prepare = async () => {
+      try {
+        console.log('[RootLayout] 🚀 Initializing app...');
+        await loadImportedParticipants();
+        console.log('[RootLayout] ✅ Preloaded market participants');
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error('[RootLayout] ❌ Error during initialization:', error);
+      } finally {
+        SplashScreen.hideAsync();
+      }
+    };
+
+    prepare();
+  }, []);
+
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -115,28 +112,23 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    const prepare = async () => {
-      try {
-        console.log('[RootLayout] 🚀 Initializing app...');
-        await loadImportedParticipants();
-        console.log('[RootLayout] ✅ Preloaded market participants');
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (error) {
-        console.error('[RootLayout] ❌ Error during initialization:', error);
-      } finally {
-        SplashScreen.hideAsync();
-      }
-    };
-
-    prepare();
-  }, []);
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Providers>
-        <RootLayoutNav />
-      </Providers>
+      <QueryClientProvider client={queryClient}>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <AdminAuthProvider>
+            <TradingProvider>
+              <SubscriptionProvider>
+                <MarketProvider>
+                  <AIMarketUpdaterProvider>
+                    <RootLayoutNav />
+                  </AIMarketUpdaterProvider>
+                </MarketProvider>
+              </SubscriptionProvider>
+            </TradingProvider>
+          </AdminAuthProvider>
+        </trpc.Provider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
