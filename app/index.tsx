@@ -147,6 +147,7 @@ export default function WelcomeScreen() {
 
     try {
       if (authMode === 'signup') {
+        console.log('[Auth] Attempting signup for:', email);
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -160,12 +161,20 @@ export default function WelcomeScreen() {
         });
 
         if (error) {
+          console.error('[Auth] Signup error:', error);
           if (error.message?.includes('Error sending confirmation email') || 
               error.message?.includes('email') && error.message?.includes('send')) {
             Alert.alert(
-              'Email Configuration Required',
-              'Email verification is not configured. Please go to your Supabase project settings > Authentication > Email Templates and either:\n\n1. Configure SMTP settings, or\n2. Disable "Enable email confirmations" under Auth settings',
-              [{ text: 'OK' }]
+              'Signup Successful - No Email Verification',
+              'Your account has been created! Email verification is not configured, so you can sign in immediately with your credentials.',
+              [
+                {
+                  text: 'Sign In Now',
+                  onPress: () => {
+                    setAuthMode('login');
+                  }
+                }
+              ]
             );
             setAuthLoading(false);
             return;
@@ -173,14 +182,26 @@ export default function WelcomeScreen() {
           throw error;
         }
 
+        console.log('[Auth] Signup response - User ID:', data.user?.id, 'Has session:', !!data.session, 'Identities:', data.user?.identities?.length);
+
         if (data.user) {
           if (data.user.identities && data.user.identities.length === 0) {
-            Alert.alert('Account Already Exists', 'An account with this email already exists. Please sign in instead.');
-            setAuthMode('login');
+            Alert.alert(
+              'Account Already Exists', 
+              'An account with this email already exists. If you haven\'t verified your email yet, please check your inbox. Otherwise, please sign in.',
+              [
+                {
+                  text: 'Go to Sign In',
+                  onPress: () => setAuthMode('login')
+                }
+              ]
+            );
+            setAuthLoading(false);
             return;
           }
 
           if (data.session) {
+            console.log('[Auth] Signup successful with immediate session');
             const user: User = {
               id: data.user.id,
               name: name,
@@ -197,12 +218,13 @@ export default function WelcomeScreen() {
               }
             }, 100);
           } else {
+            console.log('[Auth] Signup successful but requires email verification');
             Alert.alert(
               'Verify Your Email',
-              'Please check your email and click the verification link to complete signup. After verification, you can sign in.',
+              'Account created! Please check your email (including spam folder) and click the verification link. After verification, return here and sign in with your credentials.',
               [
                 {
-                  text: 'OK',
+                  text: 'OK - Go to Sign In',
                   onPress: () => {
                     setAuthMode('login');
                     setPassword('');
@@ -213,22 +235,39 @@ export default function WelcomeScreen() {
           }
         }
       } else {
+        console.log('[Auth] Attempting login for:', email);
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
+          console.error('[Auth] Login error:', error.message, error.status);
+          
           if (error.message.includes('Email not confirmed')) {
             Alert.alert(
               'Email Not Verified',
-              'Please check your email and click the verification link before signing in. Check your spam folder if you don\'t see it.',
+              'Please check your email inbox (and spam folder) and click the verification link before signing in. If you didn\'t receive the email, try signing up again - it will resend the verification email.',
               [{ text: 'OK' }]
             );
+            setAuthLoading(false);
             return;
           }
+          
+          if (error.message.includes('Invalid login credentials')) {
+            Alert.alert(
+              'Login Failed',
+              'Invalid email or password. Please check your credentials.\n\nIf you just signed up, make sure to:\n1. Verify your email first (check spam folder)\n2. Then return and sign in with the same credentials you used',
+              [{ text: 'OK' }]
+            );
+            setAuthLoading(false);
+            return;
+          }
+          
           throw error;
         }
+
+        console.log('[Auth] Login successful - User ID:', data.user?.id);
 
         if (data.user && data.session) {
           const user: User = {
@@ -237,6 +276,7 @@ export default function WelcomeScreen() {
             role: (data.user.user_metadata?.role || selectedRole) as any,
             email: data.user.email || email,
           };
+          console.log('[Auth] Setting user and navigating to dashboard');
           await setUser(user);
           setShowAuthModal(false);
           setTimeout(() => {
@@ -249,17 +289,15 @@ export default function WelcomeScreen() {
         }
       }
     } catch (error: any) {
-      console.error('[Auth] Error:', error);
+      console.error('[Auth] Unexpected error:', error);
       
-      let errorMessage = error.message || 'Failed to authenticate';
+      let errorMessage = error.message || 'An unexpected error occurred';
       
-      if (error.message?.includes('Invalid login credentials')) {
-        if (authMode === 'login') {
-          errorMessage = 'Invalid email or password. Please check your credentials and try again. If you just signed up, make sure to verify your email first.';
-        }
+      if (errorMessage.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
       }
       
-      Alert.alert('Authentication Error', errorMessage);
+      Alert.alert('Error', errorMessage);
     } finally {
       setAuthLoading(false);
     }
