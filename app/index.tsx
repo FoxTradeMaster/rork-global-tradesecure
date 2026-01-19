@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, ScrollView, Modal, TextInput, ActivityIndicator, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useRootNavigationState } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Briefcase, Shield, AlertTriangle, Scale, TrendingUp, X, Mail, Lock, User as UserIcon } from 'lucide-react-native';
 import { useTrading } from '@/contexts/TradingContext';
@@ -47,6 +47,7 @@ const ROLES = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const navigationState = useRootNavigationState();
   const { setUser, setDemoUser, currentUser, isLoading } = useTrading();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -58,14 +59,16 @@ export default function WelcomeScreen() {
   const [showDemoRoleModal, setShowDemoRoleModal] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && currentUser) {
+    if (!navigationState?.key || isLoading) return;
+    
+    if (currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         router.replace('/(tabs)/dashboard');
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isLoading, currentUser, router]);
+  }, [navigationState?.key, isLoading, currentUser, router]);
 
   if (isLoading) {
     return (
