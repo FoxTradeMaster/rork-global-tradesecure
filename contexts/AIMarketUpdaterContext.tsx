@@ -366,14 +366,44 @@ For each company provide:
         trading_volume: p.tradingVolume || undefined,
       }));
 
-      try {
-        await trpcClient.marketParticipants.insertBatch.mutate({
-          participants: companiesForDb,
-        });
-      } catch (insertError) {
-        console.error(`[AIMarketUpdater] Error saving to Supabase:`, insertError);
-        console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
-        throw new Error(`Failed to save companies to database: ${insertError instanceof Error ? insertError.message : 'Unknown error'}`);
+      let insertRetryCount = 0;
+      const maxInsertRetries = 3;
+      const insertErrors: string[] = [];
+
+      while (insertRetryCount < maxInsertRetries) {
+        try {
+          if (insertRetryCount > 0) {
+            console.log(`[AIMarketUpdater] Retry ${insertRetryCount}/${maxInsertRetries} for database insertion`);
+          }
+
+          await Promise.race([
+            trpcClient.marketParticipants.insertBatch.mutate({
+              participants: companiesForDb,
+            }),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('Database insertion timeout after 30s')), 30000)
+            )
+          ]);
+
+          if (insertRetryCount > 0) {
+            console.log(`[AIMarketUpdater] Successfully saved to database after ${insertRetryCount} retries`);
+          }
+          break;
+        } catch (insertError) {
+          insertRetryCount++;
+          const errorMsg = insertError instanceof Error ? insertError.message : 'Unknown error';
+          insertErrors.push(errorMsg);
+
+          if (insertRetryCount >= maxInsertRetries) {
+            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors);
+            console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
+            throw new Error(`Failed to save companies to database after ${maxInsertRetries} attempts. Last error: ${errorMsg}`);
+          }
+
+          const delayMs = Math.min(2000 * Math.pow(1.5, insertRetryCount), 10000);
+          console.log(`[AIMarketUpdater] Database error, waiting ${delayMs/1000}s before retry ${insertRetryCount + 1}/${maxInsertRetries}`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
       }
 
       console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
