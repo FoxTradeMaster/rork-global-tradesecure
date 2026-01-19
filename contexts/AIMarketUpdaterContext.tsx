@@ -371,8 +371,10 @@ For each company provide:
         .insert(companiesForDb as any);
 
       if (insertError) {
-        console.error(`[AIMarketUpdater] Error saving to Supabase:`, insertError);
-        throw new Error('Failed to save companies to database');
+        console.error(`[AIMarketUpdater] Error saving to Supabase:`, JSON.stringify(insertError, null, 2));
+        console.error(`[AIMarketUpdater] Error details - Code: ${insertError.code}, Message: ${insertError.message}, Details: ${insertError.details}`);
+        console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
+        throw new Error(`Failed to save companies to database: ${insertError.message || 'Unknown error'}`);
       }
 
       console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
