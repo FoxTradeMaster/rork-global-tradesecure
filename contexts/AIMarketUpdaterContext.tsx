@@ -1,26 +1,10 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { generateObject } from '@rork-ai/toolkit-sdk';
-import { z } from 'zod';
-import type { TradingHouse, CommodityType } from '@/types';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import type { CommodityType } from '@/types';
 import { trpcClient } from '@/lib/trpc';
 
-const CompanySchema = z.object({
-  name: z.string().describe('Real company name - must be an actual existing company'),
-  headquarters: z.string().describe('Headquarters location (city, country)'),
-  description: z.string().describe('Factual description of the company and their trading activities'),
-  website: z.string().optional().describe('Company website URL if known'),
-  specialization: z.string().describe('Main specialization or trading focus'),
-  businessType: z.enum(['buyer', 'seller', 'both']).describe('Whether they buy, sell, or both'),
-  companyType: z.string().describe('Type of company (e.g., Trading Company, Refinery, Distributor)'),
-  jurisdiction: z.string().describe('Country or jurisdiction code (e.g., US, GB, SG)'),
-});
 
-const MarketUpdateSchema = z.object({
-  companies: z.array(CompanySchema).describe('List of new companies in this commodity market'),
-});
 
 interface UpdateLog {
   id: string;
@@ -60,11 +44,6 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
   useEffect(() => {
     const init = async () => {
       try {
-        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (!serviceRoleKey || serviceRoleKey === 'undefined' || serviceRoleKey.length < 10) {
-          setInitError('Supabase service role key not configured. Admin operations will not work.');
-          console.error('[AIMarketUpdater] Service role key missing or invalid');
-        }
         await loadSettings();
         await loadLogs();
       } catch (error) {
@@ -175,7 +154,7 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
 
   const updateMarketForCommodity = useCallback(async (commodity: CommodityType) => {
     const commodityLabel = getCommodityLabel(commodity);
-    console.log(`[AIMarketUpdater] Updating market for ${commodityLabel} using AI generation`);
+    console.log(`[AIMarketUpdater] Updating market for ${commodityLabel}`);
     setCurrentCommodity(commodityLabel);
 
     try {
@@ -186,267 +165,39 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
 
       const commodityDescription = getCommodityDescription(commodity);
       
-      console.log(`[AIMarketUpdater] Generating ${settings.companiesPerUpdate} real companies for ${commodityLabel}`);
+      console.log(`[AIMarketUpdater] Calling backend to generate and save ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
       
-      const generationPrompt = `Generate ${settings.companiesPerUpdate} REAL, EXISTING companies that are actively involved in the ${commodityDescription} market.
+      const result = await trpcClient.aiMarketUpdater.generateAndSaveCompanies.mutate({
+        commodity,
+        commodityLabel,
+        commodityDescription,
+        companiesPerUpdate: settings.companiesPerUpdate,
+      });
 
-IMPORTANT:
-- These must be actual, real companies that exist in the real world
-- Include a diverse mix: major corporations, regional traders, distributors, refineries, wholesalers
-- Include companies from different regions (Asia, Europe, Americas, Middle East, Africa)
-- Provide factual information only - no fictional companies
-- Include company type and jurisdiction information
-
-For each company provide:
-- Exact legal name
-- Real headquarters location
-- Factual description of their business
-- Type of company (Trading Company, Refinery, Distributor, Wholesaler, etc.)
-- Whether they are a buyer, seller, or both
-- Their main specialization
-- Jurisdiction/country code
-- Website if known`;
-
-      let generationResult: z.infer<typeof MarketUpdateSchema> | undefined;
-      let retryCount = 0;
-      const maxRetries = 5;
-      const errors: string[] = [];
-
-      while (retryCount < maxRetries) {
-        try {
-          if (retryCount > 0) {
-            console.log(`[AIMarketUpdater] Retry ${retryCount}/${maxRetries} for ${commodityLabel} after network error`);
-          }
-          generationResult = await Promise.race([
-            generateObject({
-              messages: [
-                {
-                  role: 'user',
-                  content: generationPrompt,
-                },
-              ],
-              schema: MarketUpdateSchema,
-            }),
-            new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('Request timeout after 120s')), 120000)
-            )
-          ]);
-          if (retryCount > 0) {
-            console.log(`[AIMarketUpdater] Successfully recovered for ${commodityLabel} after ${retryCount} retries`);
-          }
-          break;
-        } catch (err) {
-          retryCount++;
-          const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-          errors.push(errorMsg);
-          
-          if (retryCount >= maxRetries) {
-            console.error(`[AIMarketUpdater] All ${maxRetries} attempts failed for ${commodityLabel}:`, errors);
-            throw new Error(`Network error - all ${maxRetries} attempts failed. Last error: ${errorMsg}`);
-          }
-          
-          const delayMs = Math.min(3000 * Math.pow(1.5, retryCount), 15000);
-          console.log(`[AIMarketUpdater] Waiting ${delayMs/1000}s before retry ${retryCount + 1}/${maxRetries}`);
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
-      }
-
-      if (!generationResult) {
-        throw new Error('Generation failed - no result returned');
-      }
-
-      if (!generationResult.companies || generationResult.companies.length === 0) {
-        console.log(`[AIMarketUpdater] No companies generated for ${commodityLabel}`);
+      if (!result.success) {
+        console.log(`[AIMarketUpdater] Backend returned error: ${result.error}`);
         addLog({
           commodity: commodityLabel,
           companiesAdded: 0,
           success: false,
-          error: 'No companies generated by AI',
+          error: result.error || 'Backend operation failed',
         });
         return 0;
       }
 
-      const { data: existingParticipants, error: fetchError } = await supabase
-        .from('market_participants')
-        .select('name')
-        .returns<{ name: string }[]>();
-
-      if (fetchError) {
-        console.error(`[AIMarketUpdater] Error fetching existing companies:`, fetchError);
-        throw new Error('Failed to check for duplicates');
-      }
-
-      const existingNames = new Set(
-        (existingParticipants || []).map(p => p.name.toLowerCase().trim())
-      );
-      
-      console.log(`[AIMarketUpdater] Checking for duplicates against ${existingNames.size} existing companies`);
-
-      const newParticipants: TradingHouse[] = await Promise.all(
-        generationResult.companies.map(async (company, index) => {
-          const baseParticipant = {
-            id: `ai_generated_${commodity}_${Date.now()}_${index}`,
-            name: company.name,
-            headquarters: company.headquarters,
-            description: company.description,
-            verified: true,
-            website: company.website,
-            commodities: [commodity] as CommodityType[],
-          };
-
-          let enrichedData = null;
-          try {
-            if (company.website) {
-              console.log(`[AIMarketUpdater] Enriching ${company.name} with BrandFetch`);
-              enrichedData = await trpcClient.brandfetch.enrichCompany.query({
-                name: company.name,
-                website: company.website,
-              });
-            }
-          } catch {
-            console.log(`[AIMarketUpdater] BrandFetch enrichment failed for ${company.name}, continuing without enrichment`);
-          }
-
-          return {
-            ...baseParticipant,
-            type: 'trading_house' as const,
-            category: ['diversified' as const],
-            offices: [company.headquarters],
-            licenses: [`${company.jurisdiction.toUpperCase()}: ${company.companyType}`],
-            specialization: company.specialization,
-            businessType: company.businessType,
-            logo: enrichedData?.logo,
-            brandColor: enrichedData?.primaryColor,
-            email: enrichedData?.email,
-            contactLinks: enrichedData?.links,
-            verified: enrichedData?.verified || true,
-          } as TradingHouse;
-        })
-      );
-
-      const uniqueParticipants = newParticipants.filter(p => {
-        const normalizedName = p.name.toLowerCase().trim();
-        if (existingNames.has(normalizedName)) {
-          console.log(`[AIMarketUpdater] 🚫 Duplicate detected: "${p.name}" - skipping`);
-          return false;
-        }
-        return true;
-      });
-
-      const duplicatesCount = newParticipants.length - uniqueParticipants.length;
-      if (duplicatesCount > 0) {
-        console.log(`[AIMarketUpdater] ⚠️ Filtered out ${duplicatesCount} duplicate companies`);
-      }
-
-      if (uniqueParticipants.length === 0) {
-        console.log(`[AIMarketUpdater] ⚠️ All ${newParticipants.length} companies were duplicates, nothing to add`);
-        addLog({
-          commodity: commodityLabel,
-          companiesAdded: 0,
-          success: true,
-          error: `All ${newParticipants.length} generated companies were duplicates`,
-        });
-        return 0;
-      }
-
-      const companiesForDb = uniqueParticipants.map(p => ({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        headquarters: p.headquarters,
-        description: p.description,
-        verified: p.verified,
-        website: p.website || undefined,
-        commodities: p.commodities,
-        category: p.category || undefined,
-        offices: p.offices || undefined,
-        licenses: p.licenses || undefined,
-        specialization: p.specialization || undefined,
-        business_type: p.businessType || undefined,
-        logo: p.logo || undefined,
-        brand_color: p.brandColor || undefined,
-        email: p.email || undefined,
-        contact_links: p.contactLinks || undefined,
-        founded: p.founded || undefined,
-        trading_volume: p.tradingVolume || undefined,
-      }));
-
-      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      
-      console.log(`[AIMarketUpdater] Database config check:`, {
-        hasServiceKey: !!serviceRoleKey,
-        hasUrl: !!supabaseUrl,
-        serviceKeyLength: serviceRoleKey?.length || 0,
-        urlValid: supabaseUrl && supabaseUrl.length > 10 && !supabaseUrl.includes('placeholder'),
-      });
-
-      if (!serviceRoleKey || serviceRoleKey === 'undefined' || serviceRoleKey.length < 10) {
-        console.error(`[AIMarketUpdater] Cannot insert into database - service role key not configured`);
-        throw new Error('Database admin access not configured. Please set SUPABASE_SERVICE_ROLE_KEY environment variable.');
-      }
-
-      if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl.length < 10 || supabaseUrl.includes('placeholder')) {
-        console.error(`[AIMarketUpdater] Cannot insert into database - Supabase URL not configured`);
-        throw new Error('Database URL not configured. Please set EXPO_PUBLIC_SUPABASE_URL environment variable.');
-      }
-
-      try {
-        const testQuery = await supabaseAdmin.from('market_participants').select('id').limit(1);
-        console.log(`[AIMarketUpdater] Database connection test:`, { success: !testQuery.error, error: testQuery.error?.message });
-        
-        if (testQuery.error) {
-          throw new Error(`Database connection failed: ${testQuery.error.message}. Check your SUPABASE_SERVICE_ROLE_KEY and EXPO_PUBLIC_SUPABASE_URL configuration.`);
-        }
-      } catch (testError: any) {
-        console.error(`[AIMarketUpdater] Pre-flight database test failed:`, testError);
-        throw new Error(`Cannot connect to database: ${testError.message}. Verify Supabase configuration and network connectivity.`);
-      }
-
-      console.log(`[AIMarketUpdater] Attempting to insert ${companiesForDb.length} companies`);
-      
-      const { error: insertError, data: insertData } = await supabaseAdmin
-        .from('market_participants')
-        .insert(companiesForDb as any)
-        .select();
-
-      if (insertError) {
-        console.error(`[AIMarketUpdater] Supabase insertion error:`, {
-          code: insertError.code,
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-        });
-        console.error(`[AIMarketUpdater] Sample data that failed:`, JSON.stringify(companiesForDb[0], null, 2));
-        
-        if (insertError.code === '42501') {
-          throw new Error(`Database permission error: The service role key doesn't have permission to insert. Check your Supabase RLS policies.`);
-        }
-        
-        if (insertError.code === '23505') {
-          throw new Error(`Duplicate entry detected. One or more companies already exist in the database.`);
-        }
-        
-        throw new Error(`Database error (${insertError.code}): ${insertError.message}`);
-      }
-
-      console.log(`[AIMarketUpdater] ✅ Successfully inserted ${insertData?.length || 0} companies to database`);
-
-      console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
-
-      const logMessage = duplicatesCount > 0 
-        ? `Added ${uniqueParticipants.length}, skipped ${duplicatesCount} duplicates`
+      const logMessage = result.duplicates && result.duplicates > 0
+        ? `Added ${result.added}, skipped ${result.duplicates} duplicates`
         : undefined;
 
       addLog({
         commodity: commodityLabel,
-        companiesAdded: uniqueParticipants.length,
+        companiesAdded: result.added,
         success: true,
         error: logMessage,
       });
 
-      console.log(`[AIMarketUpdater] ✅ Successfully added ${uniqueParticipants.length} real companies for ${commodityLabel}${duplicatesCount > 0 ? ` (${duplicatesCount} duplicates filtered)` : ''}`);
-      return uniqueParticipants.length;
+      console.log(`[AIMarketUpdater] ✅ Successfully added ${result.added} companies for ${commodityLabel}${result.duplicates ? ` (${result.duplicates} duplicates filtered)` : ''}`);
+      return result.added;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
