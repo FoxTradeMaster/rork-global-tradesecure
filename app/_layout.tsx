@@ -95,7 +95,43 @@ function RootLayoutNav() {
   );
 }
 
+function ProvidersWrapper({ children }: { children: React.ReactNode }) {
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    const errorHandler = (error: any) => {
+      console.error('[RootLayout] Provider error caught:', error);
+      setHasError(true);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', errorHandler);
+      return () => window.removeEventListener('error', errorHandler);
+    }
+  }, []);
+
+  if (hasError) {
+    return children;
+  }
+
+  return (
+    <AdminAuthProvider>
+      <TradingProvider>
+        <SubscriptionProvider>
+          <MarketProvider>
+            <AIMarketUpdaterProvider>
+              {children}
+            </AIMarketUpdaterProvider>
+          </MarketProvider>
+        </SubscriptionProvider>
+      </TradingProvider>
+    </AdminAuthProvider>
+  );
+}
+
 export default function RootLayout() {
+  const [isReady, setIsReady] = React.useState(false);
+
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -106,6 +142,7 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
+        setIsReady(true);
         SplashScreen.hideAsync();
       }
     };
@@ -113,21 +150,17 @@ export default function RootLayout() {
     prepare();
   }, []);
 
+  if (!isReady) {
+    return null;
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <AdminAuthProvider>
-            <TradingProvider>
-              <SubscriptionProvider>
-                <MarketProvider>
-                  <AIMarketUpdaterProvider>
-                    <RootLayoutNav />
-                  </AIMarketUpdaterProvider>
-                </MarketProvider>
-              </SubscriptionProvider>
-            </TradingProvider>
-          </AdminAuthProvider>
+          <ProvidersWrapper>
+            <RootLayoutNav />
+          </ProvidersWrapper>
         </QueryClientProvider>
       </trpc.Provider>
     </GestureHandlerRootView>
