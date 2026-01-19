@@ -833,18 +833,27 @@ export const loadImportedParticipants = async () => {
 };
 
 export const addMarketParticipants = async (participants: MarketParticipant[]) => {
+  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new participants...');
+  
+  await loadImportedParticipants();
+  
+  console.log('[MarketParticipants] 📊 Current state before adding: isLoaded =', isLoaded, ', existing count =', importedParticipants.length);
+  
   importedParticipants = [...importedParticipants, ...participants];
-  console.log('[MarketParticipants] Added', participants.length, 'participants. Total imported:', importedParticipants.length);
+  console.log('[MarketParticipants] ✅ Added', participants.length, 'participants. Total imported:', importedParticipants.length);
   
   try {
     const serialized = JSON.stringify(importedParticipants);
     await AsyncStorage.setItem('imported_market_participants', serialized);
-    console.log('[MarketParticipants] ✅ Successfully persisted', importedParticipants.length, 'participants to storage');
+    console.log('[MarketParticipants] 💾 Successfully persisted', importedParticipants.length, 'participants to storage');
     
     const verify = await AsyncStorage.getItem('imported_market_participants');
     if (verify) {
       const parsed = JSON.parse(verify);
-      console.log('[MarketParticipants] ✅ Verified persistence:', parsed.length, 'participants');
+      console.log('[MarketParticipants] ✅ Verified persistence:', parsed.length, 'participants in storage');
+      if (parsed.length !== importedParticipants.length) {
+        console.error('[MarketParticipants] ❌ MISMATCH: Memory has', importedParticipants.length, 'but storage has', parsed.length);
+      }
     }
   } catch (error) {
     console.error('[MarketParticipants] ❌ CRITICAL: Error saving participants:', error);
