@@ -96,8 +96,6 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [isReady, setIsReady] = React.useState(false);
-
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -108,7 +106,6 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
-        setIsReady(true);
         SplashScreen.hideAsync();
       }
     };
@@ -125,7 +122,7 @@ export default function RootLayout() {
               <MarketProvider>
                 <AIMarketUpdaterProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    {isReady ? <RootLayoutNav /> : null}
+                    <RootLayoutNav />
                   </GestureHandlerRootView>
                 </AIMarketUpdaterProvider>
               </MarketProvider>
