@@ -62,15 +62,17 @@ export default function WelcomeScreen() {
     if (isLoading) return;
     if (!navigationState?.key) return;
     
-    if (currentUser && router.canGoBack !== undefined) {
+    if (currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         try {
-          router.replace('/(tabs)/dashboard');
+          if (router.canDismiss !== undefined && router.canGoBack !== undefined) {
+            router.replace('/(tabs)/dashboard');
+          }
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 150);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
