@@ -786,6 +786,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
 
 let importedParticipants: MarketParticipant[] = [];
 let isLoaded = false;
+let loadingPromise: Promise<void> | null = null;
 
 export const allMarketParticipants: MarketParticipant[] = [
   ...tradingHouses,
@@ -796,23 +797,39 @@ export const allMarketParticipants: MarketParticipant[] = [
 ];
 
 export const loadImportedParticipants = async () => {
-  if (isLoaded) return;
-  
-  try {
-    console.log('[MarketParticipants] Loading persisted participants...');
-    const stored = await AsyncStorage.getItem('imported_market_participants');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      importedParticipants = parsed;
-      console.log('[MarketParticipants] ✅ Successfully loaded', importedParticipants.length, 'persisted participants from storage');
-    } else {
-      console.log('[MarketParticipants] ⚠️ No persisted participants found in storage');
-    }
-    isLoaded = true;
-  } catch (error) {
-    console.error('[MarketParticipants] ❌ CRITICAL: Error loading participants:', error);
-    isLoaded = true;
+  if (isLoaded) {
+    console.log('[MarketParticipants] Already loaded, skipping');
+    return;
   }
+  
+  if (loadingPromise) {
+    console.log('[MarketParticipants] Load already in progress, waiting...');
+    await loadingPromise;
+    return;
+  }
+  
+  loadingPromise = (async () => {
+    try {
+      console.log('[MarketParticipants] 🔄 Loading persisted participants from AsyncStorage...');
+      const stored = await AsyncStorage.getItem('imported_market_participants');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        importedParticipants = parsed;
+        console.log('[MarketParticipants] ✅ Successfully loaded', importedParticipants.length, 'persisted participants from storage');
+      } else {
+        console.log('[MarketParticipants] ⚠️ No persisted participants found in storage (this is normal for first run)');
+        importedParticipants = [];
+      }
+    } catch (error) {
+      console.error('[MarketParticipants] ❌ CRITICAL: Error loading participants:', error);
+      importedParticipants = [];
+    } finally {
+      isLoaded = true;
+      loadingPromise = null;
+    }
+  })();
+  
+  await loadingPromise;
 };
 
 export const addMarketParticipants = async (participants: MarketParticipant[]) => {
@@ -841,14 +858,19 @@ export const addMarketParticipants = async (participants: MarketParticipant[]) =
 };
 
 export const getImportedParticipants = (): MarketParticipant[] => {
-  console.log('[MarketParticipants] Current imported count:', importedParticipants.length);
+  if (!isLoaded) {
+    console.warn('[MarketParticipants] ⚠️ WARNING: getImportedParticipants called before data loaded!');
+  }
+  console.log('[MarketParticipants] 📊 Current imported count:', importedParticipants.length, '(loaded:', isLoaded, ')');
   return importedParticipants;
 };
 
 export const forceReloadParticipants = async () => {
-  console.log('[MarketParticipants] Force reloading from storage...');
+  console.log('[MarketParticipants] 🔄 Force reloading from storage...');
   isLoaded = false;
+  loadingPromise = null;
   await loadImportedParticipants();
+  console.log('[MarketParticipants] ✅ Force reload complete, returning', importedParticipants.length, 'participants');
   return importedParticipants;
 };
 

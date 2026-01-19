@@ -82,6 +82,11 @@ export default function MarketDirectoryScreen() {
       try {
         const persisted = await forceReloadParticipants();
         console.log('[Market] ✅ Loaded AI-generated participants:', persisted.length);
+        
+        if (persisted.length > 0) {
+          console.log('[Market] 🎯 Forcing UI refresh with', persisted.length, 'AI companies');
+          setRefreshKey(prev => prev + 1);
+        }
       } catch (error) {
         console.error('[Market] ❌ Error loading AI participants:', error);
       }
@@ -99,19 +104,26 @@ export default function MarketDirectoryScreen() {
         console.error('[Market] ❌ Error loading local imported participants:', error);
       }
 
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       setIsLoadingData(false);
       setRefreshKey(prev => prev + 1);
+      
+      const aiCount = getImportedParticipants().length;
+      console.log('[Market] ✅ Load complete. Total AI-generated companies:', aiCount);
     };
     
     loadAllParticipants();
   }, []);
+
+  const importedParticipantsLength = importedParticipants.length;
 
   useEffect(() => {
     const interval = setInterval(() => {
       refreshParticipants();
     }, 5000);
     return () => clearInterval(interval);
-  }, [refreshParticipants]);
+  }, [importedParticipantsLength, refreshParticipants]);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
