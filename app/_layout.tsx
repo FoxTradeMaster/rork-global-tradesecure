@@ -116,14 +116,6 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  if (!isReady) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0E27' }}>
-        <ActivityIndicator size="large" color="#3B82F6" />
-      </View>
-    );
-  }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
@@ -133,7 +125,13 @@ export default function RootLayout() {
               <SubscriptionProvider>
                 <MarketProvider>
                   <AIMarketUpdaterProvider>
-                    <RootLayoutNav />
+                    {!isReady ? (
+                      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0E27' }}>
+                        <ActivityIndicator size="large" color="#3B82F6" />
+                      </View>
+                    ) : (
+                      <RootLayoutNav />
+                    )}
                   </AIMarketUpdaterProvider>
                 </MarketProvider>
               </SubscriptionProvider>
