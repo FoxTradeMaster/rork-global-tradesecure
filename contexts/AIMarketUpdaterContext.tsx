@@ -177,15 +177,41 @@ For each company provide:
 - Jurisdiction/country code
 - Website if known`;
 
-      const generationResult = await generateObject({
-        messages: [
-          {
-            role: 'user',
-            content: generationPrompt,
-          },
-        ],
-        schema: MarketUpdateSchema,
-      });
+      let generationResult: z.infer<typeof MarketUpdateSchema> | undefined;
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`[AIMarketUpdater] Generation attempt ${retryCount + 1}/${maxRetries} for ${commodityLabel}`);
+          generationResult = await Promise.race([
+            generateObject({
+              messages: [
+                {
+                  role: 'user',
+                  content: generationPrompt,
+                },
+              ],
+              schema: MarketUpdateSchema,
+            }),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('Request timeout after 60s')), 60000)
+            )
+          ]);
+          break;
+        } catch (err) {
+          retryCount++;
+          console.error(`[AIMarketUpdater] Attempt ${retryCount} failed for ${commodityLabel}:`, err);
+          if (retryCount >= maxRetries) {
+            throw new Error(`Failed after ${maxRetries} attempts: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          }
+          await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+        }
+      }
+
+      if (!generationResult) {
+        throw new Error('Generation failed - no result returned');
+      }
 
       if (!generationResult.companies || generationResult.companies.length === 0) {
         console.log(`[AIMarketUpdater] No companies generated for ${commodityLabel}`);
@@ -251,12 +277,14 @@ For each company provide:
       console.log(`[AIMarketUpdater] Successfully added ${newParticipants.length} real companies for ${commodityLabel}`);
       return newParticipants.length;
     } catch (error) {
-      console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
+      console.error(`[AIMarketUpdater] Full error details:`, error);
       addLog({
         commodity: commodityLabel,
         companiesAdded: 0,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage.includes('Load failed') ? 'Network error - will retry next cycle' : errorMessage,
       });
       return 0;
     } finally {
