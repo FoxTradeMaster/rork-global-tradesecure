@@ -66,15 +66,13 @@ export default function WelcomeScreen() {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         try {
-          if (router.canGoBack()) {
+          if (router && router.replace) {
             router.replace('/(tabs)/dashboard');
-          } else {
-            router.push('/(tabs)/dashboard');
           }
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 150);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
@@ -120,11 +118,13 @@ export default function WelcomeScreen() {
       await setDemoUser(roleId as any);
       setTimeout(() => {
         try {
-          router.push('/(tabs)/dashboard');
+          if (router && router.push) {
+            router.push('/(tabs)/dashboard');
+          }
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 150);
+      }, 500);
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
       Alert.alert('Error', 'Failed to start demo mode');
@@ -190,11 +190,13 @@ export default function WelcomeScreen() {
             setShowAuthModal(false);
             setTimeout(() => {
               try {
-                router.push('/(tabs)/dashboard');
+                if (router && router.push) {
+                  router.push('/(tabs)/dashboard');
+                }
               } catch (error) {
                 console.error('[WelcomeScreen] Navigation error:', error);
               }
-            }, 150);
+            }, 500);
           } else {
             Alert.alert(
               'Verify Your Email',
@@ -240,11 +242,13 @@ export default function WelcomeScreen() {
           setShowAuthModal(false);
           setTimeout(() => {
             try {
-              router.push('/(tabs)/dashboard');
+              if (router && router.push) {
+                router.push('/(tabs)/dashboard');
+              }
             } catch (error) {
               console.error('[WelcomeScreen] Navigation error:', error);
             }
-          }, 150);
+          }, 500);
         }
       }
     } catch (error: any) {
