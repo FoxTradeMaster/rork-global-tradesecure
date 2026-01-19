@@ -372,70 +372,65 @@ For each company provide:
       }));
 
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      
+      console.log(`[AIMarketUpdater] Database config check:`, {
+        hasServiceKey: !!serviceRoleKey,
+        hasUrl: !!supabaseUrl,
+        serviceKeyLength: serviceRoleKey?.length || 0,
+        urlValid: supabaseUrl && supabaseUrl.length > 10 && !supabaseUrl.includes('placeholder'),
+      });
+
       if (!serviceRoleKey || serviceRoleKey === 'undefined' || serviceRoleKey.length < 10) {
         console.error(`[AIMarketUpdater] Cannot insert into database - service role key not configured`);
         throw new Error('Database admin access not configured. Please set SUPABASE_SERVICE_ROLE_KEY environment variable.');
       }
 
-      let insertRetryCount = 0;
-      const maxInsertRetries = 3;
-      const insertErrors: string[] = [];
-
-      while (insertRetryCount < maxInsertRetries) {
-        try {
-          if (insertRetryCount > 0) {
-            console.log(`[AIMarketUpdater] Retry ${insertRetryCount}/${maxInsertRetries} for database insertion`);
-          }
-
-          const { error: insertError, data: insertData } = await Promise.race([
-            supabaseAdmin
-              .from('market_participants')
-              .insert(companiesForDb as any)
-              .select(),
-            new Promise<{ error: any, data: any }>((_, reject) => 
-              setTimeout(() => reject(new Error('Database insertion timeout after 60s')), 60000)
-            )
-          ]);
-
-          if (insertError) {
-            console.error(`[AIMarketUpdater] Supabase insertion error details:`, {
-              code: insertError.code,
-              message: insertError.message,
-              details: insertError.details,
-              hint: insertError.hint,
-            });
-            
-            if (insertError.code === '42501') {
-              throw new Error(`Database permission error: Row-level security policy violation. The service role key may not have proper permissions. Error: ${insertError.message}`);
-            }
-            
-            throw new Error(`Supabase error: ${insertError.message || JSON.stringify(insertError)}`);
-          }
-
-          if (insertRetryCount > 0) {
-            console.log(`[AIMarketUpdater] Successfully saved to database after ${insertRetryCount} retries`);
-          }
-          console.log(`[AIMarketUpdater] Database insert successful, ${insertData?.length || 0} rows inserted`);
-          break;
-        } catch (insertError: any) {
-          insertRetryCount++;
-          const errorMsg = insertError?.message || (insertError instanceof Error ? insertError.message : 'Unknown error');
-          insertErrors.push(errorMsg);
-
-          console.error(`[AIMarketUpdater] Insert attempt ${insertRetryCount} failed:`, errorMsg);
-
-          if (insertRetryCount >= maxInsertRetries) {
-            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors);
-            console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
-            console.error(`[AIMarketUpdater] Service role key length:`, serviceRoleKey?.length || 0);
-            throw new Error(`Failed to save companies to database after ${maxInsertRetries} attempts. Last error: ${errorMsg}`);
-          }
-
-          const delayMs = Math.min(3000 * Math.pow(2, insertRetryCount - 1), 15000);
-          console.log(`[AIMarketUpdater] Database error, waiting ${delayMs/1000}s before retry ${insertRetryCount + 1}/${maxInsertRetries}`);
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
+      if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl.length < 10 || supabaseUrl.includes('placeholder')) {
+        console.error(`[AIMarketUpdater] Cannot insert into database - Supabase URL not configured`);
+        throw new Error('Database URL not configured. Please set EXPO_PUBLIC_SUPABASE_URL environment variable.');
       }
+
+      try {
+        const testQuery = await supabaseAdmin.from('market_participants').select('id').limit(1);
+        console.log(`[AIMarketUpdater] Database connection test:`, { success: !testQuery.error, error: testQuery.error?.message });
+        
+        if (testQuery.error) {
+          throw new Error(`Database connection failed: ${testQuery.error.message}. Check your SUPABASE_SERVICE_ROLE_KEY and EXPO_PUBLIC_SUPABASE_URL configuration.`);
+        }
+      } catch (testError: any) {
+        console.error(`[AIMarketUpdater] Pre-flight database test failed:`, testError);
+        throw new Error(`Cannot connect to database: ${testError.message}. Verify Supabase configuration and network connectivity.`);
+      }
+
+      console.log(`[AIMarketUpdater] Attempting to insert ${companiesForDb.length} companies`);
+      
+      const { error: insertError, data: insertData } = await supabaseAdmin
+        .from('market_participants')
+        .insert(companiesForDb as any)
+        .select();
+
+      if (insertError) {
+        console.error(`[AIMarketUpdater] Supabase insertion error:`, {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+        });
+        console.error(`[AIMarketUpdater] Sample data that failed:`, JSON.stringify(companiesForDb[0], null, 2));
+        
+        if (insertError.code === '42501') {
+          throw new Error(`Database permission error: The service role key doesn't have permission to insert. Check your Supabase RLS policies.`);
+        }
+        
+        if (insertError.code === '23505') {
+          throw new Error(`Duplicate entry detected. One or more companies already exist in the database.`);
+        }
+        
+        throw new Error(`Database error (${insertError.code}): ${insertError.message}`);
+      }
+
+      console.log(`[AIMarketUpdater] ✅ Successfully inserted ${insertData?.length || 0} companies to database`);
 
       console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
 
