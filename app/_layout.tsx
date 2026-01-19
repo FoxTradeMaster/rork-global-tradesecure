@@ -6,6 +6,7 @@ import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { loadImportedParticipants } from "@/mocks/market-participants";
 
@@ -115,7 +116,9 @@ export default function RootLayout() {
           <TradingProvider>
             <SubscriptionProvider>
               <MarketProvider>
-                <RootLayoutNav />
+                <AIMarketUpdaterProvider>
+                  <RootLayoutNav />
+                </AIMarketUpdaterProvider>
               </MarketProvider>
             </SubscriptionProvider>
           </TradingProvider>
