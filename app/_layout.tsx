@@ -113,22 +113,22 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <AdminAuthProvider>
-            <TradingProvider>
-              <SubscriptionProvider>
-                <MarketProvider>
-                  <AIMarketUpdaterProvider>
+    <QueryClientProvider client={queryClient}>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <AdminAuthProvider>
+          <TradingProvider>
+            <SubscriptionProvider>
+              <MarketProvider>
+                <AIMarketUpdaterProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
                     <RootLayoutNav />
-                  </AIMarketUpdaterProvider>
-                </MarketProvider>
-              </SubscriptionProvider>
-            </TradingProvider>
-          </AdminAuthProvider>
-        </trpc.Provider>
-      </QueryClientProvider>
-    </GestureHandlerRootView>
+                  </GestureHandlerRootView>
+                </AIMarketUpdaterProvider>
+              </MarketProvider>
+            </SubscriptionProvider>
+          </TradingProvider>
+        </AdminAuthProvider>
+      </trpc.Provider>
+    </QueryClientProvider>
   );
 }
