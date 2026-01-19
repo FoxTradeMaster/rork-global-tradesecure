@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
@@ -73,9 +74,25 @@ export default function MarketDirectoryScreen() {
   }, [importedParticipants.length]);
 
   useEffect(() => {
-    loadImportedParticipants().then(() => {
-      console.log('[Market] Loaded persisted participants');
-    });
+    const loadAllParticipants = async () => {
+      console.log('[Market] Initial load - loading persisted participants');
+      await loadImportedParticipants();
+      const aiGenerated = getImportedParticipants();
+      console.log('[Market] Loaded AI-generated participants:', aiGenerated.length);
+      
+      try {
+        const stored = await AsyncStorage.getItem('local_imported_market_participants');
+        if (stored) {
+          const localImported = JSON.parse(stored);
+          setImportedParticipants(localImported);
+          console.log('[Market] Restored local imported participants:', localImported.length);
+        }
+      } catch (error) {
+        console.error('[Market] Error loading local imported participants:', error);
+      }
+    };
+    
+    loadAllParticipants();
   }, []);
 
   useEffect(() => {
@@ -158,7 +175,7 @@ export default function MarketDirectoryScreen() {
     setTimeout(() => setSelectedParticipant(null), 300);
   };
 
-  const handleImport = useCallback((data: ParsedRow[], categorySettings?: { commodity: string; businessType: 'buyer' | 'seller' | 'both' }) => {
+  const handleImport = useCallback(async (data: ParsedRow[], categorySettings?: { commodity: string; businessType: 'buyer' | 'seller' | 'both' }) => {
     console.log('[Market] Importing', data.length, 'market participants', categorySettings);
     
     const newParticipants: MarketParticipant[] = data.map((row, index) => {
@@ -222,8 +239,17 @@ export default function MarketDirectoryScreen() {
     }).filter(p => p.name.trim() !== '');
 
     if (newParticipants.length > 0) {
-      setImportedParticipants(prev => [...prev, ...newParticipants]);
+      const updated = [...importedParticipants, ...newParticipants];
+      setImportedParticipants(updated);
       addMarketParticipants(newParticipants);
+      
+      try {
+        await AsyncStorage.setItem('local_imported_market_participants', JSON.stringify(updated));
+        console.log('[Market] Persisted local imported participants:', updated.length);
+      } catch (error) {
+        console.error('[Market] Error persisting local imported participants:', error);
+      }
+      
       Alert.alert(
         'Import Successful',
         `Successfully imported ${newParticipants.length} market participants.`,
@@ -236,7 +262,7 @@ export default function MarketDirectoryScreen() {
         [{ text: 'OK' }]
       );
     }
-  }, []);
+  }, [importedParticipants]);
 
   return (
     <View style={styles.container}>
