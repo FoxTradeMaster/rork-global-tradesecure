@@ -66,18 +66,16 @@ export default function WelcomeScreen() {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         try {
-          if (router && router.replace) {
-            router.replace('/(tabs)/dashboard');
-          }
+          router.replace('/(tabs)/dashboard');
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 500);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
 
-  if (isLoading || !navigationState?.key) {
+  if (isLoading) {
     return (
       <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
         <Image
@@ -88,6 +86,10 @@ export default function WelcomeScreen() {
         <Text style={[styles.title, { marginTop: 24 }]} numberOfLines={1}>Fox Trade Master™</Text>
       </View>
     );
+  }
+
+  if (!navigationState?.key) {
+    return null;
   }
 
   if (currentUser) {
@@ -118,13 +120,11 @@ export default function WelcomeScreen() {
       await setDemoUser(roleId as any);
       setTimeout(() => {
         try {
-          if (router && router.push) {
-            router.push('/(tabs)/dashboard');
-          }
+          router.push('/(tabs)/dashboard');
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 500);
+      }, 100);
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
       Alert.alert('Error', 'Failed to start demo mode');
@@ -190,13 +190,11 @@ export default function WelcomeScreen() {
             setShowAuthModal(false);
             setTimeout(() => {
               try {
-                if (router && router.push) {
-                  router.push('/(tabs)/dashboard');
-                }
+                router.push('/(tabs)/dashboard');
               } catch (error) {
                 console.error('[WelcomeScreen] Navigation error:', error);
               }
-            }, 500);
+            }, 100);
           } else {
             Alert.alert(
               'Verify Your Email',
@@ -242,13 +240,11 @@ export default function WelcomeScreen() {
           setShowAuthModal(false);
           setTimeout(() => {
             try {
-              if (router && router.push) {
-                router.push('/(tabs)/dashboard');
-              }
+              router.push('/(tabs)/dashboard');
             } catch (error) {
               console.error('[WelcomeScreen] Navigation error:', error);
             }
-          }, 500);
+          }, 100);
         }
       }
     } catch (error: any) {
