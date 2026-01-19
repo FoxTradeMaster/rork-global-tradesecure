@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   Search, 
   Building2, 
@@ -68,61 +69,51 @@ export default function MarketDirectoryScreen() {
 
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
 
-  const refreshParticipants = useCallback(async () => {
-    const reloaded = await forceReloadParticipants();
-    console.log('[Market] 🔄 Refreshed - Total persisted:', reloaded.length, 'Local imported:', importedParticipants.length);
-    setRefreshKey(prev => prev + 1);
-  }, [importedParticipants.length]);
-
-  useEffect(() => {
-    const loadAllParticipants = async () => {
-      console.log('[Market] 📂 Initial load - loading all persisted participants');
-      setIsLoadingData(true);
-      
-      try {
-        const persisted = await forceReloadParticipants();
-        console.log('[Market] ✅ Loaded AI-generated participants:', persisted.length);
-        
-        if (persisted.length > 0) {
-          console.log('[Market] 🎯 Forcing UI refresh with', persisted.length, 'AI companies');
-          setRefreshKey(prev => prev + 1);
-        }
-      } catch (error) {
-        console.error('[Market] ❌ Error loading AI participants:', error);
-      }
-      
-      try {
-        const stored = await AsyncStorage.getItem('local_imported_market_participants');
-        if (stored) {
-          const localImported = JSON.parse(stored);
-          setImportedParticipants(localImported);
-          console.log('[Market] ✅ Restored local imported participants:', localImported.length);
-        } else {
-          console.log('[Market] ⚠️ No local imported participants found');
-        }
-      } catch (error) {
-        console.error('[Market] ❌ Error loading local imported participants:', error);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      setIsLoadingData(false);
-      setRefreshKey(prev => prev + 1);
-      
-      console.log('[Market] ✅ Load complete');
-    };
+  const loadAllParticipants = useCallback(async () => {
+    console.log('[Market] 📂 Loading all persisted participants');
+    setIsLoadingData(true);
     
-    loadAllParticipants();
+    try {
+      const persisted = await forceReloadParticipants();
+      console.log('[Market] ✅ Loaded AI-generated participants:', persisted.length);
+      
+      if (persisted.length > 0) {
+        console.log('[Market] 🎯 Forcing UI refresh with', persisted.length, 'AI companies');
+        setRefreshKey(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('[Market] ❌ Error loading AI participants:', error);
+    }
+    
+    try {
+      const stored = await AsyncStorage.getItem('local_imported_market_participants');
+      if (stored) {
+        const localImported = JSON.parse(stored);
+        setImportedParticipants(localImported);
+        console.log('[Market] ✅ Restored local imported participants:', localImported.length);
+      } else {
+        console.log('[Market] ⚠️ No local imported participants found');
+      }
+    } catch (error) {
+      console.error('[Market] ❌ Error loading local imported participants:', error);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    setIsLoadingData(false);
+    setRefreshKey(prev => prev + 1);
+    
+    console.log('[Market] ✅ Load complete');
   }, []);
 
-  const importedParticipantsLength = importedParticipants.length;
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[Market] 🎯 Tab focused - reloading data');
+      loadAllParticipants();
+    }, [loadAllParticipants])
+  );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshParticipants();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [importedParticipantsLength, refreshParticipants]);
+
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
