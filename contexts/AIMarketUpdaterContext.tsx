@@ -183,11 +183,14 @@ For each company provide:
 
       let generationResult: z.infer<typeof MarketUpdateSchema> | undefined;
       let retryCount = 0;
-      const maxRetries = 3;
+      const maxRetries = 5;
+      const errors: string[] = [];
 
       while (retryCount < maxRetries) {
         try {
-          console.log(`[AIMarketUpdater] Generation attempt ${retryCount + 1}/${maxRetries} for ${commodityLabel}`);
+          if (retryCount > 0) {
+            console.log(`[AIMarketUpdater] Retry ${retryCount}/${maxRetries} for ${commodityLabel} after network error`);
+          }
           generationResult = await Promise.race([
             generateObject({
               messages: [
@@ -199,17 +202,26 @@ For each company provide:
               schema: MarketUpdateSchema,
             }),
             new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('Request timeout after 60s')), 60000)
+              setTimeout(() => reject(new Error('Request timeout after 90s')), 90000)
             )
           ]);
+          if (retryCount > 0) {
+            console.log(`[AIMarketUpdater] Successfully recovered for ${commodityLabel} after ${retryCount} retries`);
+          }
           break;
         } catch (err) {
           retryCount++;
-          console.error(`[AIMarketUpdater] Attempt ${retryCount} failed for ${commodityLabel}:`, err);
+          const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+          errors.push(errorMsg);
+          
           if (retryCount >= maxRetries) {
-            throw new Error(`Failed after ${maxRetries} attempts: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            console.error(`[AIMarketUpdater] All ${maxRetries} attempts failed for ${commodityLabel}:`, errors);
+            throw new Error(`Network error - all ${maxRetries} attempts failed. Last error: ${errorMsg}`);
           }
-          await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+          
+          const delayMs = Math.min(3000 * Math.pow(1.5, retryCount), 15000);
+          console.log(`[AIMarketUpdater] Waiting ${delayMs/1000}s before retry ${retryCount + 1}/${maxRetries}`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
 
@@ -285,10 +297,12 @@ For each company provide:
       console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
       
       let userFriendlyError = errorMessage;
-      if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed')) {
-        userFriendlyError = 'Network connection lost - will retry next cycle';
+      if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed') || errorMessage.includes('Network error')) {
+        userFriendlyError = 'Network unstable - skipping this cycle';
       } else if (errorMessage.includes('timeout')) {
-        userFriendlyError = 'Request timed out - will retry next cycle';
+        userFriendlyError = 'Request timed out - skipping this cycle';
+      } else if (errorMessage.includes('attempts failed')) {
+        userFriendlyError = 'Multiple connection failures - check network';
       }
       
       addLog({
