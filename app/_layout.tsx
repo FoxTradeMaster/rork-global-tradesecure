@@ -96,24 +96,6 @@ function RootLayoutNav() {
 }
 
 function ProvidersWrapper({ children }: { children: React.ReactNode }) {
-  const [hasError, setHasError] = React.useState(false);
-
-  React.useEffect(() => {
-    const errorHandler = (error: any) => {
-      console.error('[RootLayout] Provider error caught:', error);
-      setHasError(true);
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('error', errorHandler);
-      return () => window.removeEventListener('error', errorHandler);
-    }
-  }, []);
-
-  if (hasError) {
-    return children;
-  }
-
   return (
     <AdminAuthProvider>
       <TradingProvider>
