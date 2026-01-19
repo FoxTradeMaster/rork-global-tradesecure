@@ -62,7 +62,7 @@ export default function WelcomeScreen() {
     if (isLoading) return;
     if (!navigationState?.key) return;
     
-    if (currentUser) {
+    if (currentUser && router.canGoBack !== undefined) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         try {
@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 100);
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
@@ -120,11 +120,11 @@ export default function WelcomeScreen() {
       await setDemoUser(roleId as any);
       setTimeout(() => {
         try {
-          router.push('/(tabs)/dashboard');
+          router.replace('/(tabs)/dashboard');
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 100);
+      }, 150);
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
       Alert.alert('Error', 'Failed to start demo mode');
@@ -190,11 +190,11 @@ export default function WelcomeScreen() {
             setShowAuthModal(false);
             setTimeout(() => {
               try {
-                router.push('/(tabs)/dashboard');
+                router.replace('/(tabs)/dashboard');
               } catch (error) {
                 console.error('[WelcomeScreen] Navigation error:', error);
               }
-            }, 100);
+            }, 150);
           } else {
             Alert.alert(
               'Verify Your Email',
@@ -240,11 +240,11 @@ export default function WelcomeScreen() {
           setShowAuthModal(false);
           setTimeout(() => {
             try {
-              router.push('/(tabs)/dashboard');
+              router.replace('/(tabs)/dashboard');
             } catch (error) {
               console.error('[WelcomeScreen] Navigation error:', error);
             }
-          }, 100);
+          }, 150);
         }
       }
     } catch (error: any) {
