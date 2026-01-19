@@ -95,8 +95,6 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [isReady, setIsReady] = React.useState(false);
-
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -107,17 +105,12 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
-        setIsReady(true);
         SplashScreen.hideAsync();
       }
     };
 
     prepare();
   }, []);
-
-  if (!isReady) {
-    return null;
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
