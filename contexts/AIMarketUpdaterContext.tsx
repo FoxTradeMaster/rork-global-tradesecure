@@ -153,6 +153,10 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
     setCurrentCommodity(commodityLabel);
 
     try {
+      if (!settings.isEnabled || settings.isPaused) {
+        console.log(`[AIMarketUpdater] Update cancelled for ${commodityLabel} - updater disabled or paused`);
+        return 0;
+      }
 
       const commodityDescription = getCommodityDescription(commodity);
       
@@ -279,18 +283,26 @@ For each company provide:
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
-      console.error(`[AIMarketUpdater] Full error details:`, error);
+      
+      let userFriendlyError = errorMessage;
+      if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed')) {
+        userFriendlyError = 'Network connection lost - will retry next cycle';
+      } else if (errorMessage.includes('timeout')) {
+        userFriendlyError = 'Request timed out - will retry next cycle';
+      }
+      
       addLog({
         commodity: commodityLabel,
         companiesAdded: 0,
         success: false,
-        error: errorMessage.includes('Load failed') ? 'Network error - will retry next cycle' : errorMessage,
+        error: userFriendlyError,
       });
+      
       return 0;
     } finally {
       setCurrentCommodity(null);
     }
-  }, [settings.companiesPerUpdate, addLog]);
+  }, [settings.companiesPerUpdate, settings.isEnabled, settings.isPaused, addLog]);
 
   const runUpdate = useCallback(async () => {
     if (isUpdating || settings.isPaused) {
@@ -304,41 +316,54 @@ For each company provide:
     let totalAdded = 0;
     const commodityResults: { name: string; count: number }[] = [];
 
-    for (const commodity of settings.selectedCommodities) {
-      if (settings.isPaused) {
-        console.log('[AIMarketUpdater] Update paused mid-cycle');
-        break;
+    try {
+      for (const commodity of settings.selectedCommodities) {
+        if (settings.isPaused || !settings.isEnabled) {
+          console.log('[AIMarketUpdater] Update paused mid-cycle');
+          break;
+        }
+
+        try {
+          const added = await updateMarketForCommodity(commodity);
+          totalAdded += added;
+          commodityResults.push({ name: getCommodityLabel(commodity), count: added });
+        } catch (error) {
+          console.error(`[AIMarketUpdater] Failed to update ${commodity}, continuing with next commodity:`, error);
+          commodityResults.push({ name: getCommodityLabel(commodity), count: 0 });
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    } catch (error) {
+      console.error('[AIMarketUpdater] Critical error in update cycle:', error);
+    }
+
+    try {
+      if (totalAdded > 0) {
+        const summaryMessage = commodityResults
+          .filter(r => r.count > 0)
+          .map(r => `${r.name}: ${r.count}`)
+          .join(', ');
+        
+        addLog({
+          commodity: `Update Complete - ${summaryMessage}`,
+          companiesAdded: totalAdded,
+          success: true,
+          isSummary: true,
+          details: commodityResults,
+        });
       }
 
-      const added = await updateMarketForCommodity(commodity);
-      totalAdded += added;
-      commodityResults.push({ name: getCommodityLabel(commodity), count: added });
-
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-
-    if (totalAdded > 0) {
-      const summaryMessage = commodityResults
-        .filter(r => r.count > 0)
-        .map(r => `${r.name}: ${r.count}`)
-        .join(', ');
-      
-      addLog({
-        commodity: `Update Complete - ${summaryMessage}`,
-        companiesAdded: totalAdded,
-        success: true,
-        isSummary: true,
-        details: commodityResults,
+      await saveSettings({
+        ...settings,
+        lastUpdateTime: new Date(),
       });
+    } catch (error) {
+      console.error('[AIMarketUpdater] Error saving update results:', error);
+    } finally {
+      setIsUpdating(false);
+      console.log(`[AIMarketUpdater] Update cycle complete. Total companies added: ${totalAdded}`);
     }
-
-    await saveSettings({
-      ...settings,
-      lastUpdateTime: new Date(),
-    });
-
-    setIsUpdating(false);
-    console.log(`[AIMarketUpdater] Update cycle complete. Total companies added: ${totalAdded}`);
   }, [isUpdating, settings, updateMarketForCommodity, saveSettings, addLog]);
 
   const scheduleNextUpdate = useCallback(() => {
