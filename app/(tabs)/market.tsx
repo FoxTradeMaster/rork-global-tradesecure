@@ -23,7 +23,7 @@ import {
   FileText,
   MoreVertical
 } from 'lucide-react-native';
-import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants, loadImportedParticipants } from '@/mocks/market-participants';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants, forceReloadParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
 import EmailOutreachModal from '@/components/EmailOutreachModal';
@@ -67,28 +67,33 @@ export default function MarketDirectoryScreen() {
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
   const refreshParticipants = useCallback(async () => {
-    await loadImportedParticipants();
-    const aiGenerated = getImportedParticipants();
-    console.log('[Market] Refreshed - AI generated:', aiGenerated.length, 'Local imported:', importedParticipants.length);
+    const reloaded = await forceReloadParticipants();
+    console.log('[Market] 🔄 Refreshed - Total persisted:', reloaded.length, 'Local imported:', importedParticipants.length);
     setRefreshKey(prev => prev + 1);
   }, [importedParticipants.length]);
 
   useEffect(() => {
     const loadAllParticipants = async () => {
-      console.log('[Market] Initial load - loading persisted participants');
-      await loadImportedParticipants();
-      const aiGenerated = getImportedParticipants();
-      console.log('[Market] Loaded AI-generated participants:', aiGenerated.length);
+      console.log('[Market] 📂 Initial load - loading all persisted participants');
+      
+      try {
+        const persisted = await forceReloadParticipants();
+        console.log('[Market] ✅ Loaded AI-generated participants:', persisted.length);
+      } catch (error) {
+        console.error('[Market] ❌ Error loading AI participants:', error);
+      }
       
       try {
         const stored = await AsyncStorage.getItem('local_imported_market_participants');
         if (stored) {
           const localImported = JSON.parse(stored);
           setImportedParticipants(localImported);
-          console.log('[Market] Restored local imported participants:', localImported.length);
+          console.log('[Market] ✅ Restored local imported participants:', localImported.length);
+        } else {
+          console.log('[Market] ⚠️ No local imported participants found');
         }
       } catch (error) {
-        console.error('[Market] Error loading local imported participants:', error);
+        console.error('[Market] ❌ Error loading local imported participants:', error);
       }
     };
     
@@ -106,7 +111,9 @@ export default function MarketDirectoryScreen() {
 
   const allParticipants = useMemo(() => {
     const aiGeneratedParticipants = getImportedParticipants();
-    return [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
+    const total = [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
+    console.log('[Market] 📊 Total participants:', total.length, '(Base:', allMarketParticipants.length, 'Local:', importedParticipants.length, 'AI:', aiGeneratedParticipants.length, ')');
+    return total;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
 

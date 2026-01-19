@@ -10,6 +10,7 @@ import { MarketProvider } from "@/contexts/MarketContext";
 import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { trpc, trpcClient } from "@/lib/trpc";
+import { loadImportedParticipants } from "@/mocks/market-participants";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -100,7 +101,12 @@ export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
       try {
+        console.log('[RootLayout] 🚀 Initializing app...');
+        await loadImportedParticipants();
+        console.log('[RootLayout] ✅ Preloaded market participants');
         await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
         setIsReady(true);
         SplashScreen.hideAsync();

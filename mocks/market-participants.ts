@@ -799,14 +799,19 @@ export const loadImportedParticipants = async () => {
   if (isLoaded) return;
   
   try {
+    console.log('[MarketParticipants] Loading persisted participants...');
     const stored = await AsyncStorage.getItem('imported_market_participants');
     if (stored) {
-      importedParticipants = JSON.parse(stored);
-      console.log('[MarketParticipants] Loaded', importedParticipants.length, 'persisted participants from storage');
+      const parsed = JSON.parse(stored);
+      importedParticipants = parsed;
+      console.log('[MarketParticipants] ✅ Successfully loaded', importedParticipants.length, 'persisted participants from storage');
+    } else {
+      console.log('[MarketParticipants] ⚠️ No persisted participants found in storage');
     }
     isLoaded = true;
   } catch (error) {
-    console.error('[MarketParticipants] Error loading participants:', error);
+    console.error('[MarketParticipants] ❌ CRITICAL: Error loading participants:', error);
+    isLoaded = true;
   }
 };
 
@@ -815,14 +820,35 @@ export const addMarketParticipants = async (participants: MarketParticipant[]) =
   console.log('[MarketParticipants] Added', participants.length, 'participants. Total imported:', importedParticipants.length);
   
   try {
-    await AsyncStorage.setItem('imported_market_participants', JSON.stringify(importedParticipants));
-    console.log('[MarketParticipants] Persisted', importedParticipants.length, 'participants to storage');
+    const serialized = JSON.stringify(importedParticipants);
+    await AsyncStorage.setItem('imported_market_participants', serialized);
+    console.log('[MarketParticipants] ✅ Successfully persisted', importedParticipants.length, 'participants to storage');
+    
+    const verify = await AsyncStorage.getItem('imported_market_participants');
+    if (verify) {
+      const parsed = JSON.parse(verify);
+      console.log('[MarketParticipants] ✅ Verified persistence:', parsed.length, 'participants');
+    }
   } catch (error) {
-    console.error('[MarketParticipants] Error saving participants:', error);
+    console.error('[MarketParticipants] ❌ CRITICAL: Error saving participants:', error);
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      console.log('[MarketParticipants] Available storage keys:', keys.filter(k => k.includes('participant')));
+    } catch (e) {
+      console.error('[MarketParticipants] Storage inspection failed:', e);
+    }
   }
 };
 
 export const getImportedParticipants = (): MarketParticipant[] => {
+  console.log('[MarketParticipants] Current imported count:', importedParticipants.length);
+  return importedParticipants;
+};
+
+export const forceReloadParticipants = async () => {
+  console.log('[MarketParticipants] Force reloading from storage...');
+  isLoaded = false;
+  await loadImportedParticipants();
   return importedParticipants;
 };
 
