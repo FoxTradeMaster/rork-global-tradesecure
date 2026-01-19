@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import { LayoutDashboard, Users, FileText, TrendingUp, Building, Settings, Wallet } from "lucide-react-native";
 import React from "react";
 import { useTrading } from '@/contexts/TradingContext';
-import { AIMarketUpdaterProvider } from '@/contexts/AIMarketUpdaterContext';
 
 export default function TabLayout() {
   const { currentUser } = useTrading();
@@ -29,9 +28,8 @@ export default function TabLayout() {
   const visibleTabs = getRoleTabs();
 
   return (
-    <AIMarketUpdaterProvider>
-      <Tabs
-        screenOptions={{
+    <Tabs
+      screenOptions={{
         tabBarActiveTintColor: '#0284C7',
         tabBarInactiveTintColor: '#94A3B8',
         headerShown: false,
@@ -102,7 +100,6 @@ export default function TabLayout() {
           href: visibleTabs.includes('settings') ? '/settings' : null,
         }}
       />
-      </Tabs>
-    </AIMarketUpdaterProvider>
+    </Tabs>
   );
 }
