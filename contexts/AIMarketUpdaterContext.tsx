@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { TradingHouse, CommodityType } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -366,7 +366,7 @@ For each company provide:
         trading_volume: p.tradingVolume || undefined,
       }));
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('market_participants')
         .insert(companiesForDb as any);
 

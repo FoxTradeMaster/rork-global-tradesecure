@@ -31,7 +31,29 @@ if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || sup
   });
 }
 
-export { supabase };
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+let supabaseAdmin: ReturnType<typeof createClient>;
+
+if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
+    !supabaseServiceRoleKey || supabaseServiceRoleKey === 'undefined' || supabaseServiceRoleKey === 'null' || supabaseServiceRoleKey.length < 10) {
+  console.warn('[Supabase Admin] Service role key missing. Admin operations will be limited.');
+  supabaseAdmin = createClient('https://placeholder.supabase.co', 'placeholder-key', {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+} else {
+  supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+}
+
+export { supabase, supabaseAdmin };
 
 export interface Database {
   public: {
