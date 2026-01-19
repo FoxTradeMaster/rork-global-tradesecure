@@ -59,22 +59,20 @@ export default function WelcomeScreen() {
   const [showDemoRoleModal, setShowDemoRoleModal] = useState(false);
 
   useEffect(() => {
-    if (!navigationState?.key || isLoading) return;
+    if (isLoading) return;
+    if (!navigationState?.key) return;
     
-    if (currentUser && navigationState.key) {
+    if (currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
-      const timer = setTimeout(() => {
-        try {
-          router.replace('/dashboard');
-        } catch (error) {
-          console.error('[WelcomeScreen] Navigation error:', error);
-        }
-      }, 100);
-      return () => clearTimeout(timer);
+      try {
+        router.replace('/dashboard');
+      } catch (error) {
+        console.error('[WelcomeScreen] Navigation error:', error);
+      }
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
 
-  if (isLoading) {
+  if (isLoading || !navigationState?.key) {
     return (
       <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
         <Image
@@ -88,7 +86,16 @@ export default function WelcomeScreen() {
   }
 
   if (currentUser) {
-    return null;
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Image
+          source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/2b9a7na20abky0yfw9asz' }}
+          style={{ width: 120, height: 120 }}
+          resizeMode="contain"
+        />
+        <Text style={[styles.title, { marginTop: 24 }]} numberOfLines={1}>Fox Trade Master™</Text>
+      </View>
+    );
   }
 
   const handleRoleSelect = (roleId: string) => {
