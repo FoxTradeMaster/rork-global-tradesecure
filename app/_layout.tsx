@@ -19,9 +19,14 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <AdminAuthProvider>
+      <TradingProvider>
+        <SubscriptionProvider>
+          <MarketProvider>
+            <AIMarketUpdaterProvider>
+              <Stack screenOptions={{ headerBackTitle: "Back" }}>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
       <Stack.Screen 
         name="counterparty/[id]" 
@@ -90,8 +95,13 @@ function RootLayoutNav() {
           title: "Terms of Service"
         }} 
       />
-      <Stack.Screen name="+not-found" />
-    </Stack>
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </AIMarketUpdaterProvider>
+          </MarketProvider>
+        </SubscriptionProvider>
+      </TradingProvider>
+    </AdminAuthProvider>
   );
 }
 
@@ -124,17 +134,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <AdminAuthProvider>
-            <TradingProvider>
-              <SubscriptionProvider>
-                <MarketProvider>
-                  <AIMarketUpdaterProvider>
-                    <RootLayoutNav />
-                  </AIMarketUpdaterProvider>
-                </MarketProvider>
-              </SubscriptionProvider>
-            </TradingProvider>
-          </AdminAuthProvider>
+          <RootLayoutNav />
         </QueryClientProvider>
       </trpc.Provider>
     </GestureHandlerRootView>
