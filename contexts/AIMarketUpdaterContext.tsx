@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
-import type { MarketParticipant, TradingHouse, CommodityType } from '@/types';
-import { addMarketParticipants, getAllMarketParticipants } from '@/mocks/market-participants';
+import type { TradingHouse, CommodityType } from '@/types';
+import { supabase } from '@/lib/supabase';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -261,14 +261,23 @@ For each company provide:
         return 0;
       }
 
-      const existingParticipants = getAllMarketParticipants();
+      const { data: existingParticipants, error: fetchError } = await supabase
+        .from('market_participants')
+        .select('name')
+        .returns<{ name: string }[]>();
+
+      if (fetchError) {
+        console.error(`[AIMarketUpdater] Error fetching existing companies:`, fetchError);
+        throw new Error('Failed to check for duplicates');
+      }
+
       const existingNames = new Set(
-        existingParticipants.map(p => p.name.toLowerCase().trim())
+        (existingParticipants || []).map(p => p.name.toLowerCase().trim())
       );
       
       console.log(`[AIMarketUpdater] Checking for duplicates against ${existingNames.size} existing companies`);
 
-      const newParticipants: MarketParticipant[] = await Promise.all(
+      const newParticipants: TradingHouse[] = await Promise.all(
         generationResult.companies.map(async (company, index) => {
           const baseParticipant = {
             id: `ai_generated_${commodity}_${Date.now()}_${index}`,
@@ -335,7 +344,38 @@ For each company provide:
         return 0;
       }
 
-      addMarketParticipants(uniqueParticipants);
+      const companiesForDb = uniqueParticipants.map(p => ({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        headquarters: p.headquarters,
+        description: p.description,
+        verified: p.verified,
+        website: p.website || undefined,
+        commodities: p.commodities,
+        category: p.category || undefined,
+        offices: p.offices || undefined,
+        licenses: p.licenses || undefined,
+        specialization: p.specialization || undefined,
+        business_type: p.businessType || undefined,
+        logo: p.logo || undefined,
+        brand_color: p.brandColor || undefined,
+        email: p.email || undefined,
+        contact_links: p.contactLinks || undefined,
+        founded: p.founded || undefined,
+        trading_volume: p.tradingVolume || undefined,
+      }));
+
+      const { error: insertError } = await supabase
+        .from('market_participants')
+        .insert(companiesForDb as any);
+
+      if (insertError) {
+        console.error(`[AIMarketUpdater] Error saving to Supabase:`, insertError);
+        throw new Error('Failed to save companies to database');
+      }
+
+      console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
 
       const logMessage = duplicatesCount > 0 
         ? `Added ${uniqueParticipants.length}, skipped ${duplicatesCount} duplicates`

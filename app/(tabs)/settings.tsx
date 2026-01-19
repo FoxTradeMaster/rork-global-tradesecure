@@ -3,9 +3,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
 import { useAIMarketUpdater } from '@/contexts/AIMarketUpdaterContext';
-import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle, TestTube2 } from 'lucide-react-native';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle, TestTube2, Lock } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
 import PaywallModal from '@/components/PaywallModal';
+import AdminPasswordModal from '@/components/AdminPasswordModal';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
@@ -13,6 +15,7 @@ export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
   const { currentUser, clearUser, isDemoMode } = useTrading();
   const metrics = usePortfolioMetrics();
+  const { isAuthenticated, logout } = useAdminAuth();
   const { 
     settings, 
     updateLogs, 
@@ -25,6 +28,7 @@ export default function SettingsScreen() {
   } = useAIMarketUpdater();
   const [showPaywall, setShowPaywall] = useState(false);
   const [showUpdateLogs, setShowUpdateLogs] = useState(false);
+  const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
   const router = useRouter();
 
   const handleManageSubscription = () => {
@@ -222,7 +226,26 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>AI Market Updater</Text>
+            <Text style={styles.sectionTitle}>AI Market Updater (Admin Only)</Text>
+            
+            {!isAuthenticated ? (
+              <View style={styles.aiUpdaterCard}>
+                <View style={styles.lockedContent}>
+                  <Lock size={48} color="#64748B" />
+                  <Text style={styles.lockedTitle}>Admin Access Required</Text>
+                  <Text style={styles.lockedDescription}>
+                    Only administrators can access the AI Market Updater to control shared company generation.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.unlockButton}
+                    onPress={() => setShowAdminPasswordModal(true)}
+                  >
+                    <Shield size={18} color="#FFFFFF" />
+                    <Text style={styles.unlockButtonText}>Unlock Admin Panel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
             <View style={styles.aiUpdaterCard}>
               <View style={styles.aiUpdaterHeader}>
                 <View style={styles.aiUpdaterIconContainer}>
@@ -380,7 +403,18 @@ export default function SettingsScreen() {
               <Text style={styles.aiUpdaterWarning}>
                 ⚠️ AI updates consume API credits. Use pause feature to control costs.
               </Text>
+
+              <TouchableOpacity
+                style={styles.logoutAdminButton}
+                onPress={() => {
+                  logout();
+                }}
+              >
+                <LogOut size={16} color="#EF4444" />
+                <Text style={styles.logoutAdminButtonText}>Logout Admin</Text>
+              </TouchableOpacity>
             </View>
+            )}
           </View>
 
           <View style={styles.section}>
@@ -448,6 +482,14 @@ export default function SettingsScreen() {
       <PaywallModal
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
+      />
+      
+      <AdminPasswordModal
+        visible={showAdminPasswordModal}
+        onClose={() => setShowAdminPasswordModal(false)}
+        onAuthenticated={() => {
+          setShowAdminPasswordModal(false);
+        }}
       />
     </View>
   );
@@ -1060,5 +1102,55 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700' as const,
     color: '#FFFFFF',
+  },
+  lockedContent: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+  },
+  lockedTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#0F172A',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  lockedDescription: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  unlockButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#0284C7',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  unlockButtonText: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+  },
+  logoutAdminButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  logoutAdminButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#EF4444',
   },
 });

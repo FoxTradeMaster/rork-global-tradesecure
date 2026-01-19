@@ -36,6 +36,39 @@ export { supabase };
 export interface Database {
   public: {
     Tables: {
+      market_participants: {
+        Row: {
+          id: string;
+          name: string;
+          type: string;
+          headquarters: string;
+          description: string;
+          verified: boolean;
+          website?: string;
+          commodities: string[];
+          category?: string[];
+          offices?: string[];
+          licenses?: string[];
+          specialization?: string;
+          business_type?: string;
+          logo?: string;
+          brand_color?: string;
+          email?: string;
+          contact_links?: any;
+          founded?: number;
+          trading_volume?: string;
+          broker_type?: string[];
+          regulated_by?: string[];
+          clearing_relationships?: string[];
+          license_numbers?: any[];
+          framework?: string;
+          members?: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['market_participants']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['market_participants']['Insert']>;
+      };
       counterparties: {
         Row: {
           id: string;

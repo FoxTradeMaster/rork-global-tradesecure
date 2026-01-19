@@ -1,6 +1,6 @@
 import { TradingHouse, Broker, MarketPlatform, MarketParticipant } from '@/types';
 import { edibleOilsBuyersExtended } from './edible-oils-buyers-extended';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 
 export const tradingHouses: TradingHouse[] = [
   {
@@ -785,6 +785,7 @@ export const edibleOilsBuyers: TradingHouse[] = [
 ];
 
 let importedParticipants: MarketParticipant[] = [];
+let supabaseParticipants: MarketParticipant[] = [];
 let isLoaded = false;
 let loadingPromise: Promise<void> | null = null;
 
@@ -802,8 +803,8 @@ export const getAllMarketParticipants = (): MarketParticipant[] => {
   if (!isLoaded) {
     console.warn('[MarketParticipants] ⚠️ WARNING: getAllMarketParticipants called before data loaded!');
   }
-  const all = [...baseMarketParticipants, ...importedParticipants];
-  console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', imported =', importedParticipants.length, ', total =', all.length);
+  const all = [...baseMarketParticipants, ...supabaseParticipants, ...importedParticipants];
+  console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', supabase =', supabaseParticipants.length, ', local imported =', importedParticipants.length, ', total =', all.length);
   return all;
 };
 
@@ -821,19 +822,68 @@ export const loadImportedParticipants = async () => {
   
   loadingPromise = (async () => {
     try {
-      console.log('[MarketParticipants] 🔄 Loading persisted participants from AsyncStorage...');
-      const stored = await AsyncStorage.getItem('imported_market_participants');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        importedParticipants = parsed;
-        console.log('[MarketParticipants] ✅ Successfully loaded', importedParticipants.length, 'persisted participants from storage');
+      console.log('[MarketParticipants] 🔄 Loading participants from Supabase shared database...');
+      
+      const { data: supabaseData, error: supabaseError } = await supabase
+        .from('market_participants')
+        .select('*');
+
+      if (supabaseError) {
+        console.error('[MarketParticipants] ❌ Error loading from Supabase:', supabaseError);
+        supabaseParticipants = [];
+      } else if (supabaseData && supabaseData.length > 0) {
+        supabaseParticipants = supabaseData.map((row: any) => {
+          const base = {
+            id: row.id,
+            name: row.name,
+            type: row.type as any,
+            headquarters: row.headquarters,
+            description: row.description,
+            verified: row.verified,
+            website: row.website,
+            commodities: row.commodities as any[],
+          };
+
+          if (row.type === 'trading_house') {
+            return {
+              ...base,
+              category: row.category as any[],
+              offices: row.offices,
+              licenses: row.licenses,
+              specialization: row.specialization,
+              businessType: row.business_type as any,
+              logo: row.logo,
+              brandColor: row.brand_color,
+              email: row.email,
+              contactLinks: row.contact_links,
+              founded: row.founded,
+              tradingVolume: row.trading_volume,
+            } as TradingHouse;
+          } else if (row.type === 'broker') {
+            return {
+              ...base,
+              brokerType: row.broker_type as any[],
+              regulatedBy: row.regulated_by,
+              clearingRelationships: row.clearing_relationships,
+              licenseNumbers: row.license_numbers,
+            } as Broker;
+          } else {
+            return {
+              ...base,
+              category: row.category?.[0] as any,
+              framework: row.framework,
+              members: row.members,
+            } as MarketPlatform;
+          }
+        });
+        console.log('[MarketParticipants] ✅ Successfully loaded', supabaseParticipants.length, 'participants from Supabase');
       } else {
-        console.log('[MarketParticipants] ⚠️ No persisted participants found in storage (this is normal for first run)');
-        importedParticipants = [];
+        console.log('[MarketParticipants] ⚠️ No participants found in Supabase (this is normal for first run)');
+        supabaseParticipants = [];
       }
     } catch (error) {
-      console.error('[MarketParticipants] ❌ CRITICAL: Error loading participants:', error);
-      importedParticipants = [];
+      console.error('[MarketParticipants] ❌ CRITICAL: Error loading from Supabase:', error);
+      supabaseParticipants = [];
     } finally {
       isLoaded = true;
       loadingPromise = null;
@@ -844,37 +894,14 @@ export const loadImportedParticipants = async () => {
 };
 
 export const addMarketParticipants = async (participants: MarketParticipant[]) => {
-  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new participants...');
+  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new LOCAL participants (not synced to Supabase)...');
   
   await loadImportedParticipants();
   
   console.log('[MarketParticipants] 📊 Current state before adding: isLoaded =', isLoaded, ', existing count =', importedParticipants.length);
   
   importedParticipants = [...importedParticipants, ...participants];
-  console.log('[MarketParticipants] ✅ Added', participants.length, 'participants. Total imported:', importedParticipants.length);
-  
-  try {
-    const serialized = JSON.stringify(importedParticipants);
-    await AsyncStorage.setItem('imported_market_participants', serialized);
-    console.log('[MarketParticipants] 💾 Successfully persisted', importedParticipants.length, 'participants to storage');
-    
-    const verify = await AsyncStorage.getItem('imported_market_participants');
-    if (verify) {
-      const parsed = JSON.parse(verify);
-      console.log('[MarketParticipants] ✅ Verified persistence:', parsed.length, 'participants in storage');
-      if (parsed.length !== importedParticipants.length) {
-        console.error('[MarketParticipants] ❌ MISMATCH: Memory has', importedParticipants.length, 'but storage has', parsed.length);
-      }
-    }
-  } catch (error) {
-    console.error('[MarketParticipants] ❌ CRITICAL: Error saving participants:', error);
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      console.log('[MarketParticipants] Available storage keys:', keys.filter(k => k.includes('participant')));
-    } catch (e) {
-      console.error('[MarketParticipants] Storage inspection failed:', e);
-    }
-  }
+  console.log('[MarketParticipants] ✅ Added', participants.length, 'local participants. Total local imported:', importedParticipants.length);
 };
 
 export const getImportedParticipants = (): MarketParticipant[] => {
@@ -886,22 +913,17 @@ export const getImportedParticipants = (): MarketParticipant[] => {
 };
 
 export const forceReloadParticipants = async () => {
-  console.log('[MarketParticipants] 🔄 Force reloading from storage...');
+  console.log('[MarketParticipants] 🔄 Force reloading from Supabase shared database...');
   isLoaded = false;
   loadingPromise = null;
   await loadImportedParticipants();
-  console.log('[MarketParticipants] ✅ Force reload complete, returning', importedParticipants.length, 'participants');
-  return importedParticipants;
+  console.log('[MarketParticipants] ✅ Force reload complete, returning', supabaseParticipants.length, 'Supabase +', importedParticipants.length, 'local participants');
+  return [...supabaseParticipants, ...importedParticipants];
 };
 
 export const clearImportedParticipants = async () => {
   importedParticipants = [];
-  try {
-    await AsyncStorage.removeItem('imported_market_participants');
-    console.log('[MarketParticipants] Cleared all imported participants');
-  } catch (error) {
-    console.error('[MarketParticipants] Error clearing participants:', error);
-  }
+  console.log('[MarketParticipants] Cleared local imported participants (Supabase data remains)');
 };
 
 export const getCommodityLabel = (commodity: string): string => {
