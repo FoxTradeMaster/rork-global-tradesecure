@@ -5,7 +5,6 @@ import React, { useEffect } from "react";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
-import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { loadImportedParticipants } from "@/mocks/market-participants";
@@ -116,9 +115,7 @@ export default function RootLayout() {
           <TradingProvider>
             <SubscriptionProvider>
               <MarketProvider>
-                <AIMarketUpdaterProvider>
-                  <RootLayoutNav />
-                </AIMarketUpdaterProvider>
+                <RootLayoutNav />
               </MarketProvider>
             </SubscriptionProvider>
           </TradingProvider>
