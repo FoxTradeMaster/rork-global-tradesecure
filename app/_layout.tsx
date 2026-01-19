@@ -36,83 +36,6 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="counterparty/[id]" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "Counterparty Details"
-        }} 
-      />
-      <Stack.Screen 
-        name="trade/[id]" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "Trade Details"
-        }} 
-      />
-      <Stack.Screen 
-        name="trade/create" 
-        options={{ 
-          presentation: "modal",
-          headerShown: true,
-          title: "New Trade",
-          headerStyle: {
-            backgroundColor: '#0A0E27',
-          },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: {
-            color: '#FFFFFF',
-          },
-        }} 
-      />
-      <Stack.Screen 
-        name="user-manual" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "User Manual",
-          headerStyle: {
-            backgroundColor: '#0A0E27',
-          },
-          headerTintColor: '#FFFFFF',
-        }} 
-      />
-      <Stack.Screen 
-        name="support" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "Support"
-        }} 
-      />
-      <Stack.Screen 
-        name="privacy-policy" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "Privacy Policy"
-        }} 
-      />
-      <Stack.Screen 
-        name="terms-of-service" 
-        options={{ 
-          presentation: "card",
-          headerShown: true,
-          title: "Terms of Service"
-        }} 
-      />
-      <Stack.Screen name="+not-found" />
-    </Stack>
-  );
-}
-
-export default function RootLayout() {
-  return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -121,7 +44,78 @@ export default function RootLayout() {
               <SubscriptionProvider>
                 <MarketProvider>
                   <AIMarketUpdaterProvider>
-                    <RootLayoutNav />
+                    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+                      <Stack.Screen name="index" options={{ headerShown: false }} />
+                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      <Stack.Screen 
+                        name="counterparty/[id]" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "Counterparty Details"
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="trade/[id]" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "Trade Details"
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="trade/create" 
+                        options={{ 
+                          presentation: "modal",
+                          headerShown: true,
+                          title: "New Trade",
+                          headerStyle: {
+                            backgroundColor: '#0A0E27',
+                          },
+                          headerTintColor: '#FFFFFF',
+                          headerTitleStyle: {
+                            color: '#FFFFFF',
+                          },
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="user-manual" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "User Manual",
+                          headerStyle: {
+                            backgroundColor: '#0A0E27',
+                          },
+                          headerTintColor: '#FFFFFF',
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="support" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "Support"
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="privacy-policy" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "Privacy Policy"
+                        }} 
+                      />
+                      <Stack.Screen 
+                        name="terms-of-service" 
+                        options={{ 
+                          presentation: "card",
+                          headerShown: true,
+                          title: "Terms of Service"
+                        }} 
+                      />
+                      <Stack.Screen name="+not-found" />
+                    </Stack>
                   </AIMarketUpdaterProvider>
                 </MarketProvider>
               </SubscriptionProvider>
@@ -131,4 +125,8 @@ export default function RootLayout() {
       </QueryClientProvider>
     </GestureHandlerRootView>
   );
+}
+
+export default function RootLayout() {
+  return <RootLayoutNav />;
 }
