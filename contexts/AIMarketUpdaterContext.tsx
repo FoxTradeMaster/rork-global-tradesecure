@@ -55,15 +55,27 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
   const [updateLogs, setUpdateLogs] = useState<UpdateLog[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [currentCommodity, setCurrentCommodity] = useState<string | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSettings();
-    loadLogs();
+    const init = async () => {
+      try {
+        await loadSettings();
+        await loadLogs();
+      } catch (error) {
+        console.error('[AIMarketUpdater] Initialization error:', error);
+        setInitError(error instanceof Error ? error.message : 'Initialization failed');
+      }
+    };
+    init();
   }, []);
 
   const loadSettings = async () => {
     try {
-      const stored = await AsyncStorage.getItem('ai_market_updater_settings');
+      const stored = await Promise.race([
+        AsyncStorage.getItem('ai_market_updater_settings'),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000))
+      ]);
       if (stored) {
         const parsed = JSON.parse(stored);
         setSettings({
@@ -78,7 +90,10 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
 
   const loadLogs = async () => {
     try {
-      const stored = await AsyncStorage.getItem('ai_market_updater_logs');
+      const stored = await Promise.race([
+        AsyncStorage.getItem('ai_market_updater_logs'),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000))
+      ]);
       if (stored) {
         const parsed = JSON.parse(stored);
         setUpdateLogs(parsed.map((log: any) => ({
@@ -93,8 +108,10 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
 
   const saveSettings = useCallback(async (newSettings: UpdaterSettings) => {
     try {
-      await AsyncStorage.setItem('ai_market_updater_settings', JSON.stringify(newSettings));
       setSettings(newSettings);
+      AsyncStorage.setItem('ai_market_updater_settings', JSON.stringify(newSettings)).catch(err => {
+        console.error('[AIMarketUpdater] Error persisting settings:', err);
+      });
     } catch (error) {
       console.error('[AIMarketUpdater] Error saving settings:', error);
     }
@@ -102,8 +119,10 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
 
   const saveLogs = async (logs: UpdateLog[]) => {
     try {
-      await AsyncStorage.setItem('ai_market_updater_logs', JSON.stringify(logs));
       setUpdateLogs(logs);
+      AsyncStorage.setItem('ai_market_updater_logs', JSON.stringify(logs)).catch(err => {
+        console.error('[AIMarketUpdater] Error persisting logs:', err);
+      });
     } catch (error) {
       console.error('[AIMarketUpdater] Error saving logs:', error);
     }
@@ -502,6 +521,7 @@ For each company provide:
     updateLogs,
     isUpdating,
     currentCommodity,
+    initError,
     toggleEnabled,
     togglePaused,
     updateInterval,

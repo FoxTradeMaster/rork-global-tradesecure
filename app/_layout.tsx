@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, Component, ReactNode } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
@@ -12,7 +13,67 @@ import { loadImportedParticipants } from "@/mocks/market-participants";
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5000,
+    },
+  },
+});
+
+class ErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    console.error('[ErrorBoundary] Caught error:', error);
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('[ErrorBoundary] Error details:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <View style={errorStyles.container}>
+          <Text style={errorStyles.title}>Something went wrong</Text>
+          <Text style={errorStyles.message}>{this.state.error?.message}</Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0E27',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  message: {
+    fontSize: 16,
+    color: '#94A3B8',
+    textAlign: 'center',
+  },
+});
 
 function RootLayoutNav() {
   return (
@@ -110,20 +171,32 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <AdminAuthProvider>
-          <TradingProvider>
-            <SubscriptionProvider>
-              <MarketProvider>
-                <AIMarketUpdaterProvider>
-                  <RootLayoutNav />
-                </AIMarketUpdaterProvider>
-              </MarketProvider>
-            </SubscriptionProvider>
-          </TradingProvider>
-        </AdminAuthProvider>
-      </trpc.Provider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <ErrorBoundary>
+            <AdminAuthProvider>
+              <ErrorBoundary>
+                <TradingProvider>
+                  <ErrorBoundary>
+                    <SubscriptionProvider>
+                      <ErrorBoundary>
+                        <MarketProvider>
+                          <ErrorBoundary>
+                            <AIMarketUpdaterProvider>
+                              <RootLayoutNav />
+                            </AIMarketUpdaterProvider>
+                          </ErrorBoundary>
+                        </MarketProvider>
+                      </ErrorBoundary>
+                    </SubscriptionProvider>
+                  </ErrorBoundary>
+                </TradingProvider>
+              </ErrorBoundary>
+            </AdminAuthProvider>
+          </ErrorBoundary>
+        </trpc.Provider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
