@@ -17,7 +17,7 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function RootLayoutNav() {
+export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -125,8 +125,4 @@ function RootLayoutNav() {
       </QueryClientProvider>
     </GestureHandlerRootView>
   );
-}
-
-export default function RootLayout() {
-  return <RootLayoutNav />;
 }
