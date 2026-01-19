@@ -17,25 +17,7 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <AdminAuthProvider>
-          <TradingProvider>
-            <SubscriptionProvider>
-              <MarketProvider>
-                <AIMarketUpdaterProvider>
-                  {children}
-                </AIMarketUpdaterProvider>
-              </MarketProvider>
-            </SubscriptionProvider>
-          </TradingProvider>
-        </AdminAuthProvider>
-      </trpc.Provider>
-    </QueryClientProvider>
-  );
-}
+
 
 function RootLayoutNav() {
   return (
@@ -134,9 +116,21 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Providers>
-        <RootLayoutNav />
-      </Providers>
+      <QueryClientProvider client={queryClient}>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <AdminAuthProvider>
+            <TradingProvider>
+              <SubscriptionProvider>
+                <MarketProvider>
+                  <AIMarketUpdaterProvider>
+                    <RootLayoutNav />
+                  </AIMarketUpdaterProvider>
+                </MarketProvider>
+              </SubscriptionProvider>
+            </TradingProvider>
+          </AdminAuthProvider>
+        </trpc.Provider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
