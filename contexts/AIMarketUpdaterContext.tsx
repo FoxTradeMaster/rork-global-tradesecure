@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { MarketParticipant, TradingHouse, CommodityType } from '@/types';
-import { addMarketParticipants, allMarketParticipants, getImportedParticipants } from '@/mocks/market-participants';
+import { addMarketParticipants, getAllMarketParticipants } from '@/mocks/market-participants';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -240,7 +240,7 @@ For each company provide:
         return 0;
       }
 
-      const existingParticipants = [...allMarketParticipants, ...getImportedParticipants()];
+      const existingParticipants = getAllMarketParticipants();
       const existingNames = new Set(
         existingParticipants.map(p => p.name.toLowerCase().trim())
       );

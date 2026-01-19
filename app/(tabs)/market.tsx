@@ -23,7 +23,7 @@ import {
   FileText,
   MoreVertical
 } from 'lucide-react-native';
-import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants, forceReloadParticipants } from '@/mocks/market-participants';
+import { getCommodityLabel, getCategoryLabel, addMarketParticipants, getAllMarketParticipants, forceReloadParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
 import EmailOutreachModal from '@/components/EmailOutreachModal';
@@ -109,8 +109,7 @@ export default function MarketDirectoryScreen() {
       setIsLoadingData(false);
       setRefreshKey(prev => prev + 1);
       
-      const aiCount = getImportedParticipants().length;
-      console.log('[Market] ✅ Load complete. Total AI-generated companies:', aiCount);
+      console.log('[Market] ✅ Load complete');
     };
     
     loadAllParticipants();
@@ -128,9 +127,8 @@ export default function MarketDirectoryScreen() {
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
   const allParticipants = useMemo(() => {
-    const aiGeneratedParticipants = getImportedParticipants();
-    const total = [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
-    console.log('[Market] 📊 Total participants:', total.length, '(Base:', allMarketParticipants.length, 'Local:', importedParticipants.length, 'AI:', aiGeneratedParticipants.length, ')');
+    const total = [...getAllMarketParticipants(), ...importedParticipants];
+    console.log('[Market] 📊 Total participants:', total.length, '(getAllMarketParticipants:', getAllMarketParticipants().length, 'Local imported:', importedParticipants.length, ')');
     return total;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);

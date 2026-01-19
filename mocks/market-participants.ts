@@ -788,13 +788,24 @@ let importedParticipants: MarketParticipant[] = [];
 let isLoaded = false;
 let loadingPromise: Promise<void> | null = null;
 
-export const allMarketParticipants: MarketParticipant[] = [
+export const baseMarketParticipants: MarketParticipant[] = [
   ...tradingHouses,
   ...edibleOilsBuyers,
   ...edibleOilsBuyersExtended,
   ...brokers,
   ...platforms,
 ];
+
+export const allMarketParticipants: MarketParticipant[] = baseMarketParticipants;
+
+export const getAllMarketParticipants = (): MarketParticipant[] => {
+  if (!isLoaded) {
+    console.warn('[MarketParticipants] ⚠️ WARNING: getAllMarketParticipants called before data loaded!');
+  }
+  const all = [...baseMarketParticipants, ...importedParticipants];
+  console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', imported =', importedParticipants.length, ', total =', all.length);
+  return all;
+};
 
 export const loadImportedParticipants = async () => {
   if (isLoaded) {
