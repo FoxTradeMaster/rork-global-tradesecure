@@ -64,11 +64,14 @@ export default function WelcomeScreen() {
     
     if (currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
-      try {
-        router.replace('/dashboard');
-      } catch (error) {
-        console.error('[WelcomeScreen] Navigation error:', error);
-      }
+      const timer = setTimeout(() => {
+        try {
+          router.replace('/(tabs)/dashboard');
+        } catch (error) {
+          console.error('[WelcomeScreen] Navigation error:', error);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [navigationState?.key, isLoading, currentUser, router]);
 
@@ -111,7 +114,9 @@ export default function WelcomeScreen() {
     try {
       setShowDemoRoleModal(false);
       await setDemoUser(roleId as any);
-      router.replace('/dashboard');
+      setTimeout(() => {
+        router.replace('/(tabs)/dashboard');
+      }, 100);
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
       Alert.alert('Error', 'Failed to start demo mode');
@@ -175,7 +180,9 @@ export default function WelcomeScreen() {
             };
             await setUser(user);
             setShowAuthModal(false);
-            router.push('/dashboard');
+            setTimeout(() => {
+              router.replace('/(tabs)/dashboard');
+            }, 100);
           } else {
             Alert.alert(
               'Verify Your Email',
@@ -219,7 +226,9 @@ export default function WelcomeScreen() {
           };
           await setUser(user);
           setShowAuthModal(false);
-          router.push('/dashboard');
+          setTimeout(() => {
+            router.replace('/(tabs)/dashboard');
+          }, 100);
         }
       }
     } catch (error: any) {
