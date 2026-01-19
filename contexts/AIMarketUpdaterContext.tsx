@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { TradingHouse, CommodityType } from '@/types';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -366,15 +366,14 @@ For each company provide:
         trading_volume: p.tradingVolume || undefined,
       }));
 
-      const { error: insertError } = await supabaseAdmin
-        .from('market_participants')
-        .insert(companiesForDb as any);
-
-      if (insertError) {
-        console.error(`[AIMarketUpdater] Error saving to Supabase:`, JSON.stringify(insertError, null, 2));
-        console.error(`[AIMarketUpdater] Error details - Code: ${insertError.code}, Message: ${insertError.message}, Details: ${insertError.details}`);
+      try {
+        await trpcClient.marketParticipants.insertBatch.mutate({
+          participants: companiesForDb,
+        });
+      } catch (insertError) {
+        console.error(`[AIMarketUpdater] Error saving to Supabase:`, insertError);
         console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
-        throw new Error(`Failed to save companies to database: ${insertError.message || 'Unknown error'}`);
+        throw new Error(`Failed to save companies to database: ${insertError instanceof Error ? insertError.message : 'Unknown error'}`);
       }
 
       console.log(`[AIMarketUpdater] ✅ Successfully saved ${uniqueParticipants.length} companies to shared database`);
