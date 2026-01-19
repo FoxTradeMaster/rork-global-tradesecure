@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { TradingHouse, CommodityType } from '@/types';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -376,16 +376,14 @@ For each company provide:
             console.log(`[AIMarketUpdater] Retry ${insertRetryCount}/${maxInsertRetries} for database insertion`);
           }
 
-          const { error: insertError } = await Promise.race([
-            supabaseAdmin.from('market_participants').insert(companiesForDb as any),
+          await Promise.race([
+            trpcClient.marketParticipants.insertBatch.mutate({
+              participants: companiesForDb as any,
+            }),
             new Promise<never>((_, reject) => 
               setTimeout(() => reject(new Error('Database insertion timeout after 30s')), 30000)
             )
           ]);
-
-          if (insertError) {
-            throw insertError;
-          }
 
           if (insertRetryCount > 0) {
             console.log(`[AIMarketUpdater] Successfully saved to database after ${insertRetryCount} retries`);
@@ -397,7 +395,7 @@ For each company provide:
           insertErrors.push(errorMsg);
 
           if (insertRetryCount >= maxInsertRetries) {
-            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors);
+            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors.join(', '));
             console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
             throw new Error(`Failed to save companies to database after ${maxInsertRetries} attempts. Last error: ${errorMsg}`);
           }
