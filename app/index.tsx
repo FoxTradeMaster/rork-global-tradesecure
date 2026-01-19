@@ -48,6 +48,7 @@ const ROLES = [
 export default function WelcomeScreen() {
   const router = useRouter();
   const navigationState = useRootNavigationState();
+  const isNavigationReady = navigationState?.key != null;
   const { setUser, setDemoUser, currentUser, isLoading } = useTrading();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -60,22 +61,20 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     if (isLoading) return;
-    if (!navigationState?.key) return;
+    if (!isNavigationReady) return;
     
     if (currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
       const timer = setTimeout(() => {
         try {
-          if (router.canDismiss !== undefined && router.canGoBack !== undefined) {
-            router.replace('/(tabs)/dashboard');
-          }
+          router.replace('/(tabs)/dashboard');
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 300);
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [navigationState?.key, isLoading, currentUser, router]);
+  }, [isNavigationReady, isLoading, currentUser, router]);
 
   if (isLoading) {
     return (
@@ -90,7 +89,7 @@ export default function WelcomeScreen() {
     );
   }
 
-  if (!navigationState?.key) {
+  if (!isNavigationReady) {
     return null;
   }
 
@@ -126,7 +125,7 @@ export default function WelcomeScreen() {
         } catch (error) {
           console.error('[WelcomeScreen] Navigation error:', error);
         }
-      }, 150);
+      }, 100);
     } catch (error) {
       console.error('[WelcomeScreen] Error entering demo mode:', error);
       Alert.alert('Error', 'Failed to start demo mode');
@@ -196,7 +195,7 @@ export default function WelcomeScreen() {
               } catch (error) {
                 console.error('[WelcomeScreen] Navigation error:', error);
               }
-            }, 150);
+            }, 100);
           } else {
             Alert.alert(
               'Verify Your Email',
@@ -246,7 +245,7 @@ export default function WelcomeScreen() {
             } catch (error) {
               console.error('[WelcomeScreen] Navigation error:', error);
             }
-          }, 150);
+          }, 100);
         }
       }
     } catch (error: any) {
