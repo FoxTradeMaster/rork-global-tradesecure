@@ -21,6 +21,26 @@ const queryClient = new QueryClient({
   },
 });
 
+function ProvidersWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <AdminAuthProvider>
+          <TradingProvider>
+            <SubscriptionProvider>
+              <MarketProvider>
+                <AIMarketUpdaterProvider>
+                  {children}
+                </AIMarketUpdaterProvider>
+              </MarketProvider>
+            </SubscriptionProvider>
+          </TradingProvider>
+        </AdminAuthProvider>
+      </trpc.Provider>
+    </QueryClientProvider>
+  );
+}
+
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
@@ -120,20 +140,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <AdminAuthProvider>
-          <TradingProvider>
-            <SubscriptionProvider>
-              <MarketProvider>
-                <AIMarketUpdaterProvider>
-                  <RootLayoutNav />
-                </AIMarketUpdaterProvider>
-              </MarketProvider>
-            </SubscriptionProvider>
-          </TradingProvider>
-        </AdminAuthProvider>
-      </trpc.Provider>
-    </QueryClientProvider>
+    <ProvidersWrapper>
+      <RootLayoutNav />
+    </ProvidersWrapper>
   );
 }
