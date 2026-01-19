@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -11,53 +11,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
     url: supabaseUrl,
   });
 }
-
-let supabase: ReturnType<typeof createClient>;
-
-if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
-    !supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey === 'null' || supabaseAnonKey.length < 10) {
-  console.warn('[Supabase] Configuration missing or invalid. App will run with mock data only.');
-  supabase = createClient('https://placeholder.supabase.co', 'placeholder-key', {
-    auth: {
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-} else {
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true,
-      storage: AsyncStorage as any,
-      autoRefreshToken: true,
-      storageKey: 'supabase.auth.token',
-    },
-  });
-}
-
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-let supabaseAdmin: ReturnType<typeof createClient>;
-
-if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
-    !supabaseServiceRoleKey || supabaseServiceRoleKey === 'undefined' || supabaseServiceRoleKey === 'null' || supabaseServiceRoleKey.length < 10) {
-  console.warn('[Supabase Admin] Service role key missing. Admin operations will be limited.');
-  supabaseAdmin = createClient('https://placeholder.supabase.co', 'placeholder-key', {
-    auth: {
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-} else {
-  supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-}
-
-export { supabase, supabaseAdmin };
 
 export interface Database {
   public: {
@@ -157,3 +110,50 @@ export interface Database {
     };
   };
 }
+
+let supabase: SupabaseClient<Database>;
+
+if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
+    !supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey === 'null' || supabaseAnonKey.length < 10) {
+  console.warn('[Supabase] Configuration missing or invalid. App will run with mock data only.');
+  supabase = createClient('https://placeholder.supabase.co', 'placeholder-key', {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+} else {
+  supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      detectSessionInUrl: true,
+      storage: AsyncStorage as any,
+      autoRefreshToken: true,
+      storageKey: 'supabase.auth.token',
+    },
+  });
+}
+
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+let supabaseAdmin: SupabaseClient<Database>;
+
+if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || supabaseUrl.length < 10 ||
+    !supabaseServiceRoleKey || supabaseServiceRoleKey === 'undefined' || supabaseServiceRoleKey === 'null' || supabaseServiceRoleKey.length < 10) {
+  console.warn('[Supabase Admin] Service role key missing. Admin operations will be limited.');
+  supabaseAdmin = createClient('https://placeholder.supabase.co', 'placeholder-key', {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+} else {
+  supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+}
+
+export { supabase, supabaseAdmin };

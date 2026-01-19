@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 import type { TradingHouse, CommodityType } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { trpcClient } from '@/lib/trpc';
 
 const CompanySchema = z.object({
@@ -376,14 +376,18 @@ For each company provide:
             console.log(`[AIMarketUpdater] Retry ${insertRetryCount}/${maxInsertRetries} for database insertion`);
           }
 
-          await Promise.race([
-            trpcClient.marketParticipants.insertBatch.mutate({
-              participants: companiesForDb as any,
-            }),
-            new Promise<never>((_, reject) => 
+          const { error: insertError } = await Promise.race([
+            supabaseAdmin
+              .from('market_participants')
+              .insert(companiesForDb as any),
+            new Promise<{ error: any }>((_, reject) => 
               setTimeout(() => reject(new Error('Database insertion timeout after 30s')), 30000)
             )
           ]);
+
+          if (insertError) {
+            throw new Error(`Supabase error: ${insertError.message || JSON.stringify(insertError)}`);
+          }
 
           if (insertRetryCount > 0) {
             console.log(`[AIMarketUpdater] Successfully saved to database after ${insertRetryCount} retries`);
