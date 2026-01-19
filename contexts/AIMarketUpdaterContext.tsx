@@ -60,6 +60,11 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
   useEffect(() => {
     const init = async () => {
       try {
+        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (!serviceRoleKey || serviceRoleKey === 'undefined' || serviceRoleKey.length < 10) {
+          setInitError('Supabase service role key not configured. Admin operations will not work.');
+          console.error('[AIMarketUpdater] Service role key missing or invalid');
+        }
         await loadSettings();
         await loadLogs();
       } catch (error) {
@@ -223,7 +228,7 @@ For each company provide:
               schema: MarketUpdateSchema,
             }),
             new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('Request timeout after 90s')), 90000)
+              setTimeout(() => reject(new Error('Request timeout after 120s')), 120000)
             )
           ]);
           if (retryCount > 0) {
@@ -366,6 +371,12 @@ For each company provide:
         trading_volume: p.tradingVolume || undefined,
       }));
 
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!serviceRoleKey || serviceRoleKey === 'undefined' || serviceRoleKey.length < 10) {
+        console.error(`[AIMarketUpdater] Cannot insert into database - service role key not configured`);
+        throw new Error('Database admin access not configured. Please set SUPABASE_SERVICE_ROLE_KEY environment variable.');
+      }
+
       let insertRetryCount = 0;
       const maxInsertRetries = 3;
       const insertErrors: string[] = [];
@@ -376,35 +387,51 @@ For each company provide:
             console.log(`[AIMarketUpdater] Retry ${insertRetryCount}/${maxInsertRetries} for database insertion`);
           }
 
-          const { error: insertError } = await Promise.race([
+          const { error: insertError, data: insertData } = await Promise.race([
             supabaseAdmin
               .from('market_participants')
-              .insert(companiesForDb as any),
-            new Promise<{ error: any }>((_, reject) => 
-              setTimeout(() => reject(new Error('Database insertion timeout after 30s')), 30000)
+              .insert(companiesForDb as any)
+              .select(),
+            new Promise<{ error: any, data: any }>((_, reject) => 
+              setTimeout(() => reject(new Error('Database insertion timeout after 60s')), 60000)
             )
           ]);
 
           if (insertError) {
+            console.error(`[AIMarketUpdater] Supabase insertion error details:`, {
+              code: insertError.code,
+              message: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint,
+            });
+            
+            if (insertError.code === '42501') {
+              throw new Error(`Database permission error: Row-level security policy violation. The service role key may not have proper permissions. Error: ${insertError.message}`);
+            }
+            
             throw new Error(`Supabase error: ${insertError.message || JSON.stringify(insertError)}`);
           }
 
           if (insertRetryCount > 0) {
             console.log(`[AIMarketUpdater] Successfully saved to database after ${insertRetryCount} retries`);
           }
+          console.log(`[AIMarketUpdater] Database insert successful, ${insertData?.length || 0} rows inserted`);
           break;
         } catch (insertError: any) {
           insertRetryCount++;
           const errorMsg = insertError?.message || (insertError instanceof Error ? insertError.message : 'Unknown error');
           insertErrors.push(errorMsg);
 
+          console.error(`[AIMarketUpdater] Insert attempt ${insertRetryCount} failed:`, errorMsg);
+
           if (insertRetryCount >= maxInsertRetries) {
-            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors.join(', '));
+            console.error(`[AIMarketUpdater] All ${maxInsertRetries} database insertion attempts failed:`, insertErrors);
             console.error(`[AIMarketUpdater] Failed data sample:`, JSON.stringify(companiesForDb[0], null, 2));
+            console.error(`[AIMarketUpdater] Service role key length:`, serviceRoleKey?.length || 0);
             throw new Error(`Failed to save companies to database after ${maxInsertRetries} attempts. Last error: ${errorMsg}`);
           }
 
-          const delayMs = Math.min(2000 * Math.pow(1.5, insertRetryCount), 10000);
+          const delayMs = Math.min(3000 * Math.pow(2, insertRetryCount - 1), 15000);
           console.log(`[AIMarketUpdater] Database error, waiting ${delayMs/1000}s before retry ${insertRetryCount + 1}/${maxInsertRetries}`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
         }
