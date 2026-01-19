@@ -2,9 +2,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View, ActivityIndicator } from "react-native";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
@@ -96,8 +95,6 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [isReady, setIsReady] = useState(false);
-
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -108,7 +105,6 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
-        setIsReady(true);
         SplashScreen.hideAsync();
       }
     };
@@ -125,13 +121,7 @@ export default function RootLayout() {
               <SubscriptionProvider>
                 <MarketProvider>
                   <AIMarketUpdaterProvider>
-                    {!isReady ? (
-                      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0E27' }}>
-                        <ActivityIndicator size="large" color="#3B82F6" />
-                      </View>
-                    ) : (
-                      <RootLayoutNav />
-                    )}
+                    <RootLayoutNav />
                   </AIMarketUpdaterProvider>
                 </MarketProvider>
               </SubscriptionProvider>
