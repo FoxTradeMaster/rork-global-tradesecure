@@ -66,6 +66,8 @@ export default function MarketDirectoryScreen() {
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
+
   const refreshParticipants = useCallback(async () => {
     const reloaded = await forceReloadParticipants();
     console.log('[Market] 🔄 Refreshed - Total persisted:', reloaded.length, 'Local imported:', importedParticipants.length);
@@ -75,6 +77,7 @@ export default function MarketDirectoryScreen() {
   useEffect(() => {
     const loadAllParticipants = async () => {
       console.log('[Market] 📂 Initial load - loading all persisted participants');
+      setIsLoadingData(true);
       
       try {
         const persisted = await forceReloadParticipants();
@@ -95,6 +98,9 @@ export default function MarketDirectoryScreen() {
       } catch (error) {
         console.error('[Market] ❌ Error loading local imported participants:', error);
       }
+
+      setIsLoadingData(false);
+      setRefreshKey(prev => prev + 1);
     };
     
     loadAllParticipants();
@@ -137,13 +143,16 @@ export default function MarketDirectoryScreen() {
   }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
 
   const stats = useMemo(() => {
+    if (isLoadingData) {
+      return { total: 0, tradingHouses: 0, brokers: 0, platforms: 0 };
+    }
     return {
       total: allParticipants.length,
       tradingHouses: allParticipants.filter(p => p.type === 'trading_house').length,
       brokers: allParticipants.filter(p => p.type === 'broker').length,
       platforms: allParticipants.filter(p => p.type === 'platform').length,
     };
-  }, [allParticipants]);
+  }, [allParticipants, isLoadingData]);
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -448,6 +457,12 @@ export default function MarketDirectoryScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {isLoadingData ? (
+            <View style={styles.loadingState}>
+              <Text style={styles.loadingText}>Loading companies...</Text>
+            </View>
+          ) : (
+            <>
           <Text style={styles.resultsCount}>
             {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
           </Text>
@@ -583,6 +598,8 @@ export default function MarketDirectoryScreen() {
           )}
 
           <View style={styles.bottomPadding} />
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
 
@@ -1303,6 +1320,15 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  loadingState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0284C7',
   },
   bottomPadding: {
     height: 20,
