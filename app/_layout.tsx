@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRootNavigationState } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
@@ -23,7 +23,6 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  const navigationState = useRootNavigationState();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -48,7 +47,7 @@ function RootLayoutNav() {
     });
   }, []);
 
-  if (!isReady || !navigationState?.key) {
+  if (!isReady) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0E27' }}>
         <ActivityIndicator size="large" color="#3B82F6" />
