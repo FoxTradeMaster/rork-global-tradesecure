@@ -17,17 +17,27 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function RootLayoutNav() {
+function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuthProvider>
       <TradingProvider>
         <SubscriptionProvider>
           <MarketProvider>
             <AIMarketUpdaterProvider>
-              <Stack screenOptions={{ headerBackTitle: "Back" }}>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              {children}
+            </AIMarketUpdaterProvider>
+          </MarketProvider>
+        </SubscriptionProvider>
+      </TradingProvider>
+    </AdminAuthProvider>
+  );
+}
 
+function RootLayoutNav() {
+  return (
+    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen 
         name="counterparty/[id]" 
         options={{ 
@@ -95,13 +105,8 @@ function RootLayoutNav() {
           title: "Terms of Service"
         }} 
       />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </AIMarketUpdaterProvider>
-          </MarketProvider>
-        </SubscriptionProvider>
-      </TradingProvider>
-    </AdminAuthProvider>
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 }
 
@@ -134,7 +139,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <RootLayoutNav />
+          <ProvidersWrapper>
+            <RootLayoutNav />
+          </ProvidersWrapper>
         </QueryClientProvider>
       </trpc.Provider>
     </GestureHandlerRootView>
