@@ -829,7 +829,12 @@ export const loadImportedParticipants = async () => {
         .select('*');
 
       if (supabaseError) {
-        console.error('[MarketParticipants] ❌ Error loading from Supabase:', supabaseError);
+        console.error('[MarketParticipants] ❌ Error loading from Supabase:', {
+          message: supabaseError.message,
+          details: supabaseError.details,
+          hint: supabaseError.hint,
+          code: supabaseError.code,
+        });
         supabaseParticipants = [];
       } else if (supabaseData && supabaseData.length > 0) {
         supabaseParticipants = supabaseData.map((row: any) => {
@@ -882,7 +887,10 @@ export const loadImportedParticipants = async () => {
         supabaseParticipants = [];
       }
     } catch (error) {
-      console.error('[MarketParticipants] ❌ CRITICAL: Error loading from Supabase:', error);
+      console.error('[MarketParticipants] ❌ CRITICAL: Error loading from Supabase:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       supabaseParticipants = [];
     } finally {
       isLoaded = true;
