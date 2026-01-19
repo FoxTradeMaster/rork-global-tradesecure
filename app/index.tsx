@@ -60,7 +60,10 @@ export default function WelcomeScreen() {
   useEffect(() => {
     if (!isLoading && currentUser) {
       console.log('[WelcomeScreen] User already exists, navigating to dashboard');
-      router.replace('/(tabs)/dashboard');
+      const timer = setTimeout(() => {
+        router.replace('/(tabs)/dashboard');
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, currentUser, router]);
 
