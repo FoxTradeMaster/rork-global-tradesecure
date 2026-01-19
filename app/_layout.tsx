@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRootNavigationState } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { MarketProvider } from "@/contexts/MarketContext";
@@ -21,7 +22,10 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function RootLayout() {
+function RootLayoutNav() {
+  const navigationState = useRootNavigationState();
+  const [isReady, setIsReady] = useState(false);
+
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -32,18 +36,27 @@ export default function RootLayout() {
       } catch (error) {
         console.error('[RootLayout] ❌ Error during initialization:', error);
       } finally {
+        setIsReady(true);
         SplashScreen.hideAsync();
       }
     };
 
     prepare().catch(err => {
       console.error('[RootLayout] Uncaught preparation error:', err);
+      setIsReady(true);
       SplashScreen.hideAsync();
     });
   }, []);
 
+  if (!isReady || !navigationState?.key) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0E27' }}>
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <AdminAuthProvider>
           <TradingProvider>
@@ -127,6 +140,15 @@ export default function RootLayout() {
             </SubscriptionProvider>
           </TradingProvider>
         </AdminAuthProvider>
+      </trpc.Provider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <RootLayoutNav />
       </trpc.Provider>
     </QueryClientProvider>
   );
