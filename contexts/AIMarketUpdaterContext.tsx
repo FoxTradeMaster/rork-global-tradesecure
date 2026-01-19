@@ -67,7 +67,9 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         setInitError(error instanceof Error ? error.message : 'Initialization failed');
       }
     };
-    init();
+    init().catch(err => {
+      console.error('[AIMarketUpdater] Uncaught init error:', err);
+    });
   }, []);
 
   const loadSettings = async () => {

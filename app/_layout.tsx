@@ -167,36 +167,29 @@ export default function RootLayout() {
       }
     };
 
-    prepare();
+    prepare().catch(err => {
+      console.error('[RootLayout] Uncaught preparation error:', err);
+      SplashScreen.hideAsync();
+    });
   }, []);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <ErrorBoundary>
-            <AdminAuthProvider>
-              <ErrorBoundary>
-                <TradingProvider>
+    <QueryClientProvider client={queryClient}>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <AdminAuthProvider>
+          <TradingProvider>
+            <SubscriptionProvider>
+              <MarketProvider>
+                <AIMarketUpdaterProvider>
                   <ErrorBoundary>
-                    <SubscriptionProvider>
-                      <ErrorBoundary>
-                        <MarketProvider>
-                          <ErrorBoundary>
-                            <AIMarketUpdaterProvider>
-                              <RootLayoutNav />
-                            </AIMarketUpdaterProvider>
-                          </ErrorBoundary>
-                        </MarketProvider>
-                      </ErrorBoundary>
-                    </SubscriptionProvider>
+                    <RootLayoutNav />
                   </ErrorBoundary>
-                </TradingProvider>
-              </ErrorBoundary>
-            </AdminAuthProvider>
-          </ErrorBoundary>
-        </trpc.Provider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+                </AIMarketUpdaterProvider>
+              </MarketProvider>
+            </SubscriptionProvider>
+          </TradingProvider>
+        </AdminAuthProvider>
+      </trpc.Provider>
+    </QueryClientProvider>
   );
 }
