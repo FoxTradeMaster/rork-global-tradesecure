@@ -305,8 +305,8 @@ export default function MarketDirectoryScreen() {
           </View>
           <Text style={styles.subtitle}>
             {selectedCompanies.length > 0 
-              ? `${selectedCompanies.length} selected • All data verified by BrandFetch`
-              : 'Real company data verified by BrandFetch API'
+              ? `${selectedCompanies.length} selected • All data verified`
+              : 'Real company data from proprietary sources'
             }
           </Text>
         </View>

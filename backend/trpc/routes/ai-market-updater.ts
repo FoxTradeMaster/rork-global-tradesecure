@@ -40,7 +40,7 @@ export const aiMarketUpdaterRouter = createTRPCRouter({
         return { 
           success: false, 
           added: 0, 
-          error: 'BrandFetch API not configured. This is the primary data source for real company data.' 
+          error: 'Data verification service not configured. Please contact support.' 
         };
       }
 
@@ -245,7 +245,7 @@ Only include major, established companies that would have a public brand presenc
             return { 
               success: false, 
               added: 0, 
-              error: `BrandFetch API experiencing issues: ${brandFetchErrors} failures out of ${companyNames.length} attempts. Please try again later.`
+              error: `Data verification service experiencing issues. Please try again later.`
             };
           }
         }
@@ -255,7 +255,7 @@ Only include major, established companies that would have a public brand presenc
 
       if (enrichedCompanies.length === 0) {
         const errorMsg = brandFetchErrors > 0 
-          ? `BrandFetch could not find valid data for any companies (${brandFetchErrors} errors out of ${companyNames.length} attempts)` 
+          ? `Unable to verify company data at this time. Please try again later.` 
           : 'No companies met quality standards';
         return { 
           success: false, 
@@ -327,7 +327,7 @@ Only include major, established companies that would have a public brand presenc
           success: true, 
           added: 0, 
           duplicates: enrichedCompanies.length,
-          error: `All ${enrichedCompanies.length} companies already exist (verified via BrandFetch)` 
+          error: `All ${enrichedCompanies.length} companies already exist (verified)` 
         };
       }
 

@@ -207,7 +207,7 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         }
         
         if (result.brandfetchSuccess !== undefined && result.totalAttempted !== undefined) {
-          logMessage += ` - BrandFetch: ${result.brandfetchSuccess}/${result.totalAttempted} successful`;
+          logMessage += ` - Data verification: ${result.brandfetchSuccess}/${result.totalAttempted} successful`;
         }
       } else if (result.duplicates) {
         logMessage = `All ${result.duplicates} companies already exist`;
