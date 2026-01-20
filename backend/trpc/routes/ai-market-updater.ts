@@ -289,8 +289,8 @@ Only include major, established companies that would have a public brand presenc
 
       const existingDomains = new Set(
         (existingParticipants || [])
-          .filter(p => p.domain)
-          .map(p => p.domain!.toLowerCase().trim())
+          .filter((p: { name: string; domain?: string }) => p.domain)
+          .map((p: { name: string; domain?: string }) => p.domain!.toLowerCase().trim())
       );
 
       const newCompanies = enrichedCompanies
@@ -380,7 +380,7 @@ Only include major, established companies that would have a public brand presenc
         verifiedCount,
         totalAttempted: companyNames.length,
         brandfetchSuccess: successfulLookups,
-        brandfetchErrors,
+        brandFetchErrors,
       };
     }),
 });
