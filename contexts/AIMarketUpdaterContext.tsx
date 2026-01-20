@@ -171,13 +171,19 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
       const commodityDescription = getCommodityDescription(commodity);
       
       console.log(`[AIMarketUpdater] Calling backend to generate and save ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
+      console.log(`[AIMarketUpdater] Backend URL: ${process.env.EXPO_PUBLIC_RORK_API_BASE_URL}`);
       
-      const result = await trpcClient.aiMarketUpdater.generateAndSaveCompanies.mutate({
-        commodity,
-        commodityLabel,
-        commodityDescription,
-        companiesPerUpdate: settings.companiesPerUpdate,
-      });
+      const result = await Promise.race([
+        trpcClient.aiMarketUpdater.generateAndSaveCompanies.mutate({
+          commodity,
+          commodityLabel,
+          commodityDescription,
+          companiesPerUpdate: settings.companiesPerUpdate,
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Frontend timeout after 180s')), 180000)
+        )
+      ]);
 
       if (!result.success) {
         console.log(`[AIMarketUpdater] Backend returned error: ${result.error}`);
@@ -224,21 +230,32 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`[AIMarketUpdater] Error updating ${commodityLabel}:`, errorMessage);
+      console.error(`[AIMarketUpdater] Full error:`, error);
       
       let userFriendlyError = errorMessage;
+      let technicalDetails = '';
+      
       if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed') || errorMessage.includes('Network error')) {
-        userFriendlyError = 'Network unstable - skipping this cycle';
-      } else if (errorMessage.includes('timeout')) {
-        userFriendlyError = 'Request timed out - skipping this cycle';
+        userFriendlyError = 'Network connection issue';
+        technicalDetails = 'Cannot reach backend API. Check internet connection.';
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('Frontend timeout')) {
+        userFriendlyError = 'Request timed out';
+        technicalDetails = 'Backend took too long to respond (>3 min)';
       } else if (errorMessage.includes('attempts failed')) {
-        userFriendlyError = 'Multiple connection failures - check network';
+        userFriendlyError = 'Multiple connection failures';
+        technicalDetails = 'Check network stability';
+      } else if (errorMessage.includes('Rork did not set')) {
+        userFriendlyError = 'Backend URL not configured';
+        technicalDetails = errorMessage;
       }
+      
+      const finalError = technicalDetails ? `${userFriendlyError} - ${technicalDetails}` : userFriendlyError;
       
       addLog({
         commodity: commodityLabel,
         companiesAdded: 0,
         success: false,
-        error: userFriendlyError,
+        error: finalError,
       });
       
       return 0;
