@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { publicProcedure, createTRPCRouter } from '../create-context';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
 import { generateObject } from '@rork-ai/toolkit-sdk';
-import type { Database } from '@/lib/supabase';
 
 const CompanySchema = z.object({
   name: z.string(),
@@ -29,20 +28,6 @@ export const aiMarketUpdaterRouter = createTRPCRouter({
     }))
     .mutation(async ({ input }) => {
       const { commodity, commodityLabel, commodityDescription, companiesPerUpdate } = input;
-
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-      if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Server configuration error: Database credentials not configured');
-      }
-
-      const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-        auth: {
-          persistSession: false,
-          detectSessionInUrl: false,
-        },
-      });
 
       console.log(`[AI Market Updater Backend] Generating companies for ${commodityLabel}`);
 
