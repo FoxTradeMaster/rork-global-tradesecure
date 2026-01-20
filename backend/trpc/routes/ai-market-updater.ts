@@ -91,30 +91,82 @@ Only include major, established companies that would have a public brand presenc
 
       const enrichedCompanies = [];
       let brandFetchErrors = 0;
+      let successfulLookups = 0;
+
+      const retryWithBackoff = async <T,>(fn: () => Promise<T>, maxRetries = 3): Promise<T> => {
+        for (let i = 0; i < maxRetries; i++) {
+          try {
+            return await fn();
+          } catch (error) {
+            if (i === maxRetries - 1) throw error;
+            const backoffMs = Math.min(1000 * Math.pow(2, i), 5000);
+            console.log(`[AI Market Updater Backend] Retry ${i + 1}/${maxRetries} after ${backoffMs}ms`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+          }
+        }
+        throw new Error('Max retries reached');
+      };
+
+      const calculateDataQuality = (data: any, hasLogo: boolean, hasDescription: boolean): number => {
+        let score = 0;
+        if (data.claimed) score += 40;
+        if (hasLogo) score += 20;
+        if (hasDescription && data.description?.length > 50) score += 20;
+        if (data.links && data.links.length > 2) score += 10;
+        if (data.colors && data.colors.length > 0) score += 10;
+        return score;
+      };
+
+      const findBestMatch = (results: any[], searchName: string): any | null => {
+        if (!results || results.length === 0) return null;
+        
+        const searchLower = searchName.toLowerCase();
+        const exactMatch = results.find(r => r.name?.toLowerCase() === searchLower);
+        if (exactMatch) return exactMatch;
+        
+        const closeMatch = results.find(r => 
+          r.name?.toLowerCase().includes(searchLower) || 
+          searchLower.includes(r.name?.toLowerCase())
+        );
+        if (closeMatch) return closeMatch;
+        
+        return results[0];
+      };
 
       for (const company of companyNames) {
         try {
           console.log(`[AI Market Updater Backend] Fetching BrandFetch data for: ${company.name}`);
           
-          const searchResults = await Promise.race([
-            brandFetchClient.searchByName(company.name),
-            new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('BrandFetch search timeout')), 15000)
-            )
-          ]);
+          const searchResults = await retryWithBackoff(() => 
+            Promise.race([
+              brandFetchClient.searchByName(company.name),
+              new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error('BrandFetch search timeout')), 15000)
+              )
+            ])
+          );
 
           if (!searchResults || searchResults.length === 0) {
             console.log(`[AI Market Updater Backend] No BrandFetch data found for: ${company.name}`);
             continue;
           }
 
-          const bestMatch = searchResults[0];
-          const fullData = await Promise.race([
-            brandFetchClient.searchByDomain(bestMatch.domain),
-            new Promise<null>((_, reject) => 
-              setTimeout(() => reject(new Error('BrandFetch domain lookup timeout')), 15000)
-            )
-          ]);
+          const bestMatch = findBestMatch(searchResults, company.name);
+          if (!bestMatch || !bestMatch.domain) {
+            console.log(`[AI Market Updater Backend] No valid match found for: ${company.name}`);
+            continue;
+          }
+
+          console.log(`[AI Market Updater Backend] Best match: ${bestMatch.name} (${bestMatch.domain})`);
+
+          const fullData = await retryWithBackoff(() => 
+            Promise.race([
+              brandFetchClient.searchByDomain(bestMatch.domain),
+              new Promise<null>((_, reject) => 
+                setTimeout(() => reject(new Error('BrandFetch domain lookup timeout')), 15000)
+              )
+            ])
+          );
 
           if (!fullData) {
             console.log(`[AI Market Updater Backend] No detailed data for: ${company.name}`);
@@ -130,7 +182,24 @@ Only include major, established companies that would have a public brand presenc
             link.url.startsWith('mailto:')
           )?.url.replace('mailto:', '') || null;
 
+          const phone = fullData.links?.find(link => 
+            link.name.toLowerCase() === 'phone' || 
+            link.url.startsWith('tel:')
+          )?.url.replace('tel:', '') || null;
+
+          const linkedin = fullData.links?.find(link => 
+            link.name.toLowerCase() === 'linkedin' || 
+            link.url.includes('linkedin.com')
+          )?.url || null;
+
           const website = `https://${bestMatch.domain}`;
+
+          const dataQualityScore = calculateDataQuality(fullData, !!logo, !!description);
+          
+          if (dataQualityScore < 30) {
+            console.log(`[AI Market Updater Backend] Low quality data (${dataQualityScore}/100) for ${fullData.name}, skipping`);
+            continue;
+          }
           
           enrichedCompanies.push({
             name: fullData.name,
@@ -140,31 +209,48 @@ Only include major, established companies that would have a public brand presenc
             logo,
             primaryColor,
             email,
+            phone,
+            linkedin,
             verified: fullData.claimed,
             companyType: company.type,
             region: company.region,
+            dataQualityScore,
+            brandFetchData: {
+              claimed: fullData.claimed,
+              hasLogo: !!logo,
+              hasColors: !!(fullData.colors && fullData.colors.length > 0),
+              linksCount: fullData.links?.length || 0,
+            },
           });
 
-          console.log(`[AI Market Updater Backend] ✓ Enriched ${fullData.name} with BrandFetch data`);
+          successfulLookups++;
+          console.log(`[AI Market Updater Backend] ✓ Enriched ${fullData.name} with BrandFetch data (Quality: ${dataQualityScore}/100, Verified: ${fullData.claimed})`);
           
           await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
           brandFetchErrors++;
           console.error(`[AI Market Updater Backend] BrandFetch error for ${company.name}:`, error);
-          if (brandFetchErrors > 3) {
-            console.error('[AI Market Updater Backend] Too many BrandFetch errors, stopping');
+          if (brandFetchErrors >= companyNames.length * 0.5) {
+            console.error('[AI Market Updater Backend] Too many BrandFetch errors (>50%), stopping');
             break;
           }
         }
       }
 
+      console.log(`[AI Market Updater Backend] BrandFetch lookup complete: ${successfulLookups} successful, ${brandFetchErrors} errors`);
+
       if (enrichedCompanies.length === 0) {
+        const errorMsg = brandFetchErrors > 0 
+          ? `BrandFetch could not find valid data for any companies (${brandFetchErrors} errors out of ${companyNames.length} attempts)` 
+          : 'No companies met quality standards';
         return { 
           success: false, 
           added: 0, 
-          error: `BrandFetch could not find data for any companies (${brandFetchErrors} errors)` 
+          error: errorMsg
         };
       }
+
+      console.log(`[AI Market Updater Backend] Successfully enriched ${enrichedCompanies.length} companies with average quality score: ${Math.round(enrichedCompanies.reduce((sum, c) => sum + c.dataQualityScore, 0) / enrichedCompanies.length)}`);
 
       let existingParticipants;
       try {
@@ -195,6 +281,7 @@ Only include major, established companies that would have a public brand presenc
 
       const newCompanies = enrichedCompanies
         .filter(company => !existingDomains.has(company.domain.toLowerCase().trim()))
+        .sort((a, b) => b.dataQualityScore - a.dataQualityScore)
         .map((company, index) => ({
           id: `brandfetch_${commodity}_${Date.now()}_${index}`,
           name: company.name,
@@ -207,22 +294,30 @@ Only include major, established companies that would have a public brand presenc
           logo: company.logo,
           primary_color: company.primaryColor,
           email: company.email,
+          phone: company.phone,
+          linkedin: company.linkedin,
           commodities: [commodity],
           category: ['diversified'],
           offices: [company.region],
           licenses: [`${company.region}: ${company.companyType}`],
           specialization: commodityDescription,
           business_type: 'both' as const,
+          data_quality_score: company.dataQualityScore,
+          brandfetch_claimed: company.brandFetchData.claimed,
+          last_verified: new Date().toISOString(),
         }));
 
       if (newCompanies.length === 0) {
+        console.log(`[AI Market Updater Backend] All ${enrichedCompanies.length} BrandFetch companies already exist in database`);
         return { 
           success: true, 
           added: 0, 
           duplicates: enrichedCompanies.length,
-          error: 'All BrandFetch companies already exist in database' 
+          error: `All ${enrichedCompanies.length} companies already exist (verified via BrandFetch)` 
         };
       }
+
+      console.log(`[AI Market Updater Backend] Preparing to insert ${newCompanies.length} new companies (${enrichedCompanies.length - newCompanies.length} duplicates filtered)`);
 
       let insertError, insertData;
       try {
@@ -255,10 +350,23 @@ Only include major, established companies that would have a public brand presenc
         };
       }
 
+      const addedCount = insertData?.length || 0;
+      const avgQuality = addedCount > 0 
+        ? Math.round(newCompanies.slice(0, addedCount).reduce((sum, c) => sum + (c.data_quality_score || 0), 0) / addedCount)
+        : 0;
+      const verifiedCount = newCompanies.slice(0, addedCount).filter(c => c.brandfetch_claimed).length;
+
+      console.log(`[AI Market Updater Backend] ✅ Successfully inserted ${addedCount} companies (Avg Quality: ${avgQuality}/100, Verified: ${verifiedCount}/${addedCount})`);
+
       return { 
         success: true, 
-        added: insertData?.length || 0,
-        duplicates: generationResult.companies.length - newCompanies.length,
+        added: addedCount,
+        duplicates: enrichedCompanies.length - newCompanies.length,
+        qualityScore: avgQuality,
+        verifiedCount,
+        totalAttempted: companyNames.length,
+        brandfetchSuccess: successfulLookups,
+        brandfetchErrors,
       };
     }),
 });

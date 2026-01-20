@@ -15,6 +15,11 @@ interface UpdateLog {
   error?: string;
   isSummary?: boolean;
   details?: { name: string; count: number }[];
+  qualityScore?: number;
+  verifiedCount?: number;
+  totalAttempted?: number;
+  brandfetchSuccess?: number;
+  brandfetchErrors?: number;
 }
 
 interface UpdaterSettings {
@@ -185,18 +190,36 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         return 0;
       }
 
-      const logMessage = result.duplicates && result.duplicates > 0
-        ? `Added ${result.added}, skipped ${result.duplicates} duplicates`
-        : undefined;
+      let logMessage = '';
+      if (result.added > 0) {
+        const qualityInfo = result.qualityScore ? ` (Quality: ${result.qualityScore}/100)` : '';
+        const verifiedInfo = result.verifiedCount !== undefined ? ` (Verified: ${result.verifiedCount}/${result.added})` : '';
+        logMessage = `${qualityInfo}${verifiedInfo}`;
+        
+        if (result.duplicates && result.duplicates > 0) {
+          logMessage += ` - ${result.duplicates} duplicates filtered`;
+        }
+        
+        if (result.brandfetchSuccess !== undefined && result.totalAttempted !== undefined) {
+          logMessage += ` - BrandFetch: ${result.brandfetchSuccess}/${result.totalAttempted} successful`;
+        }
+      } else if (result.duplicates) {
+        logMessage = `All ${result.duplicates} companies already exist`;
+      }
 
       addLog({
         commodity: commodityLabel,
         companiesAdded: result.added,
         success: true,
-        error: logMessage,
+        error: logMessage || undefined,
+        qualityScore: result.qualityScore,
+        verifiedCount: result.verifiedCount,
+        totalAttempted: result.totalAttempted,
+        brandfetchSuccess: result.brandfetchSuccess,
+        brandfetchErrors: result.brandfetchErrors,
       });
 
-      console.log(`[AIMarketUpdater] ✅ Successfully added ${result.added} companies for ${commodityLabel}${result.duplicates ? ` (${result.duplicates} duplicates filtered)` : ''}`);
+      console.log(`[AIMarketUpdater] ✅ Successfully added ${result.added} companies for ${commodityLabel}${logMessage ? ` ${logMessage}` : ''}`);
       return result.added;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
