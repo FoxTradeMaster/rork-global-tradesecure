@@ -63,31 +63,41 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   const customerInfoQuery = useQuery({
     queryKey: ['customerInfo'],
     queryFn: async () => {
+      if (Platform.OS === 'web') {
+        console.log('[RevenueCat] Skipping on web');
+        return null;
+      }
       try {
         const info = await Purchases.getCustomerInfo();
         console.log('[RevenueCat] Customer info loaded');
         return info;
       } catch (error) {
         console.error('[RevenueCat] Error loading customer info:', error);
-        throw error;
+        return null;
       }
     },
     staleTime: 60000,
+    retry: false,
   });
 
   const offeringsQuery = useQuery({
     queryKey: ['offerings'],
     queryFn: async () => {
+      if (Platform.OS === 'web') {
+        console.log('[RevenueCat] Skipping on web');
+        return null;
+      }
       try {
         const offerings = await Purchases.getOfferings();
         console.log('[RevenueCat] Offerings loaded:', offerings);
         return offerings;
       } catch (error) {
         console.error('[RevenueCat] Error loading offerings:', error);
-        throw error;
+        return null;
       }
     },
     staleTime: 300000,
+    retry: false,
   });
 
   const getSubscriptionStatus = (): SubscriptionStatus => {
@@ -185,6 +195,8 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     }
   };
 
+  const subscriptionStatus = getSubscriptionStatus();
+
   const checkFeatureAccess = (feature: keyof SubscriptionFeatures): boolean => {
     return subscriptionStatus.features[feature] === true;
   };
@@ -193,8 +205,6 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     const value = subscriptionStatus.features[feature];
     return typeof value === 'number' ? value : null;
   };
-
-  const subscriptionStatus = getSubscriptionStatus();
 
   return {
     subscriptionStatus,
