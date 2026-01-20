@@ -93,14 +93,17 @@ Only include major, established companies that would have a public brand presenc
       let brandFetchErrors = 0;
       let successfulLookups = 0;
 
-      const retryWithBackoff = async <T,>(fn: () => Promise<T>, maxRetries = 3): Promise<T> => {
+      const retryWithBackoff = async <T,>(fn: () => Promise<T>, maxRetries = 5): Promise<T> => {
         for (let i = 0; i < maxRetries; i++) {
           try {
             return await fn();
           } catch (error) {
-            if (i === maxRetries - 1) throw error;
-            const backoffMs = Math.min(1000 * Math.pow(2, i), 5000);
-            console.log(`[AI Market Updater Backend] Retry ${i + 1}/${maxRetries} after ${backoffMs}ms`);
+            if (i === maxRetries - 1) {
+              console.error(`[AI Market Updater Backend] All ${maxRetries} retries failed:`, error);
+              throw error;
+            }
+            const backoffMs = Math.min(1000 * Math.pow(2, i), 10000);
+            console.log(`[AI Market Updater Backend] Retry ${i + 1}/${maxRetries} after ${backoffMs}ms - Error: ${error instanceof Error ? error.message : 'Unknown'}`);
             await new Promise(resolve => setTimeout(resolve, backoffMs));
           }
         }
@@ -141,7 +144,7 @@ Only include major, established companies that would have a public brand presenc
             Promise.race([
               brandFetchClient.searchByName(company.name),
               new Promise<never>((_, reject) => 
-                setTimeout(() => reject(new Error('BrandFetch search timeout')), 15000)
+                setTimeout(() => reject(new Error('BrandFetch search timeout')), 30000)
               )
             ])
           );
@@ -163,7 +166,7 @@ Only include major, established companies that would have a public brand presenc
             Promise.race([
               brandFetchClient.searchByDomain(bestMatch.domain),
               new Promise<null>((_, reject) => 
-                setTimeout(() => reject(new Error('BrandFetch domain lookup timeout')), 15000)
+                setTimeout(() => reject(new Error('BrandFetch domain lookup timeout')), 30000)
               )
             ])
           );
@@ -226,13 +229,24 @@ Only include major, established companies that would have a public brand presenc
           successfulLookups++;
           console.log(`[AI Market Updater Backend] ✓ Enriched ${fullData.name} with BrandFetch data (Quality: ${dataQualityScore}/100, Verified: ${fullData.claimed})`);
           
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (error) {
           brandFetchErrors++;
-          console.error(`[AI Market Updater Backend] BrandFetch error for ${company.name}:`, error);
-          if (brandFetchErrors >= companyNames.length * 0.5) {
-            console.error('[AI Market Updater Backend] Too many BrandFetch errors (>50%), stopping');
-            break;
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`[AI Market Updater Backend] BrandFetch error for ${company.name}: ${errorMsg}`);
+          
+          if (errorMsg.includes('timeout')) {
+            console.log('[AI Market Updater Backend] Timeout detected, waiting 5s before next attempt');
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          
+          if (brandFetchErrors >= companyNames.length * 0.7) {
+            console.error('[AI Market Updater Backend] Too many BrandFetch errors (>70%), stopping');
+            return { 
+              success: false, 
+              added: 0, 
+              error: `BrandFetch API experiencing issues: ${brandFetchErrors} failures out of ${companyNames.length} attempts. Please try again later.`
+            };
           }
         }
       }
