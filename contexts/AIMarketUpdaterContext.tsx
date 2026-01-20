@@ -216,7 +216,7 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         verifiedCount: result.verifiedCount,
         totalAttempted: result.totalAttempted,
         brandfetchSuccess: result.brandfetchSuccess,
-        brandfetchErrors: result.brandfetchErrors,
+        brandfetchErrors: result.brandFetchErrors,
       });
 
       console.log(`[AIMarketUpdater] ✅ Successfully added ${result.added} companies for ${commodityLabel}${logMessage ? ` ${logMessage}` : ''}`);
