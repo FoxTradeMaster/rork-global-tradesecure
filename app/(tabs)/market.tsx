@@ -305,8 +305,8 @@ export default function MarketDirectoryScreen() {
           </View>
           <Text style={styles.subtitle}>
             {selectedCompanies.length > 0 
-              ? `${selectedCompanies.length} selected • Long press more to select`
-              : 'Long press companies to select for email outreach'
+              ? `${selectedCompanies.length} selected • All data verified by BrandFetch`
+              : 'Real company data verified by BrandFetch API'
             }
           </Text>
         </View>
@@ -520,11 +520,9 @@ export default function MarketDirectoryScreen() {
                 </View>
               </View>
 
-              {verification && (
-                <View style={styles.verificationContainer}>
-                  <PremiumBadge verification={verification} compact />
-                </View>
-              )}
+              <View style={styles.verificationContainer}>
+                <PremiumBadge verification={verification} participant={participant} compact />
+              </View>
 
               {avgRating > 0 && (
                 <TouchableOpacity 

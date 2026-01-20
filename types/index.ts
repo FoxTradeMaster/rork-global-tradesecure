@@ -144,6 +144,13 @@ export interface TradingHouse {
   brandColor?: string | null;
   email?: string | null;
   contactLinks?: { name: string; url: string }[];
+  domain?: string;
+  data_quality_score?: number;
+  brandfetch_claimed?: boolean;
+  last_verified?: string;
+  phone?: string | null;
+  linkedin?: string | null;
+  primary_color?: string | null;
 }
 
 export interface Broker {
@@ -159,6 +166,15 @@ export interface Broker {
   clearingRelationships: string[];
   website?: string;
   licenseNumbers: { authority: string; number: string }[];
+  domain?: string;
+  data_quality_score?: number;
+  brandfetch_claimed?: boolean;
+  last_verified?: string;
+  logo?: string | null;
+  primary_color?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  linkedin?: string | null;
 }
 
 export interface MarketPlatform {
@@ -173,6 +189,15 @@ export interface MarketPlatform {
   members?: string[];
   website?: string;
   framework: string;
+  domain?: string;
+  data_quality_score?: number;
+  brandfetch_claimed?: boolean;
+  last_verified?: string;
+  logo?: string | null;
+  primary_color?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  linkedin?: string | null;
 }
 
 export type MarketParticipant = TradingHouse | Broker | MarketPlatform;
