@@ -21,7 +21,18 @@ app.use(
 );
 
 app.get("/", (c) => {
-  return c.json({ status: "ok", message: "API is running" });
+  return c.json({ status: "ok", message: "API is running", timestamp: new Date().toISOString() });
+});
+
+app.get("/health", (c) => {
+  return c.json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    services: {
+      brandfetch: !!process.env.BRANDFETCH_API_KEY,
+      supabase: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    }
+  });
 });
 
 app.get("/user-manual.pdf", async (c) => {

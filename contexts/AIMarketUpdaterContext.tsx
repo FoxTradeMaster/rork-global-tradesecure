@@ -181,7 +181,7 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
           companiesPerUpdate: settings.companiesPerUpdate,
         }),
         new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Frontend timeout after 180s')), 180000)
+          setTimeout(() => reject(new Error('Frontend timeout after 240s - backend still processing')), 240000)
         )
       ]);
 
@@ -235,18 +235,21 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
       let userFriendlyError = errorMessage;
       let technicalDetails = '';
       
-      if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed') || errorMessage.includes('Network error')) {
-        userFriendlyError = 'Network connection issue';
-        technicalDetails = 'Cannot reach backend API. Check internet connection.';
+      if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed') || errorMessage.includes('Network error') || errorMessage.includes('unreachable')) {
+        userFriendlyError = 'Backend server not responding';
+        technicalDetails = 'The backend server may not be running. Please contact support.';
       } else if (errorMessage.includes('timeout') || errorMessage.includes('Frontend timeout')) {
-        userFriendlyError = 'Request timed out';
-        technicalDetails = 'Backend took too long to respond (>3 min)';
+        userFriendlyError = 'Operation timed out';
+        technicalDetails = 'The operation took too long. Try reducing companies per update or check network stability.';
       } else if (errorMessage.includes('attempts failed')) {
         userFriendlyError = 'Multiple connection failures';
         technicalDetails = 'Check network stability';
       } else if (errorMessage.includes('Rork did not set')) {
         userFriendlyError = 'Backend URL not configured';
         technicalDetails = errorMessage;
+      } else if (errorMessage.includes('AbortError')) {
+        userFriendlyError = 'Request cancelled';
+        technicalDetails = 'Backend processing exceeded time limit';
       }
       
       const finalError = technicalDetails ? `${userFriendlyError} - ${technicalDetails}` : userFriendlyError;
