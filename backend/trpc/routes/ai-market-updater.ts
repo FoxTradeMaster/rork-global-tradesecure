@@ -59,24 +59,55 @@ For each company provide:
 - Jurisdiction/country code
 - Website if known`;
 
-      const generationResult = await generateObject({
-        messages: [
-          {
-            role: 'user',
-            content: generationPrompt,
-          },
-        ],
-        schema: MarketUpdateSchema,
-      });
+      let generationResult;
+      try {
+        generationResult = await Promise.race([
+          generateObject({
+            messages: [
+              {
+                role: 'user',
+                content: generationPrompt,
+              },
+            ],
+            schema: MarketUpdateSchema,
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('AI generation timeout after 90s')), 90000)
+          )
+        ]) as any;
+      } catch (error) {
+        console.error('[AI Market Updater Backend] Generation error:', error);
+        return { 
+          success: false, 
+          added: 0, 
+          error: error instanceof Error ? error.message : 'AI generation failed'
+        };
+      }
 
       if (!generationResult.companies || generationResult.companies.length === 0) {
         return { success: false, added: 0, error: 'No companies generated' };
       }
 
-      const { data: existingParticipants } = await supabaseAdmin
-        .from('market_participants')
-        .select('name')
-        .returns<{ name: string }[]>();
+      let existingParticipants;
+      try {
+        const result = await Promise.race([
+          supabaseAdmin
+            .from('market_participants')
+            .select('name')
+            .returns<{ name: string }[]>(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Database query timeout')), 10000)
+          )
+        ]) as any;
+        existingParticipants = result.data;
+      } catch (error) {
+        console.error('[AI Market Updater Backend] Failed to fetch existing participants:', error);
+        return { 
+          success: false, 
+          added: 0, 
+          error: 'Failed to check existing companies'
+        };
+      }
 
       const existingNames = new Set(
         (existingParticipants || []).map(p => p.name.toLowerCase().trim())
@@ -109,10 +140,27 @@ For each company provide:
         };
       }
 
-      const { error: insertError, data: insertData } = await supabaseAdmin
-        .from('market_participants')
-        .insert(newCompanies as any)
-        .select();
+      let insertError, insertData;
+      try {
+        const result = await Promise.race([
+          supabaseAdmin
+            .from('market_participants')
+            .insert(newCompanies as any)
+            .select(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Database insert timeout')), 15000)
+          )
+        ]) as any;
+        insertError = result.error;
+        insertData = result.data;
+      } catch (error) {
+        console.error('[AI Market Updater Backend] Insert timeout or error:', error);
+        return { 
+          success: false, 
+          added: 0, 
+          error: error instanceof Error ? error.message : 'Database insert failed'
+        };
+      }
 
       if (insertError) {
         console.error('[AI Market Updater Backend] Insert error:', insertError);
