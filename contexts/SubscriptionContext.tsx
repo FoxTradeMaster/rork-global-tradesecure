@@ -1,4 +1,4 @@
-import createContextHook from '@nkzw/create-context-hook';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Purchases, { PurchasesPackage } from 'react-native-purchases';
@@ -57,7 +57,24 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
 
 const ENTITLEMENT_ID = 'Fox Trade Master™ Global Trading App Pro';
 
-export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
+interface SubscriptionContextValue {
+  subscriptionStatus: SubscriptionStatus;
+  isLoading: boolean;
+  isPremium: boolean;
+  offerings: any;
+  purchasePackage: (rcPackage: PurchasesPackage) => Promise<any>;
+  isPurchasing: boolean;
+  restorePurchases: () => Promise<any>;
+  isRestoring: boolean;
+  manageSubscription: () => Promise<void>;
+  checkFeatureAccess: (feature: keyof SubscriptionFeatures) => boolean;
+  getFeatureLimit: (feature: keyof SubscriptionFeatures) => number | null;
+  customerInfo: any;
+}
+
+const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(undefined);
+
+export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { isDemoMode } = useTrading();
 
   const customerInfoQuery = useQuery({
@@ -175,8 +192,6 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     },
   });
 
-
-
   const manageSubscription = async () => {
     try {
       console.log('[RevenueCat] Opening subscription management');
@@ -206,7 +221,7 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     return typeof value === 'number' ? value : null;
   };
 
-  return {
+  const value: SubscriptionContextValue = {
     subscriptionStatus,
     isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
     isPremium: subscriptionStatus.tier === 'premium' || isDemoMode,
@@ -220,4 +235,18 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     getFeatureLimit,
     customerInfo: customerInfoQuery.data,
   };
-});
+
+  return (
+    <SubscriptionContext.Provider value={value}>
+      {children}
+    </SubscriptionContext.Provider>
+  );
+}
+
+export function useSubscription(): SubscriptionContextValue {
+  const context = useContext(SubscriptionContext);
+  if (!context) {
+    throw new Error('useSubscription must be used within SubscriptionProvider');
+  }
+  return context;
+}
