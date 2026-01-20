@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "expo/fetch": "./backend/polyfills/expo-fetch.ts"
+  }
+}
