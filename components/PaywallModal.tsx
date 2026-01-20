@@ -3,7 +3,7 @@ import { BlurView } from 'expo-blur';
 import { Check, X, Crown, Zap, Shield, TrendingUp, FileText, Database } from 'lucide-react-native';
 import { useState } from 'react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import { openPayPalCheckout } from '@/lib/paypal';
+import { PurchasesPackage } from 'react-native-purchases';
 
 interface PaywallModalProps {
   visible: boolean;
@@ -21,28 +21,44 @@ const PREMIUM_FEATURES = [
 ];
 
 export default function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
-  const { plans, purchaseSubscription, isLoading } = useSubscription();
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>('P-3W87840565478320LNFLCXEA');
+  const { offerings, purchasePackage, isPurchasing, isLoading, restorePurchases, isRestoring } = useSubscription();
+  const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
 
-  const monthlyPlan = plans.find(p => p.interval === 'MONTH');
-  const yearlyPlan = plans.find(p => p.interval === 'YEAR');
+  const currentOffering = offerings?.current;
+  const monthlyPackage = currentOffering?.availablePackages.find(p => p.identifier === '$rc_monthly');
+  const yearlyPackage = currentOffering?.availablePackages.find(p => p.identifier === '$rc_annual');
+  const lifetimePackage = currentOffering?.availablePackages.find(p => p.identifier === '$rc_lifetime');
 
-  const handlePurchase = async (planId: string) => {
-    setIsPurchasing(true);
+  const handlePurchase = async () => {
+    if (!selectedPackage) {
+      Alert.alert('Select Plan', 'Please select a subscription plan');
+      return;
+    }
+
     try {
-      const { approvalUrl } = await purchaseSubscription(planId);
-      openPayPalCheckout(approvalUrl);
-      
+      await purchasePackage(selectedPackage);
       Alert.alert(
-        'Complete Payment',
-        'You will be redirected to PayPal to complete your subscription. After payment, your premium features will be activated.',
+        'Success!',
+        'Your premium subscription is now active. Enjoy all features!',
         [{ text: 'OK', onPress: onClose }]
       );
     } catch (error: any) {
-      Alert.alert('Purchase Failed', error.message || 'Please try again');
-    } finally {
-      setIsPurchasing(false);
+      if (error.message !== 'Purchase cancelled') {
+        Alert.alert('Purchase Failed', error.message || 'Please try again');
+      }
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await restorePurchases();
+      Alert.alert(
+        'Restore Complete',
+        'Your purchases have been restored.',
+        [{ text: 'OK', onPress: onClose }]
+      );
+    } catch (error: any) {
+      Alert.alert('Restore Failed', error.message || 'No purchases to restore');
     }
   };
 
@@ -100,39 +116,59 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
               </View>
             ) : (
               <View style={styles.packagesContainer}>
-                {yearlyPlan && (
+                {yearlyPackage && (
                   <TouchableOpacity
                     style={[
                       styles.packageCard,
-                      selectedPlan === yearlyPlan.id && styles.packageCardSelected
+                      selectedPackage?.identifier === yearlyPackage.identifier && styles.packageCardSelected
                     ]}
-                    onPress={() => setSelectedPlan(yearlyPlan.id)}
+                    onPress={() => setSelectedPackage(yearlyPackage)}
                     activeOpacity={0.7}
                   >
                     <View style={styles.bestValueBadge}>
                       <Text style={styles.bestValueText}>BEST VALUE</Text>
                     </View>
                     <Text style={styles.packageTitle}>Yearly</Text>
-                    <Text style={styles.packagePrice}>${yearlyPlan.price}</Text>
+                    <Text style={styles.packagePrice}>{yearlyPackage.product.priceString}</Text>
                     <Text style={styles.packagePeriod}>per year</Text>
-                    {monthlyPlan && (
-                      <Text style={styles.packageSave}>Save ${(parseFloat(monthlyPlan.price) * 12 - parseFloat(yearlyPlan.price)).toFixed(0)}/year</Text>
+                    {monthlyPackage && yearlyPackage.product.price < monthlyPackage.product.price * 12 && (
+                      <Text style={styles.packageSave}>
+                        Save {monthlyPackage.product.currencyCode} {(monthlyPackage.product.price * 12 - yearlyPackage.product.price).toFixed(0)}/year
+                      </Text>
                     )}
                   </TouchableOpacity>
                 )}
                 
-                {monthlyPlan && (
+                {monthlyPackage && (
                   <TouchableOpacity
                     style={[
                       styles.packageCard,
-                      selectedPlan === monthlyPlan.id && styles.packageCardSelected
+                      selectedPackage?.identifier === monthlyPackage.identifier && styles.packageCardSelected
                     ]}
-                    onPress={() => setSelectedPlan(monthlyPlan.id)}
+                    onPress={() => setSelectedPackage(monthlyPackage)}
                     activeOpacity={0.7}
                   >
                     <Text style={styles.packageTitle}>Monthly</Text>
-                    <Text style={styles.packagePrice}>${monthlyPlan.price}</Text>
+                    <Text style={styles.packagePrice}>{monthlyPackage.product.priceString}</Text>
                     <Text style={styles.packagePeriod}>per month</Text>
+                  </TouchableOpacity>
+                )}
+
+                {lifetimePackage && (
+                  <TouchableOpacity
+                    style={[
+                      styles.packageCard,
+                      selectedPackage?.identifier === lifetimePackage.identifier && styles.packageCardSelected
+                    ]}
+                    onPress={() => setSelectedPackage(lifetimePackage)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.bestValueBadge}>
+                      <Text style={styles.bestValueText}>LIFETIME</Text>
+                    </View>
+                    <Text style={styles.packageTitle}>Lifetime Access</Text>
+                    <Text style={styles.packagePrice}>{lifetimePackage.product.priceString}</Text>
+                    <Text style={styles.packagePeriod}>one-time payment</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -157,9 +193,9 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
             </View>
 
             <TouchableOpacity
-              style={[styles.upgradeButton, (isPurchasing || isLoading) && styles.upgradeButtonDisabled]}
-              onPress={() => handlePurchase(selectedPlan)}
-              disabled={isPurchasing || isLoading}
+              style={[styles.upgradeButton, (isPurchasing || isLoading || !selectedPackage) && styles.upgradeButtonDisabled]}
+              onPress={handlePurchase}
+              disabled={isPurchasing || isLoading || !selectedPackage}
               activeOpacity={0.8}
             >
               {isPurchasing ? (
@@ -167,8 +203,21 @@ export default function PaywallModal({ visible, onClose, feature }: PaywallModal
               ) : (
                 <>
                   <Crown size={20} color="#FFFFFF" fill="#FFFFFF" />
-                  <Text style={styles.upgradeButtonText}>Continue to PayPal</Text>
+                  <Text style={styles.upgradeButtonText}>Subscribe Now</Text>
                 </>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={handleRestore}
+              disabled={isRestoring}
+              activeOpacity={0.8}
+            >
+              {isRestoring ? (
+                <ActivityIndicator color="#3B82F6" size="small" />
+              ) : (
+                <Text style={styles.restoreButtonText}>Restore Purchases</Text>
               )}
             </TouchableOpacity>
 
@@ -441,5 +490,15 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     marginTop: 8,
+  },
+  restoreButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  restoreButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
 });

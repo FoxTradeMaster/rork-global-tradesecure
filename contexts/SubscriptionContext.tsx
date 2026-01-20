@@ -1,8 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SUBSCRIPTION_PLANS, PayPalSubscriptionPlan, createPayPalSubscription, getPayPalSubscription, cancelPayPalSubscription } from '@/lib/paypal';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import Purchases, { PurchasesPackage } from 'react-native-purchases';
 import { useTrading } from './TradingContext';
 
 export type SubscriptionTier = 'free' | 'premium';
@@ -26,7 +25,6 @@ export interface SubscriptionStatus {
   features: SubscriptionFeatures;
   expiresAt: Date | null;
   isActive: boolean;
-  paypalSubscriptionId?: string;
 }
 
 const FREE_FEATURES: SubscriptionFeatures = {
@@ -57,180 +55,133 @@ const PREMIUM_FEATURES: SubscriptionFeatures = {
   platformFee: 99,
 };
 
-const STORAGE_KEY = 'subscription_status';
+const ENTITLEMENT_ID = 'Fox Trade Master™ Global Trading App Pro';
 
 export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
   const { isDemoMode } = useTrading();
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
-    tier: 'free',
-    features: FREE_FEATURES,
-    expiresAt: null,
-    isActive: true,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [plans] = useState<PayPalSubscriptionPlan[]>(SUBSCRIPTION_PLANS);
 
-  useEffect(() => {
-    const init = async () => {
+  const customerInfoQuery = useQuery({
+    queryKey: ['customerInfo'],
+    queryFn: async () => {
       try {
-        console.log('[Subscription] Loading subscription status...');
-        
-        if (isDemoMode) {
-          console.log('[Subscription] Demo mode detected, granting premium features');
-          setSubscriptionStatus({
-            tier: 'premium',
-            features: PREMIUM_FEATURES,
-            expiresAt: null,
-            isActive: true,
-          });
-          setIsLoading(false);
-          return;
-        }
-        
-        const storagePromise = AsyncStorage.getItem(STORAGE_KEY);
-        const timeoutPromise = new Promise<null>((resolve) => 
-          setTimeout(() => resolve(null), 3000)
-        );
-        
-        const stored = await Promise.race([storagePromise, timeoutPromise]);
-        
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const status: SubscriptionStatus = {
-            ...parsed,
-            expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : null,
-          };
-          
-          if (status.paypalSubscriptionId) {
-            try {
-              const paypalCheckPromise = getPayPalSubscription(status.paypalSubscriptionId);
-              const paypalTimeout = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('PayPal check timeout')), 3000)
-              );
-              
-              const paypalSub = await Promise.race([paypalCheckPromise, paypalTimeout]) as any;
-              
-              if (paypalSub.status === 'ACTIVE') {
-                setSubscriptionStatus(status);
-                console.log('[Subscription] Active PayPal subscription loaded');
-              } else {
-                console.log('[Subscription] PayPal subscription not active:', paypalSub.status);
-                await AsyncStorage.removeItem(STORAGE_KEY);
-              }
-            } catch (error) {
-              console.error('[Subscription] Error checking PayPal subscription:', error);
-              await AsyncStorage.removeItem(STORAGE_KEY);
-            }
-          } else {
-            setSubscriptionStatus(status);
-          }
-        }
+        const info = await Purchases.getCustomerInfo();
+        console.log('[RevenueCat] Customer info loaded');
+        return info;
       } catch (error) {
-        console.error('[Subscription] Error loading subscription:', error);
-      } finally {
-        setIsLoading(false);
-        console.log('[Subscription] Initialization complete');
+        console.error('[RevenueCat] Error loading customer info:', error);
+        throw error;
       }
-    };
-    init();
-  }, [isDemoMode]);
+    },
+    staleTime: 60000,
+  });
 
-  const saveSubscriptionStatus = async (status: SubscriptionStatus) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(status));
-      setSubscriptionStatus(status);
-      console.log('[Subscription] Status saved:', status.tier);
-    } catch (error) {
-      console.error('[Subscription] Error saving status:', error);
+  const offeringsQuery = useQuery({
+    queryKey: ['offerings'],
+    queryFn: async () => {
+      try {
+        const offerings = await Purchases.getOfferings();
+        console.log('[RevenueCat] Offerings loaded:', offerings);
+        return offerings;
+      } catch (error) {
+        console.error('[RevenueCat] Error loading offerings:', error);
+        throw error;
+      }
+    },
+    staleTime: 300000,
+  });
+
+  const getSubscriptionStatus = (): SubscriptionStatus => {
+    if (isDemoMode) {
+      return {
+        tier: 'premium',
+        features: PREMIUM_FEATURES,
+        expiresAt: null,
+        isActive: true,
+      };
     }
-  };
 
-  const purchaseSubscription = async (planId: string): Promise<{ approvalUrl: string }> => {
-    try {
-      console.log('[Subscription] Creating PayPal subscription:', planId);
-      
-      const subscription = await createPayPalSubscription(planId);
-      
-      const approvalLink = subscription.links?.find((link: any) => link.rel === 'approve');
-      if (!approvalLink) {
-        throw new Error('No approval URL found');
-      }
-
-      return { approvalUrl: approvalLink.href };
-    } catch (error) {
-      console.error('[Subscription] Error creating subscription:', error);
-      throw error;
-    }
-  };
-
-  const confirmSubscription = async (subscriptionId: string) => {
-    try {
-      const subscription = await getPayPalSubscription(subscriptionId);
-      
-      if (subscription.status === 'ACTIVE') {
-        const plan = plans.find(p => subscription.plan_id === p.id);
-        const expiresAt = new Date();
-        
-        if (plan?.interval === 'MONTH') {
-          expiresAt.setMonth(expiresAt.getMonth() + 1);
-        } else if (plan?.interval === 'YEAR') {
-          expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-        }
-
-        const status: SubscriptionStatus = {
-          tier: 'premium',
-          features: PREMIUM_FEATURES,
-          expiresAt,
-          isActive: true,
-          paypalSubscriptionId: subscriptionId,
-        };
-
-        await saveSubscriptionStatus(status);
-        console.log('[Subscription] PayPal subscription activated');
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('[Subscription] Error confirming subscription:', error);
-      throw error;
-    }
-  };
-
-  const cancelSubscription = async () => {
-    try {
-      if (!subscriptionStatus.paypalSubscriptionId) {
-        throw new Error('No active subscription');
-      }
-
-      await cancelPayPalSubscription(subscriptionStatus.paypalSubscriptionId);
-      
-      const status: SubscriptionStatus = {
+    const customerInfo = customerInfoQuery.data;
+    if (!customerInfo) {
+      return {
         tier: 'free',
         features: FREE_FEATURES,
         expiresAt: null,
         isActive: true,
       };
-
-      await saveSubscriptionStatus(status);
-      console.log('[Subscription] Subscription cancelled');
-    } catch (error) {
-      console.error('[Subscription] Error cancelling subscription:', error);
-      throw error;
     }
+
+    const hasEntitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
+    if (hasEntitlement) {
+      return {
+        tier: 'premium',
+        features: PREMIUM_FEATURES,
+        expiresAt: hasEntitlement.expirationDate ? new Date(hasEntitlement.expirationDate) : null,
+        isActive: true,
+      };
+    }
+
+    return {
+      tier: 'free',
+      features: FREE_FEATURES,
+      expiresAt: null,
+      isActive: true,
+    };
   };
 
-  const manageSubscription = () => {
-    const url = __DEV__
-      ? 'https://www.sandbox.paypal.com/myaccount/autopay/'
-      : 'https://www.paypal.com/myaccount/autopay/';
-    
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') {
-        window.open(url, '_blank');
+  const purchaseMutation = useMutation({
+    mutationFn: async (rcPackage: PurchasesPackage) => {
+      try {
+        console.log('[RevenueCat] Purchasing package:', rcPackage.identifier);
+        const result = await Purchases.purchasePackage(rcPackage);
+        console.log('[RevenueCat] Purchase successful');
+        return result;
+      } catch (error: any) {
+        console.error('[RevenueCat] Purchase error:', error);
+        if (error.userCancelled) {
+          throw new Error('Purchase cancelled');
+        }
+        throw error;
       }
-    } else {
-      console.log('[Subscription] Open PayPal management:', url);
+    },
+    onSuccess: () => {
+      customerInfoQuery.refetch();
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        console.log('[RevenueCat] Restoring purchases');
+        const customerInfo = await Purchases.restorePurchases();
+        console.log('[RevenueCat] Purchases restored');
+        return customerInfo;
+      } catch (error) {
+        console.error('[RevenueCat] Restore error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      customerInfoQuery.refetch();
+    },
+  });
+
+
+
+  const manageSubscription = async () => {
+    try {
+      console.log('[RevenueCat] Opening subscription management');
+      const info = await Purchases.getCustomerInfo();
+      if (info.managementURL) {
+        if (Platform.OS === 'web') {
+          if (typeof window !== 'undefined') {
+            window.open(info.managementURL, '_blank');
+          }
+        } else {
+          console.log('[RevenueCat] Management URL:', info.managementURL);
+        }
+      }
+    } catch (error) {
+      console.error('[RevenueCat] Error getting management URL:', error);
     }
   };
 
@@ -243,16 +194,20 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     return typeof value === 'number' ? value : null;
   };
 
+  const subscriptionStatus = getSubscriptionStatus();
+
   return {
     subscriptionStatus,
-    isLoading,
+    isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
     isPremium: subscriptionStatus.tier === 'premium' || isDemoMode,
-    plans,
-    purchaseSubscription,
-    confirmSubscription,
-    cancelSubscription,
+    offerings: offeringsQuery.data,
+    purchasePackage: purchaseMutation.mutateAsync,
+    isPurchasing: purchaseMutation.isPending,
+    restorePurchases: restoreMutation.mutateAsync,
+    isRestoring: restoreMutation.isPending,
     manageSubscription,
     checkFeatureAccess,
     getFeatureLimit,
+    customerInfo: customerInfoQuery.data,
   };
 });
