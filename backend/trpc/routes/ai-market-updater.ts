@@ -2,20 +2,16 @@ import { z } from 'zod';
 import { publicProcedure, createTRPCRouter } from '../create-context';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateObject } from '@rork-ai/toolkit-sdk';
+import { createBrandFetchClient } from '@/lib/brandfetch';
 
-const CompanySchema = z.object({
+const CompanyNameSchema = z.object({
   name: z.string(),
-  headquarters: z.string(),
-  description: z.string(),
-  website: z.string().optional(),
-  specialization: z.string(),
-  businessType: z.enum(['buyer', 'seller', 'both']),
-  companyType: z.string(),
-  jurisdiction: z.string(),
+  type: z.string(),
+  region: z.string(),
 });
 
-const MarketUpdateSchema = z.object({
-  companies: z.array(CompanySchema),
+const CompanyNamesSchema = z.object({
+  companies: z.array(CompanyNameSchema),
 });
 
 export const aiMarketUpdaterRouter = createTRPCRouter({
@@ -38,30 +34,31 @@ export const aiMarketUpdaterRouter = createTRPCRouter({
         };
       }
 
-      console.log(`[AI Market Updater Backend] Generating companies for ${commodityLabel}`);
+      const brandFetchClient = createBrandFetchClient();
+      if (!brandFetchClient) {
+        console.error('[AI Market Updater Backend] BrandFetch API key not configured');
+        return { 
+          success: false, 
+          added: 0, 
+          error: 'BrandFetch API not configured. This is the primary data source for real company data.' 
+        };
+      }
 
-      const generationPrompt = `Generate ${companiesPerUpdate} REAL, EXISTING companies that are actively involved in the ${commodityDescription} market.
+      console.log(`[AI Market Updater Backend] Using BrandFetch to find real companies for ${commodityLabel}`);
 
-IMPORTANT:
-- These must be actual, real companies that exist in the real world
-- Include a diverse mix: major corporations, regional traders, distributors, refineries, wholesalers
-- Include companies from different regions (Asia, Europe, Americas, Middle East, Africa)
-- Provide factual information only - no fictional companies
-- Include company type and jurisdiction information
+      const generationPrompt = `List ${companiesPerUpdate} well-known, REAL companies that operate in the ${commodityDescription} market.
 
-For each company provide:
-- Exact legal name
-- Real headquarters location
-- Factual description of their business
-- Type of company (Trading Company, Refinery, Distributor, Wholesaler, etc.)
-- Whether they are a buyer, seller, or both
-- Their main specialization
-- Jurisdiction/country code
-- Website if known`;
+Provide only:
+- Exact company name (as it appears publicly)
+- Company type (Trading Company, Refinery, Distributor, Mining Company, etc.)
+- Primary region (Asia, Europe, Americas, Middle East, Africa)
 
-      let generationResult;
+These will be looked up in BrandFetch to get verified business data, logos, and contact information.
+Only include major, established companies that would have a public brand presence.`;
+
+      let companyNames;
       try {
-        generationResult = await Promise.race([
+        const generationResult = await Promise.race([
           generateObject({
             messages: [
               {
@@ -69,23 +66,104 @@ For each company provide:
                 content: generationPrompt,
               },
             ],
-            schema: MarketUpdateSchema,
+            schema: CompanyNamesSchema,
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('AI generation timeout after 90s')), 90000)
+            setTimeout(() => reject(new Error('Company name generation timeout after 60s')), 60000)
           )
         ]) as any;
+        
+        companyNames = generationResult.companies || [];
       } catch (error) {
-        console.error('[AI Market Updater Backend] Generation error:', error);
+        console.error('[AI Market Updater Backend] Company name generation error:', error);
         return { 
           success: false, 
           added: 0, 
-          error: error instanceof Error ? error.message : 'AI generation failed'
+          error: error instanceof Error ? error.message : 'Failed to generate company list'
         };
       }
 
-      if (!generationResult.companies || generationResult.companies.length === 0) {
-        return { success: false, added: 0, error: 'No companies generated' };
+      if (companyNames.length === 0) {
+        return { success: false, added: 0, error: 'No company names generated' };
+      }
+
+      console.log(`[AI Market Updater Backend] Looking up ${companyNames.length} companies in BrandFetch...`);
+
+      const enrichedCompanies = [];
+      let brandFetchErrors = 0;
+
+      for (const company of companyNames) {
+        try {
+          console.log(`[AI Market Updater Backend] Fetching BrandFetch data for: ${company.name}`);
+          
+          const searchResults = await Promise.race([
+            brandFetchClient.searchByName(company.name),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('BrandFetch search timeout')), 15000)
+            )
+          ]);
+
+          if (!searchResults || searchResults.length === 0) {
+            console.log(`[AI Market Updater Backend] No BrandFetch data found for: ${company.name}`);
+            continue;
+          }
+
+          const bestMatch = searchResults[0];
+          const fullData = await Promise.race([
+            brandFetchClient.searchByDomain(bestMatch.domain),
+            new Promise<null>((_, reject) => 
+              setTimeout(() => reject(new Error('BrandFetch domain lookup timeout')), 15000)
+            )
+          ]);
+
+          if (!fullData) {
+            console.log(`[AI Market Updater Backend] No detailed data for: ${company.name}`);
+            continue;
+          }
+
+          const logo = brandFetchClient.getLogo(fullData);
+          const primaryColor = brandFetchClient.getPrimaryColor(fullData);
+          const description = fullData.description || fullData.longDescription || `${company.type} operating in ${commodityDescription}`;
+          
+          const email = fullData.links?.find(link => 
+            link.name.toLowerCase() === 'email' || 
+            link.url.startsWith('mailto:')
+          )?.url.replace('mailto:', '') || null;
+
+          const website = `https://${bestMatch.domain}`;
+          
+          enrichedCompanies.push({
+            name: fullData.name,
+            domain: bestMatch.domain,
+            description,
+            website,
+            logo,
+            primaryColor,
+            email,
+            verified: fullData.claimed,
+            companyType: company.type,
+            region: company.region,
+          });
+
+          console.log(`[AI Market Updater Backend] ✓ Enriched ${fullData.name} with BrandFetch data`);
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          brandFetchErrors++;
+          console.error(`[AI Market Updater Backend] BrandFetch error for ${company.name}:`, error);
+          if (brandFetchErrors > 3) {
+            console.error('[AI Market Updater Backend] Too many BrandFetch errors, stopping');
+            break;
+          }
+        }
+      }
+
+      if (enrichedCompanies.length === 0) {
+        return { 
+          success: false, 
+          added: 0, 
+          error: `BrandFetch could not find data for any companies (${brandFetchErrors} errors)` 
+        };
       }
 
       let existingParticipants;
@@ -93,8 +171,8 @@ For each company provide:
         const result = await Promise.race([
           supabaseAdmin
             .from('market_participants')
-            .select('name')
-            .returns<{ name: string }[]>(),
+            .select('name, domain')
+            .returns<{ name: string; domain?: string }[]>(),
           new Promise((_, reject) => 
             setTimeout(() => reject(new Error('Database query timeout')), 10000)
           )
@@ -109,34 +187,40 @@ For each company provide:
         };
       }
 
-      const existingNames = new Set(
-        (existingParticipants || []).map(p => p.name.toLowerCase().trim())
+      const existingDomains = new Set(
+        (existingParticipants || [])
+          .filter(p => p.domain)
+          .map(p => p.domain!.toLowerCase().trim())
       );
 
-      const newCompanies = generationResult.companies
-        .filter(company => !existingNames.has(company.name.toLowerCase().trim()))
+      const newCompanies = enrichedCompanies
+        .filter(company => !existingDomains.has(company.domain.toLowerCase().trim()))
         .map((company, index) => ({
-          id: `ai_generated_${commodity}_${Date.now()}_${index}`,
+          id: `brandfetch_${commodity}_${Date.now()}_${index}`,
           name: company.name,
+          domain: company.domain,
           type: 'trading_house' as const,
-          headquarters: company.headquarters,
+          headquarters: company.region,
           description: company.description,
-          verified: true,
+          verified: company.verified,
           website: company.website,
+          logo: company.logo,
+          primary_color: company.primaryColor,
+          email: company.email,
           commodities: [commodity],
           category: ['diversified'],
-          offices: [company.headquarters],
-          licenses: [`${company.jurisdiction.toUpperCase()}: ${company.companyType}`],
-          specialization: company.specialization,
-          business_type: company.businessType,
+          offices: [company.region],
+          licenses: [`${company.region}: ${company.companyType}`],
+          specialization: commodityDescription,
+          business_type: 'both' as const,
         }));
 
       if (newCompanies.length === 0) {
         return { 
           success: true, 
           added: 0, 
-          duplicates: generationResult.companies.length,
-          error: 'All generated companies were duplicates' 
+          duplicates: enrichedCompanies.length,
+          error: 'All BrandFetch companies already exist in database' 
         };
       }
 
