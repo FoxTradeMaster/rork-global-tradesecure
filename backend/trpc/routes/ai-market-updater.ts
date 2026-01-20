@@ -29,6 +29,15 @@ export const aiMarketUpdaterRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { commodity, commodityLabel, commodityDescription, companiesPerUpdate } = input;
 
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY === 'placeholder-key') {
+        console.error('[AI Market Updater Backend] SUPABASE_SERVICE_ROLE_KEY not configured');
+        return { 
+          success: false, 
+          added: 0, 
+          error: 'Database admin access not configured. Please set SUPABASE_SERVICE_ROLE_KEY environment variable.' 
+        };
+      }
+
       console.log(`[AI Market Updater Backend] Generating companies for ${commodityLabel}`);
 
       const generationPrompt = `Generate ${companiesPerUpdate} REAL, EXISTING companies that are actively involved in the ${commodityDescription} market.
@@ -107,7 +116,11 @@ For each company provide:
 
       if (insertError) {
         console.error('[AI Market Updater Backend] Insert error:', insertError);
-        throw new Error(`Database error: ${insertError.message}`);
+        return { 
+          success: false, 
+          added: 0, 
+          error: `Database error: ${insertError.message}` 
+        };
       }
 
       return { 
