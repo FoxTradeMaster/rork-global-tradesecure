@@ -39,14 +39,14 @@ jobs:
           echo "⏰ Started at: $(date)"
           
           # Run updater for each commodity
-          node scripts/populate-market.mjs --commodity gold --count 50
-          node scripts/populate-market.mjs --commodity fuel_oil --count 50
-          node scripts/populate-market.mjs --commodity steam_coal --count 50
-          node scripts/populate-market.mjs --commodity anthracite_coal --count 50
-          node scripts/populate-market.mjs --commodity urea --count 50
-          node scripts/populate-market.mjs --commodity edible_oils --count 50
-          node scripts/populate-market.mjs --commodity bio_fuels --count 50
-          node scripts/populate-market.mjs --commodity iron_ore --count 50
+          bash scripts/run-updater.sh gold 50
+          bash scripts/run-updater.sh fuel_oil 50
+          bash scripts/run-updater.sh steam_coal 50
+          bash scripts/run-updater.sh anthracite_coal 50
+          bash scripts/run-updater.sh urea 50
+          bash scripts/run-updater.sh edible_oils 50
+          bash scripts/run-updater.sh bio_fuels 50
+          bash scripts/run-updater.sh iron_ore 50
           
           echo "✅ Update Complete!"
           echo "⏰ Finished at: $(date)"
