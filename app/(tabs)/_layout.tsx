@@ -39,8 +39,10 @@ export default function TabLayout() {
           borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600' as const,
+          display: 'none',
+        },
+        tabBarIconStyle: {
+          marginTop: 4,
         },
       }}
     >

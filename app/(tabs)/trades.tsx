@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Search, TrendingUp, AlertCircle, Plus, Upload, TrendingDown, Activity } from 'lucide-react-native';
 import ImportModal from '@/components/ImportModal';
 import { ParsedRow } from '@/lib/fileParser';
@@ -21,6 +22,7 @@ const TRADE_IMPORT_FIELDS = [
 export default function TradesScreen() {
   const router = useRouter();
   const { trades, addTrades, currentUser } = useTrading();
+  const { canEdit, showPaywall } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showImportModal, setShowImportModal] = useState(false);
@@ -138,14 +140,26 @@ export default function TradesScreen() {
               <>
                 <TouchableOpacity 
                   style={styles.importButton}
-                  onPress={() => setShowImportModal(true)}
+                  onPress={() => {
+                    if (canEdit) {
+                      setShowImportModal(true);
+                    } else {
+                      showPaywall();
+                    }
+                  }}
                 >
                   <Upload size={16} color="#0284C7" />
                   <Text style={styles.importButtonText}>Import</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.addButton}
-                  onPress={() => router.push('/trade/create')}
+                  onPress={() => {
+                    if (canEdit) {
+                      router.push('/trade/create');
+                    } else {
+                      showPaywall();
+                    }
+                  }}
                 >
                   <Plus size={20} color="#FFFFFF" />
                 </TouchableOpacity>

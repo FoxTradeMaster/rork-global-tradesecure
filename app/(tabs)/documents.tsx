@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert, ActivityIndicator, Platform, Linking, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading } from '@/contexts/TradingContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useState, useEffect, useMemo } from 'react';
 import { FileText, File as FileIcon, CheckCircle, Clock, Download, Send, Mail, X, Plus, Camera, Upload, FolderOpen, User, Edit3 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +15,7 @@ import * as Sharing from 'expo-sharing';
 
 export default function DocumentsScreen() {
   const { trades, counterparties, currentUser, updateTrade, updateCounterparty } = useTrading();
+  const { canEdit, showPaywall } = useSubscription();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [selectedDocType, setSelectedDocType] = useState<'CIS' | 'SCO' | 'FCO' | 'ICPO' | 'LOI' | 'POF' | 'RWA' | 'BCL' | 'NCNDA' | 'IMFPA' | 'TSA' | 'SPA' | 'ASWP' | 'POP' | 'BOL' | 'COO' | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -457,13 +459,23 @@ export default function DocumentsScreen() {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.addButton}
-              onPress={() => setShowTradeSelector(true)}
+              onPress={() => {
+                if (canEdit) {
+                  setShowTradeSelector(true);
+                } else {
+                  showPaywall();
+                }
+              }}
             >
               <Send size={20} color="#FFFFFF" />
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.uploadButton}
               onPress={() => {
+                if (!canEdit) {
+                  showPaywall();
+                  return;
+                }
                 if (trades.length === 0 && counterparties.length === 0) {
                   Alert.alert('No Targets', 'Create a trade or counterparty first to upload documents');
                   return;

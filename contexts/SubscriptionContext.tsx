@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Platform } from 'react-native';
+import { WebSubscriptionModal } from '@/components/WebSubscriptionModal';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Purchases, { PurchasesPackage } from 'react-native-purchases';
 import { useTrading } from './TradingContext';
@@ -61,6 +62,7 @@ interface SubscriptionContextValue {
   subscriptionStatus: SubscriptionStatus;
   isLoading: boolean;
   isPremium: boolean;
+  canEdit: boolean;
   offerings: any;
   purchasePackage: (rcPackage: PurchasesPackage) => Promise<any>;
   isPurchasing: boolean;
@@ -70,6 +72,7 @@ interface SubscriptionContextValue {
   checkFeatureAccess: (feature: keyof SubscriptionFeatures) => boolean;
   getFeatureLimit: (feature: keyof SubscriptionFeatures) => number | null;
   customerInfo: any;
+  showPaywall: () => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(undefined);
@@ -221,10 +224,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return typeof value === 'number' ? value : null;
   };
 
+  const [paywallVisible, setPaywallVisible] = React.useState(false);
+
+  const showPaywall = () => {
+    setPaywallVisible(true);
+  };
+
   const value: SubscriptionContextValue = {
     subscriptionStatus,
     isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
-    isPremium: subscriptionStatus.tier === 'premium' || isDemoMode,
+    isPremium: subscriptionStatus.tier === 'premium',
+    canEdit: subscriptionStatus.tier === 'premium',
     offerings: offeringsQuery.data,
     purchasePackage: purchaseMutation.mutateAsync,
     isPurchasing: purchaseMutation.isPending,
@@ -234,11 +244,18 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     checkFeatureAccess,
     getFeatureLimit,
     customerInfo: customerInfoQuery.data,
+    showPaywall,
   };
 
   return (
     <SubscriptionContext.Provider value={value}>
       {children}
+      {Platform.OS === 'web' && (
+        <WebSubscriptionModal
+          visible={paywallVisible}
+          onClose={() => setPaywallVisible(false)}
+        />
+      )}
     </SubscriptionContext.Provider>
   );
 }

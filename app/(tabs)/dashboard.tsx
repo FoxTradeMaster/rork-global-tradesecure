@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTrading, usePortfolioMetrics, useTradesByStatus } from '@/contexts/TradingContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { 
   TrendingUp, 
   AlertCircle, 
@@ -16,6 +17,7 @@ import {
 export default function DashboardScreen() {
   const router = useRouter();
   const { currentUser, trades, isDemoMode, clearUser } = useTrading();
+  const { canEdit, showPaywall } = useSubscription();
   const metrics = usePortfolioMetrics();
   const tradesByStatus = useTradesByStatus()
 
@@ -78,7 +80,13 @@ export default function DashboardScreen() {
               {(currentUser.role === 'trade_originator' || currentUser.role === 'senior_management') && (
                 <TouchableOpacity 
                   style={styles.addButton}
-                  onPress={() => router.push('/trade/create')}
+                  onPress={() => {
+                    if (canEdit) {
+                      router.push('/trade/create');
+                    } else {
+                      showPaywall();
+                    }
+                  }}
                 >
                   <Plus size={24} color="#FFFFFF" />
                 </TouchableOpacity>

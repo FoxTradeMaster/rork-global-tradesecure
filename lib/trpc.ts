@@ -10,9 +10,8 @@ const getBaseUrl = () => {
   const url = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
 
   if (!url) {
-    throw new Error(
-      "Rork did not set EXPO_PUBLIC_RORK_API_BASE_URL, please use support",
-    );
+    // Return a dummy URL for standalone deployment (tRPC won't be used)
+    return 'http://localhost:3000';
   }
 
   return url;

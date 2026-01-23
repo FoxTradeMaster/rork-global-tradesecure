@@ -12,6 +12,7 @@ export interface PayPalSubscriptionPlan {
   description: string;
   price: string;
   interval: 'MONTH' | 'YEAR';
+  features: string[];
 }
 
 export interface PayPalPaymentResponse {
@@ -200,15 +201,34 @@ export const SUBSCRIPTION_PLANS: PayPalSubscriptionPlan[] = [
     id: 'P-3W87840565478320LNFLCXEA',
     name: 'Premium Monthly',
     description: '0.5% platform fee + unlimited features',
-    price: '99.00',
+    price: '$99/month',
     interval: 'MONTH',
+    features: [
+      'Create unlimited trades',
+      'Add unlimited counterparties',
+      'Generate all document types',
+      'Add companies to market directory',
+      'Advanced analytics & insights',
+      'Priority support',
+      'Only 0.5% commission rate',
+    ],
   },
   {
     id: 'P-9XE03721ER697370SNFLDL7Q',
     name: 'Premium Yearly',
     description: '0.5% platform fee + unlimited features',
-    price: '999.00',
+    price: '$999/year',
     interval: 'YEAR',
+    features: [
+      'Create unlimited trades',
+      'Add unlimited counterparties',
+      'Generate all document types',
+      'Add companies to market directory',
+      'Advanced analytics & insights',
+      'Priority support',
+      'Only 0.5% commission rate',
+      'Save $189/year (2 months free)',
+    ],
   },
 ];
 

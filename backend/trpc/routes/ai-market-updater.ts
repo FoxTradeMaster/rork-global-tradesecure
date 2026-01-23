@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { publicProcedure, createTRPCRouter } from '../create-context';
 import { supabaseAdmin } from '@/lib/supabase';
-import { generateObject } from '@rork-ai/toolkit-sdk';
 import { createBrandFetchClient } from '@/lib/brandfetch';
+import OpenAI from 'openai';
 
 const CompanyNameSchema = z.object({
   name: z.string(),
@@ -58,22 +58,37 @@ Only include major, established companies that would have a public brand presenc
 
       let companyNames;
       try {
-        const generationResult = await Promise.race([
-          generateObject({
+        const openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const completion = await Promise.race([
+          openai.chat.completions.create({
+            model: 'gpt-4o-mini',
             messages: [
               {
+                role: 'system',
+                content: 'You are a business research assistant. Generate accurate, real company names in JSON format.',
+              },
+              {
                 role: 'user',
-                content: generationPrompt,
+                content: generationPrompt + '\n\nRespond with valid JSON only: {"companies": [{"name": "...", "type": "...", "region": "..."}]}',
               },
             ],
-            schema: CompanyNamesSchema,
+            temperature: 0.7,
           }),
-          new Promise((_, reject) => 
+          new Promise<never>((_, reject) => 
             setTimeout(() => reject(new Error('Company name generation timeout after 60s')), 60000)
           )
-        ]) as any;
+        ]);
         
-        companyNames = generationResult.companies || [];
+        const content = completion.choices[0]?.message?.content;
+        if (!content) {
+          throw new Error('No response from OpenAI');
+        }
+        
+        const parsed = JSON.parse(content);
+        companyNames = parsed.companies || [];
       } catch (error) {
         console.error('[AI Market Updater Backend] Company name generation error:', error);
         return { 

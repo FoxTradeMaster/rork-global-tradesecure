@@ -9,6 +9,7 @@ import { MarketProvider } from "@/contexts/MarketContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { AIMarketUpdaterProvider } from "@/contexts/AIMarketUpdaterContext";
 import { trpc, trpcClient } from "@/lib/trpc";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { loadImportedParticipants } from "@/mocks/market-participants";
 import Purchases from "react-native-purchases";
 
@@ -24,9 +25,11 @@ function getRCToken() {
 }
 
 const rcToken = getRCToken();
-if (rcToken) {
+if (Platform.OS !== 'web' && rcToken) {
   Purchases.configure({ apiKey: rcToken });
-  console.log('[RevenueCat] SDK configured');
+  console.log('[RevenueCat] SDK configured for native');
+} else if (Platform.OS === 'web') {
+  console.log('[Subscription] Web platform - using PayPal instead of RevenueCat');
 } else {
   console.warn('[RevenueCat] No API key found');
 }
@@ -81,6 +84,7 @@ export default function RootLayout() {
             <SubscriptionProvider>
               <MarketProvider>
                 <AIMarketUpdaterProvider>
+                  <GoogleAnalytics />
                   <Slot />
                 </AIMarketUpdaterProvider>
               </MarketProvider>

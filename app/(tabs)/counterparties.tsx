@@ -6,7 +6,6 @@ import { useTrading } from '@/contexts/TradingContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Search, Users, Building2, MapPin, CheckCircle, AlertTriangle, XCircle, Upload } from 'lucide-react-native';
 import ImportModal from '@/components/ImportModal';
-import PaywallModal from '@/components/PaywallModal';
 import { ParsedRow } from '@/lib/fileParser';
 import { Counterparty, RiskLevel } from '@/types';
 
@@ -22,11 +21,9 @@ const COUNTERPARTY_IMPORT_FIELDS = [
 export default function CounterpartiesScreen() {
   const router = useRouter();
   const { counterparties, addCounterparties } = useTrading();
-  const { isPremium, checkFeatureAccess, getFeatureLimit } = useSubscription();
+  const { isPremium, checkFeatureAccess, getFeatureLimit, canEdit, showPaywall: triggerPaywall } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
-  const [paywallFeature, setPaywallFeature] = useState<string>();
 
   const filteredCounterparties = counterparties.filter(cp =>
     cp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -52,9 +49,8 @@ export default function CounterpartiesScreen() {
   };
 
   const handleImportClick = () => {
-    if (!checkFeatureAccess('bulkImport')) {
-      setPaywallFeature('Bulk Import');
-      setShowPaywall(true);
+    if (!canEdit) {
+      triggerPaywall();
       return;
     }
     setShowImportModal(true);
@@ -93,18 +89,9 @@ export default function CounterpartiesScreen() {
     }).filter(cp => cp.name.trim() !== '');
 
     if (newCounterparties.length > 0) {
-      if (!isPremium) {
-        const maxCounterparties = getFeatureLimit('maxCounterparties');
-        if (maxCounterparties !== null && counterparties.length + newCounterparties.length > maxCounterparties) {
-          setShowPaywall(true);
-          setPaywallFeature('Unlimited Counterparties');
-          Alert.alert(
-            'Limit Reached',
-            `Free plan is limited to ${maxCounterparties} counterparties. Upgrade to add more.`,
-            [{ text: 'OK' }]
-          );
-          return;
-        }
+      if (!canEdit) {
+        triggerPaywall();
+        return;
       }
       
       addCounterparties(newCounterparties);
@@ -297,11 +284,7 @@ export default function CounterpartiesScreen() {
         targetFields={COUNTERPARTY_IMPORT_FIELDS}
       />
 
-      <PaywallModal
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        feature={paywallFeature}
-      />
+
     </View>
   );
 }

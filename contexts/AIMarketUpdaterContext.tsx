@@ -2,7 +2,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { CommodityType } from '@/types';
-import { trpcClient } from '@/lib/trpc';
+import { directMarketUpdater } from '@/lib/direct-market-updater';
 
 
 
@@ -168,30 +168,25 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         return 0;
       }
 
-      const commodityDescription = getCommodityDescription(commodity);
-      
-      console.log(`[AIMarketUpdater] Calling backend to generate and save ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
-      console.log(`[AIMarketUpdater] Backend URL: ${process.env.EXPO_PUBLIC_RORK_API_BASE_URL}`);
+      console.log(`[AIMarketUpdater] Using direct BrandFetch integration to add ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
       
       const result = await Promise.race([
-        trpcClient.aiMarketUpdater.generateAndSaveCompanies.mutate({
+        directMarketUpdater.generateAndSaveCompanies(
           commodity,
-          commodityLabel,
-          commodityDescription,
-          companiesPerUpdate: settings.companiesPerUpdate,
-        }),
+          settings.companiesPerUpdate
+        ),
         new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Frontend timeout after 240s - backend still processing')), 240000)
+          setTimeout(() => reject(new Error('Operation timeout after 120s')), 120000)
         )
       ]);
 
       if (!result.success) {
-        console.log(`[AIMarketUpdater] Backend returned error: ${result.error}`);
+        console.log(`[AIMarketUpdater] Operation failed: ${result.error}`);
         addLog({
           commodity: commodityLabel,
           companiesAdded: 0,
           success: false,
-          error: result.error || 'Backend operation failed',
+          error: result.error || 'Operation failed',
         });
         return 0;
       }
@@ -236,20 +231,20 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
       let technicalDetails = '';
       
       if (errorMessage.includes('Load failed') || errorMessage.includes('Network request failed') || errorMessage.includes('Network error') || errorMessage.includes('unreachable')) {
-        userFriendlyError = 'Backend server not responding';
-        technicalDetails = 'The backend server may not be running. Please contact support.';
+        userFriendlyError = 'Network error';
+        technicalDetails = 'Please check your internet connection and try again.';
       } else if (errorMessage.includes('timeout') || errorMessage.includes('Frontend timeout')) {
         userFriendlyError = 'Operation timed out';
         technicalDetails = 'The operation took too long. Try reducing companies per update or check network stability.';
       } else if (errorMessage.includes('attempts failed')) {
         userFriendlyError = 'Multiple connection failures';
         technicalDetails = 'Check network stability';
-      } else if (errorMessage.includes('Rork did not set')) {
-        userFriendlyError = 'Backend URL not configured';
-        technicalDetails = errorMessage;
+      } else if (errorMessage.includes('BrandFetch')) {
+        userFriendlyError = 'Data enrichment service error';
+        technicalDetails = 'Unable to fetch company data. Please try again later.';
       } else if (errorMessage.includes('AbortError')) {
         userFriendlyError = 'Request cancelled';
-        technicalDetails = 'Backend processing exceeded time limit';
+        technicalDetails = 'Operation exceeded time limit';
       }
       
       const finalError = technicalDetails ? `${userFriendlyError} - ${technicalDetails}` : userFriendlyError;

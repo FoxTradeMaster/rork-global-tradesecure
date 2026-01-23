@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -33,6 +34,7 @@ export interface Database {
           logo?: string;
           brand_color?: string;
           email?: string;
+          domain?: string;
           contact_links?: any;
           founded?: number;
           trading_volume?: string;
@@ -123,15 +125,39 @@ if (!supabaseUrl || supabaseUrl === 'undefined' || supabaseUrl === 'null' || sup
     },
   });
 } else {
-  supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true,
-      storage: AsyncStorage as any,
-      autoRefreshToken: true,
-      storageKey: 'supabase.auth.token',
-    },
-  });
+  // Web platform configuration
+  if (Platform.OS === 'web' && typeof window === 'undefined') {
+    // Server-side rendering - no storage
+    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        detectSessionInUrl: false,
+        autoRefreshToken: false,
+      },
+    });
+  } else if (Platform.OS === 'web') {
+    // Client-side web - use localStorage
+    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage,
+        autoRefreshToken: true,
+        storageKey: 'supabase.auth.token',
+      },
+    });
+  } else {
+    // Native platforms - use AsyncStorage
+    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        detectSessionInUrl: true,
+        storage: AsyncStorage as any,
+        autoRefreshToken: true,
+        storageKey: 'supabase.auth.token',
+      },
+    });
+  }
 }
 
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
