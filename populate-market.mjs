@@ -291,3 +291,4 @@ updateMarketDirectory(commodity, count)
     console.error('❌ Autonomous updater failed:', error);
     process.exit(1);
   });
+
