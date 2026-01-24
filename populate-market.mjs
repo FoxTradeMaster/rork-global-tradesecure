@@ -43,7 +43,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
  * Generate company names using OpenAI
  */
 async function generateCompanyNames(commodity, count) {
-  console.log(`🤖 Generating ${count} ${commodity} companies using AI...`);
+  console.log(`ð¤ Generating ${count} ${commodity} companies using AI...`);
   
   const prompt = `Generate a list of ${count} real, verified companies that operate in the ${COMMODITIES[commodity]} industry. 
 Include companies from different regions (North America, Europe, Asia, Africa, South America, Australia).
@@ -63,10 +63,10 @@ Format: ["Company Name 1", "Company Name 2", ...]`;
     const jsonContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
     const companies = JSON.parse(jsonContent);
-    console.log(`✅ Generated ${companies.length} company names`);
+    console.log(`â Generated ${companies.length} company names`);
     return companies;
   } catch (error) {
-    console.error('❌ Error generating companies:', error.message);
+    console.error('â Error generating companies:', error.message);
     throw error;
   }
 }
@@ -135,7 +135,7 @@ async function verifyWithBrandFetch(companyName) {
       website: `https://${domain}`,
     };
   } catch (error) {
-    console.error(`⚠️  BrandFetch error for ${companyName}:`, error.message);
+    console.error(`â ï¸  BrandFetch error for ${companyName}:`, error.message);
     return null;
   }
 }
@@ -154,7 +154,7 @@ async function addCompanyToDatabase(companyData, commodity) {
         .single();
 
       if (existing) {
-        console.log(`⏭️  Skipped: ${companyData.name} (domain already exists)`);
+        console.log(`â­ï¸  Skipped: ${companyData.name} (domain already exists)`);
         return { success: false, reason: 'duplicate' };
       }
     }
@@ -184,14 +184,14 @@ async function addCompanyToDatabase(companyData, commodity) {
       .single();
 
     if (error) {
-      console.error(`❌ Database error for ${companyData.name}:`, error.message);
+      console.error(`â Database error for ${companyData.name}:`, error.message);
       return { success: false, reason: 'database_error', error };
     }
 
-    console.log(`✅ Added: ${companyData.name} (quality: ${qualityScore}%)`);
+    console.log(`â Added: ${companyData.name} (quality: ${qualityScore}%)`);
     return { success: true, data };
   } catch (error) {
-    console.error(`❌ Error adding ${companyData.name}:`, error.message);
+    console.error(`â Error adding ${companyData.name}:`, error.message);
     return { success: false, reason: 'exception', error };
   }
 }
@@ -200,9 +200,9 @@ async function addCompanyToDatabase(companyData, commodity) {
  * Main update function
  */
 async function updateMarketDirectory(commodity, targetCount) {
-  console.log(`\n🚀 Starting Autonomous Market Directory Update`);
-  console.log(`📊 Target: ${targetCount} companies per commodity (${targetCount * 8} total)\n`);
-  console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+  console.log(`\nð Starting Autonomous Market Directory Update`);
+  console.log(`ð Target: ${targetCount} companies per commodity (${targetCount * 8} total)\n`);
+  console.log(`â° Started at: ${new Date().toISOString()}\n`);
 
   const stats = {
     generated: 0,
@@ -212,7 +212,7 @@ async function updateMarketDirectory(commodity, targetCount) {
     failed: 0,
   };
 
-  console.log(`\n📦 Running updater for ${commodity} (target: ${targetCount} companies)\n`);
+  console.log(`\nð¦ Running updater for ${commodity} (target: ${targetCount} companies)\n`);
 
   // Generate company names
   const companyNames = await generateCompanyNames(commodity, targetCount);
@@ -220,7 +220,7 @@ async function updateMarketDirectory(commodity, targetCount) {
 
   // Process each company
   for (const companyName of companyNames) {
-    console.log(`\n🔍 Processing: ${companyName}`);
+    console.log(`\nð Processing: ${companyName}`);
 
     // Verify with BrandFetch
     const brandData = await verifyWithBrandFetch(companyName);
@@ -261,14 +261,14 @@ async function updateMarketDirectory(commodity, targetCount) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  console.log(`\n\n✅ Update Complete!`);
-  console.log(`\n📊 Final Statistics:`);
+  console.log(`\n\nâ Update Complete!`);
+  console.log(`\nð Final Statistics:`);
   console.log(`   Generated: ${stats.generated} companies`);
   console.log(`   Verified: ${stats.verified} companies`);
   console.log(`   Added: ${stats.added} companies`);
   console.log(`   Skipped: ${stats.skipped} companies (duplicates)`);
   console.log(`   Failed: ${stats.failed} companies`);
-  console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
+  console.log(`\nâ° Completed at: ${new Date().toISOString()}\n`);
 
   return stats;
 }
@@ -284,11 +284,10 @@ const count = countArg ? parseInt(countArg.split('=')[1]) : 50;
 // Run the updater
 updateMarketDirectory(commodity, count)
   .then(() => {
-    console.log('✅ Autonomous updater completed successfully!');
+    console.log('â Autonomous updater completed successfully!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Autonomous updater failed:', error);
+    console.error('â Autonomous updater failed:', error);
     process.exit(1);
   });
-
