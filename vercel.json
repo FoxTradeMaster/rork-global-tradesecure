@@ -6,7 +6,7 @@
   "devCommand": "pnpm expo start --web",
   "functions": {
     "api/**/*.js": {
-      "runtime": "@vercel/node@3.2.0"
+      "runtime": "nodejs20.x"
     }
   },
   "routes": [
