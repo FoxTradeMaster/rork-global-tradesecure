@@ -3,23 +3,5 @@
   "outputDirectory": "dist",
   "framework": null,
   "installCommand": "pnpm install",
-  "devCommand": "pnpm expo start --web",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "devCommand": "pnpm expo start --web"
 }
