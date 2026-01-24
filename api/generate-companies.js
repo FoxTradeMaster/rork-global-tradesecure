@@ -1,5 +1,7 @@
 // Updated: Jan 24, 2026 export default async function handler(req, res) {
-  // Only allow POST requests
+ console.log('OpenAI API Key available:', !!process.env.OPENAI_API_KEY);
+console.log('OpenAI API Key starts with:', process.env.OPENAI_API_KEY?.substring(0, 7));
+ // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
