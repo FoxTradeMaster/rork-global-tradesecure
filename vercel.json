@@ -4,11 +4,22 @@
   "framework": null,
   "installCommand": "pnpm install",
   "devCommand": "pnpm expo start --web",
-
-  "rewrites": [
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@3.2.0"
+    }
+  },
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
