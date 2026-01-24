@@ -1,78 +1,130 @@
-// Updated: Jan 24, 2026 export default async function handler(req, res) {
- console.log('OpenAI API Key available:', !!process.env.OPENAI_API_KEY);
-console.log('OpenAI API Key starts with:', process.env.OPENAI_API_KEY?.substring(0, 7));
- // Only allow POST requests
+// api/generate-companies.js
+export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Handle OPTIONS request
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { commodity, commodityLabel, count } = req.body;
-
-    if (!commodity || !commodityLabel || !count) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
-    const prompt = `List ${count} well-known, REAL companies that operate in the ${commodityLabel} market.
-
-Provide only:
-- Exact company name (as it appears publicly)
-- Company type (Trading Company, Refinery, Distributor, Mining Company, Producer, etc.)
-- Primary region (Asia, Europe, Americas, Middle East, Africa)
-
-These will be looked up in BrandFetch to get verified business data, logos, and contact information.
-Only include major, established companies that would have a public brand presence.
-Focus on companies that haven't been added yet - try to find diverse companies from different regions.
-
-Respond with valid JSON only: {"companies": [{"name": "...", "type": "...", "region": "..."}]}`;
-
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a business research assistant. Generate accurate, real company names in JSON format.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      return res.status(response.status).json({ 
-        error: `OpenAI API error: ${response.status}`,
-        details: errorText 
+    // Get OpenAI API key from environment variable
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    console.log('=== DEBUG INFO ===');
+    console.log('API Key exists:', !!apiKey);
+    console.log('API Key length:', apiKey ? apiKey.length : 0);
+    console.log('API Key starts with:', apiKey ? apiKey.substring(0, 7) : 'N/A');
+    console.log('All env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
+    
+    if (!apiKey) {
+      return res.status(500).json({ 
+        error: 'OpenAI API key is required',
+        debug: {
+          hasKey: !!apiKey,
+          envVars: Object.keys(process.env).filter(k => k.includes('OPENAI'))
+        }
       });
     }
 
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
+    // Get request parameters
+    const { commodity, count = 5 } = req.body;
 
-    if (!content) {
-      return res.status(500).json({ error: 'No response from OpenAI' });
+    if (!commodity) {
+      return res.status(400).json({ error: 'Commodity is required' });
     }
 
-    const parsed = JSON.parse(content);
-    return res.status(200).json({ companies: parsed.companies || [] });
+    // Import OpenAI
+    const { default: OpenAI } = await import('openai');
+    
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    });
+
+    console.log('Generating companies for:', commodity);
+
+    // Generate companies using OpenAI
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that generates realistic company data for a global trade directory. Generate diverse, realistic company names and descriptions.'
+        },
+        {
+          role: 'user',
+          content: `Generate <LaTex>${count} realistic companies that deal with $</LaTex>{commodity}. For each company, provide:
+1. Company name (realistic and diverse, from different countries)
+2. Short description (1-2 sentences)
+3. Country of operation
+
+Format the response as a JSON array with objects containing: name, description, country, commodity.`
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 2000,
+    });
+
+    const responseText = completion.choices[0].message.content;
+    console.log('OpenAI Response:', responseText);
+
+    // Try to parse the JSON response
+    let companies;
+    try {
+      // Extract JSON from markdown code blocks if present
+      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
+                       responseText.match(/```\n([\s\S]*?)\n```/) ||
+                       [null, responseText];
+      const jsonText = jsonMatch[1] || responseText;
+      companies = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', parseError);
+      return res.status(500).json({ 
+        error: 'Failed to parse AI response',
+        details: parseError.message,
+        rawResponse: responseText
+      });
+    }
+
+    // Ensure companies is an array
+    if (!Array.isArray(companies)) {
+      companies = [companies];
+    }
+
+    // Add commodity to each company if not present
+    companies = companies.map(company => ({
+      ...company,
+      commodity: company.commodity || commodity
+    }));
+
+    console.log('Generated companies:', companies.length);
+
+    return res.status(200).json({
+      success: true,
+      companies: companies,
+      count: companies.length
+    });
 
   } catch (error) {
-    console.error('Server error:', error);
+    console.error('Error generating companies:', error);
     return res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message || 'Unknown error'
+      error: 'Failed to generate companies',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
