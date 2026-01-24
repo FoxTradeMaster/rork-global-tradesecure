@@ -172,8 +172,8 @@ async function addCompanyToDatabase(companyData, commodity) {
       .from('market_participants')
       .insert({
         name: companyData.name,
-        commodity: commodity,
-        logo_url: companyData.logo,
+        commodities: [commodity],
+        logo: companyData.logo,
         description: companyData.description,
         website: companyData.website,
         domain: companyData.domain,
