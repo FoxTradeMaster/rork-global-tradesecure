@@ -1,4 +1,13 @@
 // api/generate-companies.js
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -21,109 +30,84 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get OpenAI API key from environment variable
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    console.log('=== DEBUG INFO ===');
-    console.log('API Key exists:', !!apiKey);
-    console.log('API Key length:', apiKey ? apiKey.length : 0);
-    console.log('API Key starts with:', apiKey ? apiKey.substring(0, 7) : 'N/A');
-    console.log('All env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
-    
-    if (!apiKey) {
+    // Verify required environment variables
+    const requiredEnvVars = {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      BRANDFETCH_API_KEY: process.env.BRANDFETCH_API_KEY,
+      EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    };
+
+    const missingVars = Object.entries(requiredEnvVars)
+      .filter(([key, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingVars.length > 0) {
       return res.status(500).json({ 
-        error: 'OpenAI API key is required',
-        debug: {
-          hasKey: !!apiKey,
-          envVars: Object.keys(process.env).filter(k => k.includes('OPENAI'))
-        }
+        error: 'Missing required environment variables',
+        missing: missingVars
       });
     }
 
     // Get request parameters
-    const { commodity, count = 5 } = req.body;
+    const { commodity = 'gold', count = 10 } = req.body;
 
-    if (!commodity) {
-      return res.status(400).json({ error: 'Commodity is required' });
-    }
+    console.log(`[Autonomous Updater] Starting generation: ${count} ${commodity} companies`);
 
-    // Import OpenAI
-    const { default: OpenAI } = await import('openai');
-    
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: apiKey,
+    // Path to the populate-market script
+    const scriptPath = path.join(__dirname, '..', 'scripts', 'populate-market.mjs');
+
+    // Build command with environment variables
+    const command = `node "${scriptPath}" --commodity ${commodity} --count ${count}`;
+
+    console.log(`[Autonomous Updater] Executing: ${command}`);
+
+    // Execute the script with a timeout of 5 minutes
+    const { stdout, stderr } = await execAsync(command, {
+      env: {
+        ...process.env,
+        OPENAI_API_KEY: requiredEnvVars.OPENAI_API_KEY,
+        BRANDFETCH_API_KEY: requiredEnvVars.BRANDFETCH_API_KEY,
+        EXPO_PUBLIC_SUPABASE_URL: requiredEnvVars.EXPO_PUBLIC_SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY: requiredEnvVars.SUPABASE_SERVICE_ROLE_KEY,
+      },
+      timeout: 300000, // 5 minutes
+      maxBuffer: 1024 * 1024 * 10, // 10MB buffer
     });
 
-    console.log('Generating companies for:', commodity);
-
-    // Generate companies using OpenAI
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that generates realistic company data for a global trade directory. Generate diverse, realistic company names and descriptions.'
-        },
-        {
-          role: 'user',
-          content: `Generate <LaTex>${count} realistic companies that deal with $</LaTex>{commodity}. For each company, provide:
-1. Company name (realistic and diverse, from different countries)
-2. Short description (1-2 sentences)
-3. Country of operation
-
-Format the response as a JSON array with objects containing: name, description, country, commodity.`
-        }
-      ],
-      temperature: 0.8,
-      max_tokens: 2000,
-    });
-
-    const responseText = completion.choices[0].message.content;
-    console.log('OpenAI Response:', responseText);
-
-    // Try to parse the JSON response
-    let companies;
-    try {
-      // Extract JSON from markdown code blocks if present
-      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
-                       responseText.match(/```\n([\s\S]*?)\n```/) ||
-                       [null, responseText];
-      const jsonText = jsonMatch[1] || responseText;
-      companies = JSON.parse(jsonText);
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      return res.status(500).json({ 
-        error: 'Failed to parse AI response',
-        details: parseError.message,
-        rawResponse: responseText
-      });
+    console.log('[Autonomous Updater] Script output:', stdout);
+    if (stderr) {
+      console.warn('[Autonomous Updater] Script warnings:', stderr);
     }
 
-    // Ensure companies is an array
-    if (!Array.isArray(companies)) {
-      companies = [companies];
-    }
-
-    // Add commodity to each company if not present
-    companies = companies.map(company => ({
-      ...company,
-      commodity: company.commodity || commodity
-    }));
-
-    console.log('Generated companies:', companies.length);
+    // Parse the output to extract success count
+    const successMatch = stdout.match(/Successfully added (\d+)/i);
+    const successCount = successMatch ? parseInt(successMatch[1]) : 0;
 
     return res.status(200).json({
       success: true,
-      companies: companies,
-      count: companies.length
+      message: `Successfully generated and saved ${successCount} companies with Brandfetch verification`,
+      commodity,
+      requested: count,
+      added: successCount,
+      output: stdout,
     });
 
   } catch (error) {
-    console.error('Error generating companies:', error);
+    console.error('[Autonomous Updater] Error:', error);
+    
+    // Check if it's a timeout error
+    if (error.killed) {
+      return res.status(504).json({ 
+        error: 'Request timeout - generation took too long',
+        details: 'The company generation process exceeded the 5-minute limit'
+      });
+    }
+
     return res.status(500).json({ 
       error: 'Failed to generate companies',
       details: error.message,
+      stderr: error.stderr,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }

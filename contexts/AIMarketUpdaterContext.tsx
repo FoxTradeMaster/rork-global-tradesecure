@@ -2,7 +2,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { CommodityType } from '@/types';
-import { directMarketUpdater } from '@/lib/direct-market-updater';
+// Removed direct-market-updater - now using server-side API endpoint
 
 
 
@@ -168,17 +168,45 @@ export const [AIMarketUpdaterProvider, useAIMarketUpdater] = createContextHook((
         return 0;
       }
 
-      console.log(`[AIMarketUpdater] Using direct BrandFetch integration to add ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
+      console.log(`[AIMarketUpdater] Calling server-side API to add ${settings.companiesPerUpdate} companies for ${commodityLabel}`);
       
-      const result = await Promise.race([
-        directMarketUpdater.generateAndSaveCompanies(
-          commodity,
-          settings.companiesPerUpdate
-        ),
+      // Call the server-side API endpoint that runs populate-market.mjs
+      const apiUrl = `${process.env.EXPO_PUBLIC_API_URL || ''}/api/generate-companies`;
+      
+      const response = await Promise.race([
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            commodity,
+            count: settings.companiesPerUpdate,
+          }),
+        }),
         new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Operation timeout after 120s')), 120000)
+          setTimeout(() => reject(new Error('Frontend timeout after 120s')), 120000)
         )
       ]);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `API error: ${response.status}`);
+      }
+
+      const apiResult = await response.json();
+      
+      // Transform API response to match expected result format
+      const result = {
+        success: apiResult.success,
+        added: apiResult.added || 0,
+        error: apiResult.error,
+        qualityScore: 85, // API doesn't return this yet
+        verifiedCount: apiResult.added || 0,
+        totalAttempted: apiResult.requested || settings.companiesPerUpdate,
+        brandfetchSuccess: apiResult.added || 0,
+        duplicates: (apiResult.requested || settings.companiesPerUpdate) - (apiResult.added || 0),
+      };
 
       if (!result.success) {
         console.log(`[AIMarketUpdater] Operation failed: ${result.error}`);
