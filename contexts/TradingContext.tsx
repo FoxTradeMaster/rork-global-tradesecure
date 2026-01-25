@@ -232,6 +232,19 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           console.log('[TradingContext] Loaded', mapped.length, 'trades from cache');
         }
 
+        // First, try to load user from AsyncStorage (instant)
+        const storedUser = await AsyncStorage.getItem('current_user');
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            setCurrentUser(user);
+            console.log('[TradingContext] Loaded user from AsyncStorage:', user.email);
+          } catch (error) {
+            console.error('[TradingContext] Error parsing stored user:', error);
+          }
+        }
+
+        // Then verify session with Supabase in the background
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Session check timeout')), 5000)
@@ -243,11 +256,12 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           session = result.data?.session;
         } catch (error) {
           console.error('[TradingContext] Session check failed or timed out:', error);
+          // Don't clear user on timeout - keep the cached user
           session = null;
         }
         
         if (session?.user) {
-          console.log('[TradingContext] Found existing Supabase session');
+          console.log('[TradingContext] Verified Supabase session');
           const user: User = {
             id: session.user.id,
             name: session.user.user_metadata?.name || 'Trade User',
@@ -256,11 +270,14 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
           };
           setCurrentUser(user);
           await AsyncStorage.setItem('current_user', JSON.stringify(user));
-          console.log('[TradingContext] Restored user from session:', user.email);
-        } else {
-          console.log('[TradingContext] No valid session found, clearing stored user');
+          console.log('[TradingContext] Updated user from session:', user.email);
+        } else if (!storedUser) {
+          // Only clear user if there was no stored user AND no session
+          console.log('[TradingContext] No session and no stored user');
           await AsyncStorage.removeItem('current_user');
           setCurrentUser(null);
+        } else {
+          console.log('[TradingContext] No active session, but keeping cached user');
         }
 
         let counterpartiesData, counterpartiesError;
@@ -372,6 +389,35 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
     };
 
     loadData();
+
+    // Set up auth state listener for automatic session updates
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[TradingContext] Auth state changed:', event);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        const user: User = {
+          id: session.user.id,
+          name: session.user.user_metadata?.name || 'Trade User',
+          role: session.user.user_metadata?.role || 'trade_originator',
+          email: session.user.email || '',
+        };
+        setCurrentUser(user);
+        await AsyncStorage.setItem('current_user', JSON.stringify(user));
+        console.log('[TradingContext] User signed in:', user.email);
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+        await AsyncStorage.removeItem('current_user');
+        console.log('[TradingContext] User signed out');
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        console.log('[TradingContext] Token refreshed for:', session.user.email);
+        // Session is still valid, no need to update user
+      }
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -448,6 +494,35 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   const setUser = async (user: User) => {
     setCurrentUser(user);
     await AsyncStorage.setItem('current_user', JSON.stringify(user));
+  };
+
+  const updateUserRole = async (newRole: User['role']) => {
+    if (!currentUser) {
+      console.error('[TradingContext] Cannot update role: no current user');
+      return;
+    }
+
+    const updatedUser = {
+      ...currentUser,
+      role: newRole,
+    };
+
+    setCurrentUser(updatedUser);
+    await AsyncStorage.setItem('current_user', JSON.stringify(updatedUser));
+
+    // Update role in Supabase user metadata
+    if (!isDemoMode) {
+      try {
+        await supabase.auth.updateUser({
+          data: { role: newRole }
+        });
+        console.log('[TradingContext] Updated user role in Supabase:', newRole);
+      } catch (error) {
+        console.error('[TradingContext] Error updating role in Supabase:', error);
+      }
+    }
+
+    console.log('[TradingContext] User role updated to:', newRole);
   };
 
   const setDemoUser = async (role: User['role'] = 'trade_originator') => {
@@ -805,6 +880,7 @@ export const [TradingProvider, useTrading] = createContextHook(() => {
   return {
     currentUser,
     setUser,
+    updateUserRole,
     setDemoUser,
     clearUser,
     counterparties,
