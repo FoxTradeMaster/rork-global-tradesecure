@@ -257,7 +257,7 @@ export default function WelcomeScreen() {
           if (error.message.includes('Invalid login credentials')) {
             Alert.alert(
               'Login Failed',
-              'Invalid email or password. Please check your credentials.\n\nIf you just signed up, make sure to:\n1. Verify your email first (check spam folder)\n2. Then return and sign in with the same credentials you used',
+              'Invalid email or password. Please check your credentials and try again.',
               [{ text: 'OK' }]
             );
             setAuthLoading(false);
