@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useTrading, usePortfolioMetrics } from '@/contexts/TradingContext';
@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
-  const { currentUser, clearUser, isDemoMode } = useTrading();
+  const { currentUser, updateUserRole, clearUser, isDemoMode } = useTrading();
   const metrics = usePortfolioMetrics();
   const { isAuthenticated, logout } = useAdminAuth();
   const { 
@@ -29,6 +29,7 @@ export default function SettingsScreen() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showUpdateLogs, setShowUpdateLogs] = useState(false);
   const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const router = useRouter();
 
   const handleManageSubscription = () => {
@@ -39,9 +40,13 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleChangeRole = async () => {
-    await clearUser();
-    router.replace('/');
+  const handleChangeRole = () => {
+    setShowRoleModal(true);
+  };
+
+  const handleSelectNewRole = async (roleId: string) => {
+    await updateUserRole(roleId as any);
+    setShowRoleModal(false);
   };
 
 
@@ -478,6 +483,54 @@ export default function SettingsScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <Modal
+        visible={showRoleModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRoleModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.roleModalContent}>
+            <Text style={styles.roleModalTitle}>Select Your Role</Text>
+            <Text style={styles.roleModalSubtitle}>Choose a role to explore different features</Text>
+            
+            <View style={styles.rolesList}>
+              {[
+                { id: 'trade_originator', title: 'Trade Originator', description: 'Create and manage trades' },
+                { id: 'compliance_officer', title: 'Compliance Officer', description: 'Ensure regulatory compliance' },
+                { id: 'risk_manager', title: 'Risk Manager', description: 'Assess counterparty risk' },
+                { id: 'legal_reviewer', title: 'Legal Reviewer', description: 'Review contracts' },
+                { id: 'senior_management', title: 'Senior Management', description: 'Oversee operations' },
+              ].map((role) => (
+                <TouchableOpacity
+                  key={role.id}
+                  style={[
+                    styles.roleOption,
+                    currentUser?.role === role.id && styles.roleOptionSelected
+                  ]}
+                  onPress={() => handleSelectNewRole(role.id)}
+                >
+                  <View>
+                    <Text style={styles.roleOptionTitle}>{role.title}</Text>
+                    <Text style={styles.roleOptionDescription}>{role.description}</Text>
+                  </View>
+                  {currentUser?.role === role.id && (
+                    <CheckCircle size={20} color="#3B82F6" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              style={styles.roleModalCloseButton}
+              onPress={() => setShowRoleModal(false)}
+            >
+              <Text style={styles.roleModalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <PaywallModal
         visible={showPaywall}
@@ -1152,5 +1205,72 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600' as const,
     color: '#EF4444',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  roleModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+  },
+  roleModalTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  roleModalSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  rolesList: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  roleOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  roleOptionSelected: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#3B82F6',
+  },
+  roleOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  roleOptionDescription: {
+    fontSize: 13,
+    color: '#64748B',
+  },
+  roleModalCloseButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+  },
+  roleModalCloseText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#64748B',
   },
 });
