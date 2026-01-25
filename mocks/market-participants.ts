@@ -902,7 +902,7 @@ export const loadImportedParticipants = async () => {
 };
 
 export const addMarketParticipants = async (participants: MarketParticipant[]) => {
-  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new participants to Supabase...');
+  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new participants to Supabase... [v2.0-RLS-FIX]');
   
   await loadImportedParticipants();
   

@@ -255,8 +255,8 @@ export default function MarketDirectoryScreen() {
         setImportedParticipants(updated);
         
         Alert.alert(
-          'Import Successful',
-          `Successfully imported ${newParticipants.length} market participants to Supabase database.`,
+          'Import Successful ✅',
+          `Successfully saved ${newParticipants.length} companies to Supabase cloud database! [v2.0]`,
           [{ text: 'OK' }]
         );
       } catch (error) {
