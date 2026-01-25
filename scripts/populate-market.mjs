@@ -171,7 +171,7 @@ async function addCompanyToDatabase(companyData, commodity) {
     const { data, error } = await supabase
       .from('market_participants')
       .insert({
-        name: companyData.name,
+        name: companyData.name,type: 'company',
         commodities: [commodity],
         logo: companyData.logo,
         description: companyData.description,
