@@ -85,18 +85,8 @@ export default function MarketDirectoryScreen() {
       console.error('[Market] ❌ Error loading AI participants:', error);
     }
     
-    try {
-      const stored = await AsyncStorage.getItem('local_imported_market_participants');
-      if (stored) {
-        const localImported = JSON.parse(stored);
-        setImportedParticipants(localImported);
-        console.log('[Market] ✅ Restored local imported participants:', localImported.length);
-      } else {
-        console.log('[Market] ⚠️ No local imported participants found');
-      }
-    } catch (error) {
-      console.error('[Market] ❌ Error loading local imported participants:', error);
-    }
+    // Data now loaded from Supabase via loadImportedParticipants() in market-participants.ts
+    console.log('[Market] Data will be loaded from Supabase database');
 
     await new Promise(resolve => setTimeout(resolve, 100));
     
@@ -258,14 +248,9 @@ export default function MarketDirectoryScreen() {
     if (newParticipants.length > 0) {
       const updated = [...importedParticipants, ...newParticipants];
       setImportedParticipants(updated);
-      addMarketParticipants(newParticipants);
       
-      try {
-        await AsyncStorage.setItem('local_imported_market_participants', JSON.stringify(updated));
-        console.log('[Market] Persisted local imported participants:', updated.length);
-      } catch (error) {
-        console.error('[Market] Error persisting local imported participants:', error);
-      }
+      // Save to Supabase database (now handled by addMarketParticipants)
+      await addMarketParticipants(newParticipants);
       
       Alert.alert(
         'Import Successful',

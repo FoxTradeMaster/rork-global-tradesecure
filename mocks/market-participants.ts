@@ -902,14 +902,88 @@ export const loadImportedParticipants = async () => {
 };
 
 export const addMarketParticipants = async (participants: MarketParticipant[]) => {
-  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new LOCAL participants (not synced to Supabase)...');
+  console.log('[MarketParticipants] 🔄 Adding', participants.length, 'new participants to Supabase...');
   
   await loadImportedParticipants();
   
   console.log('[MarketParticipants] 📊 Current state before adding: isLoaded =', isLoaded, ', existing count =', importedParticipants.length);
   
-  importedParticipants = [...importedParticipants, ...participants];
-  console.log('[MarketParticipants] ✅ Added', participants.length, 'local participants. Total local imported:', importedParticipants.length);
+  try {
+    // Prepare data for Supabase insertion
+    const supabaseData = participants.map(p => {
+      const base = {
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        headquarters: p.headquarters,
+        description: p.description,
+        verified: p.verified,
+        website: p.website,
+        commodities: p.commodities,
+      };
+
+      if (p.type === 'trading_house') {
+        const th = p as TradingHouse;
+        return {
+          ...base,
+          category: th.category,
+          offices: th.offices,
+          licenses: th.licenses,
+          specialization: th.specialization,
+          business_type: th.businessType,
+          logo: th.logo,
+          brand_color: th.brandColor,
+          email: th.email,
+          contact_links: th.contactLinks,
+          founded: th.founded,
+          trading_volume: th.tradingVolume,
+        };
+      } else if (p.type === 'broker') {
+        const b = p as Broker;
+        return {
+          ...base,
+          broker_type: b.brokerType,
+          regulated_by: b.regulatedBy,
+          clearing_relationships: b.clearingRelationships,
+          license_numbers: b.licenseNumbers,
+        };
+      } else {
+        const mp = p as MarketPlatform;
+        return {
+          ...base,
+          category: [mp.category],
+          framework: mp.framework,
+          members: mp.members,
+        };
+      }
+    });
+
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('market_participants')
+      .insert(supabaseData)
+      .select();
+
+    if (error) {
+      console.error('[MarketParticipants] ❌ Error saving to Supabase:', JSON.stringify({
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      }, null, 2));
+      throw error;
+    }
+
+    console.log('[MarketParticipants] ✅ Successfully saved', participants.length, 'participants to Supabase');
+    
+    // Add to local cache
+    supabaseParticipants = [...supabaseParticipants, ...participants];
+    
+    console.log('[MarketParticipants] ✅ Added', participants.length, 'participants. Total in Supabase:', supabaseParticipants.length);
+  } catch (error) {
+    console.error('[MarketParticipants] ❌ CRITICAL: Failed to save participants:', error);
+    throw error;
+  }
 };
 
 export const getImportedParticipants = (): MarketParticipant[] => {
