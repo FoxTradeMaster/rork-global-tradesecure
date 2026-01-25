@@ -246,17 +246,27 @@ export default function MarketDirectoryScreen() {
     }).filter(p => p.name.trim() !== '');
 
     if (newParticipants.length > 0) {
-      const updated = [...importedParticipants, ...newParticipants];
-      setImportedParticipants(updated);
-      
-      // Save to Supabase database (now handled by addMarketParticipants)
-      await addMarketParticipants(newParticipants);
-      
-      Alert.alert(
-        'Import Successful',
-        `Successfully imported ${newParticipants.length} market participants.`,
-        [{ text: 'OK' }]
-      );
+      try {
+        // Save to Supabase database (now handled by addMarketParticipants)
+        await addMarketParticipants(newParticipants);
+        
+        // Only update local state if Supabase save succeeds
+        const updated = [...importedParticipants, ...newParticipants];
+        setImportedParticipants(updated);
+        
+        Alert.alert(
+          'Import Successful',
+          `Successfully imported ${newParticipants.length} market participants to Supabase database.`,
+          [{ text: 'OK' }]
+        );
+      } catch (error) {
+        console.error('[Market] Import failed:', error);
+        Alert.alert(
+          'Import Failed',
+          `Failed to save to database: ${error instanceof Error ? error.message : String(error)}`,
+          [{ text: 'OK' }]
+        );
+      }
     } else {
       Alert.alert(
         'Import Failed',
