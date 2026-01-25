@@ -924,36 +924,38 @@ export const addMarketParticipants = async (participants: MarketParticipant[]) =
 
       if (p.type === 'trading_house') {
         const th = p as TradingHouse;
-        return {
+        const data: any = {
           ...base,
-          category: th.category,
-          offices: th.offices,
-          licenses: th.licenses,
-          specialization: th.specialization,
-          business_type: th.businessType,
-          logo: th.logo,
-          brand_color: th.brandColor,
-          email: th.email,
-          contact_links: th.contactLinks,
-          founded: th.founded,
-          trading_volume: th.tradingVolume,
+          category: th.category || [],
+          offices: th.offices || [],
+          licenses: th.licenses || [],
+          specialization: th.specialization || null,
+          business_type: th.businessType || null,
         };
+        // Only include optional fields if they have values
+        if (th.logo) data.logo = th.logo;
+        if (th.brandColor) data.brand_color = th.brandColor;
+        if (th.email) data.email = th.email;
+        if (th.contactLinks) data.contact_links = th.contactLinks;
+        if (th.founded) data.founded = th.founded;
+        if (th.tradingVolume) data.trading_volume = th.tradingVolume;
+        return data;
       } else if (p.type === 'broker') {
         const b = p as Broker;
         return {
           ...base,
-          broker_type: b.brokerType,
-          regulated_by: b.regulatedBy,
-          clearing_relationships: b.clearingRelationships,
-          license_numbers: b.licenseNumbers,
+          broker_type: b.brokerType || [],
+          regulated_by: b.regulatedBy || [],
+          clearing_relationships: b.clearingRelationships || [],
+          license_numbers: b.licenseNumbers || [],
         };
       } else {
         const mp = p as MarketPlatform;
         return {
           ...base,
           category: [mp.category],
-          framework: mp.framework,
-          members: mp.members,
+          framework: mp.framework || null,
+          members: mp.members || null,
         };
       }
     });
