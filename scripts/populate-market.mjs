@@ -8,7 +8,7 @@
  * 
  * Usage:
  *   node populate-market.mjs --commodity iron_ore --count 50
- *   node populate-market.mjs --build-all --target 500
+ *   node populate-market.mjs --build-all --target 50
  */
 
 import OpenAI from 'openai';
@@ -197,12 +197,10 @@ async function addCompanyToDatabase(companyData, commodity) {
 }
 
 /**
- * Main update function
+ * Update market directory for a single commodity
  */
-async function updateMarketDirectory(commodity, targetCount) {
-  console.log(`\n🚀 Starting Autonomous Market Directory Update`);
-  console.log(`📊 Target: ${targetCount} companies per commodity (${targetCount * 8} total)\n`);
-  console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+async function updateSingleCommodity(commodity, targetCount) {
+  console.log(`\n📦 Running updater for ${commodity} (target: ${targetCount} companies)\n`);
 
   const stats = {
     generated: 0,
@@ -211,8 +209,6 @@ async function updateMarketDirectory(commodity, targetCount) {
     skipped: 0,
     failed: 0,
   };
-
-  console.log(`\n📦 Running updater for ${commodity} (target: ${targetCount} companies)\n`);
 
   // Generate company names
   const companyNames = await generateCompanyNames(commodity, targetCount);
@@ -261,28 +257,96 @@ async function updateMarketDirectory(commodity, targetCount) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  console.log(`\n\n✅ Update Complete!`);
-  console.log(`\n📊 Final Statistics:`);
-  console.log(`   Generated: ${stats.generated} companies`);
-  console.log(`   Verified: ${stats.verified} companies`);
-  console.log(`   Added: ${stats.added} companies`);
-  console.log(`   Skipped: ${stats.skipped} companies (duplicates)`);
-  console.log(`   Failed: ${stats.failed} companies`);
-  console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
-
   return stats;
+}
+
+/**
+ * Main update function - supports both single commodity and build-all modes
+ */
+async function updateMarketDirectory(options) {
+  const { buildAll, commodity, targetCount } = options;
+  
+  console.log(`\n🚀 Starting Autonomous Market Directory Update`);
+  
+  if (buildAll) {
+    const commodityList = Object.keys(COMMODITIES);
+    console.log(`📊 Target: ${targetCount} companies per commodity (${targetCount * commodityList.length} total)\n`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+    
+    const allStats = {
+      generated: 0,
+      verified: 0,
+      added: 0,
+      skipped: 0,
+      failed: 0,
+    };
+
+    // Process all commodities
+    for (const comm of commodityList) {
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`📦 Processing commodity: ${comm.toUpperCase()} (${COMMODITIES[comm]})`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      const stats = await updateSingleCommodity(comm, targetCount);
+      
+      // Aggregate stats
+      allStats.generated += stats.generated;
+      allStats.verified += stats.verified;
+      allStats.added += stats.added;
+      allStats.skipped += stats.skipped;
+      allStats.failed += stats.failed;
+      
+      console.log(`\n✅ ${comm} Complete!`);
+      console.log(`   Generated: ${stats.generated} | Verified: ${stats.verified} | Added: ${stats.added} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`);
+    }
+
+    console.log(`\n\n${'='.repeat(60)}`);
+    console.log(`🎉 ALL COMMODITIES COMPLETE!`);
+    console.log(`${'='.repeat(60)}\n`);
+    console.log(`📊 Final Statistics:`);
+    console.log(`   Generated: ${allStats.generated} companies`);
+    console.log(`   Verified: ${allStats.verified} companies`);
+    console.log(`   Added: ${allStats.added} companies`);
+    console.log(`   Skipped: ${allStats.skipped} companies (duplicates)`);
+    console.log(`   Failed: ${allStats.failed} companies`);
+    console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
+
+    return allStats;
+  } else {
+    // Single commodity mode
+    console.log(`📊 Target: ${targetCount} companies for ${commodity}\n`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+    
+    const stats = await updateSingleCommodity(commodity, targetCount);
+    
+    console.log(`\n\n✅ Update Complete!`);
+    console.log(`\n📊 Final Statistics:`);
+    console.log(`   Generated: ${stats.generated} companies`);
+    console.log(`   Verified: ${stats.verified} companies`);
+    console.log(`   Added: ${stats.added} companies`);
+    console.log(`   Skipped: ${stats.skipped} companies (duplicates)`);
+    console.log(`   Failed: ${stats.failed} companies`);
+    console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
+
+    return stats;
+  }
 }
 
 // Parse command line arguments
 const args = process.argv.slice(2);
+const buildAllFlag = args.includes('--build-all');
 const commodityArg = args.find(arg => arg.startsWith('--commodity='));
-const countArg = args.find(arg => arg.startsWith('--count='));
+const countArg = args.find(arg => arg.startsWith('--count=')) || args.find(arg => arg.startsWith('--target='));
 
 const commodity = commodityArg ? commodityArg.split('=')[1] : 'gold';
 const count = countArg ? parseInt(countArg.split('=')[1]) : 50;
 
 // Run the updater
-updateMarketDirectory(commodity, count)
+updateMarketDirectory({
+  buildAll: buildAllFlag,
+  commodity: commodity,
+  targetCount: count,
+})
   .then(() => {
     console.log('✅ Autonomous updater completed successfully!');
     process.exit(0);
