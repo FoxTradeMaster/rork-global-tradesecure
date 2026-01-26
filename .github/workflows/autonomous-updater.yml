@@ -38,15 +38,8 @@ jobs:
           echo "📊 Target: 50 companies per commodity (400 total)"
           echo "⏰ Started at: $(date)"
           
-          # Run updater for each commodity
-          bash scripts/run-updater.sh gold 50
-          bash scripts/run-updater.sh fuel_oil 50
-          bash scripts/run-updater.sh steam_coal 50
-          bash scripts/run-updater.sh anthracite_coal 50
-          bash scripts/run-updater.sh urea 50
-          bash scripts/run-updater.sh edible_oils 50
-          bash scripts/run-updater.sh bio_fuels 50
-          bash scripts/run-updater.sh iron_ore 50
+          # Run updater with --build-all flag to process all commodities
+          node scripts/populate-market.mjs --build-all --target 50
           
           echo "✅ Update Complete!"
           echo "⏰ Finished at: $(date)"
