@@ -8,7 +8,7 @@
  * 
  * Usage:
  *   node populate-market.mjs --commodity iron_ore --count 50
- *   node populate-market.mjs --build-all --target 500
+ *   node populate-market.mjs --build-all --target 50
  */
 
 import OpenAI from 'openai';
@@ -43,7 +43,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
  * Generate company names using OpenAI
  */
 async function generateCompanyNames(commodity, count) {
-  console.log(`ð¤ Generating ${count} ${commodity} companies using AI...`);
+  console.log(`🤖 Generating ${count} ${commodity} companies using AI...`);
   
   const prompt = `Generate a list of ${count} real, verified companies that operate in the ${COMMODITIES[commodity]} industry. 
 Include companies from different regions (North America, Europe, Asia, Africa, South America, Australia).
@@ -63,10 +63,10 @@ Format: ["Company Name 1", "Company Name 2", ...]`;
     const jsonContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
     const companies = JSON.parse(jsonContent);
-    console.log(`â Generated ${companies.length} company names`);
+    console.log(`✅ Generated ${companies.length} company names`);
     return companies;
   } catch (error) {
-    console.error('â Error generating companies:', error.message);
+    console.error('❌ Error generating companies:', error.message);
     throw error;
   }
 }
@@ -135,7 +135,7 @@ async function verifyWithBrandFetch(companyName) {
       website: `https://${domain}`,
     };
   } catch (error) {
-    console.error(`â ï¸  BrandFetch error for ${companyName}:`, error.message);
+    console.error(`⚠️  BrandFetch error for ${companyName}:`, error.message);
     return null;
   }
 }
@@ -148,13 +148,13 @@ async function addCompanyToDatabase(companyData, commodity) {
     // Check if company already exists by domain
     if (companyData.domain) {
       const { data: existing } = await supabase
-        .from('market_directory')
+        .from('market_participants')
         .select('id')
         .eq('domain', companyData.domain)
         .single();
 
       if (existing) {
-        console.log(`â­ï¸  Skipped: ${companyData.name} (domain already exists)`);
+        console.log(`⏭️  Skipped: ${companyData.name} (domain already exists)`);
         return { success: false, reason: 'duplicate' };
       }
     }
@@ -169,11 +169,11 @@ async function addCompanyToDatabase(companyData, commodity) {
 
     // Insert company
     const { data, error } = await supabase
-      .from('market_directory')
+      .from('market_participants')
       .insert({
-        name: companyData.name,
-        commodity: commodity,
-        logo_url: companyData.logo,
+        name: companyData.name,type: 'company',
+        commodities: [commodity],
+        logo: companyData.logo,
         description: companyData.description,
         website: companyData.website,
         domain: companyData.domain,
@@ -184,25 +184,23 @@ async function addCompanyToDatabase(companyData, commodity) {
       .single();
 
     if (error) {
-      console.error(`â Database error for ${companyData.name}:`, error.message);
+      console.error(`❌ Database error for ${companyData.name}:`, error.message);
       return { success: false, reason: 'database_error', error };
     }
 
-    console.log(`â Added: ${companyData.name} (quality: ${qualityScore}%)`);
+    console.log(`✅ Added: ${companyData.name} (quality: ${qualityScore}%)`);
     return { success: true, data };
   } catch (error) {
-    console.error(`â Error adding ${companyData.name}:`, error.message);
+    console.error(`❌ Error adding ${companyData.name}:`, error.message);
     return { success: false, reason: 'exception', error };
   }
 }
 
 /**
- * Main update function
+ * Update market directory for a single commodity
  */
-async function updateMarketDirectory(commodity, targetCount) {
-  console.log(`\nð Starting Autonomous Market Directory Update`);
-  console.log(`ð Target: ${targetCount} companies per commodity (${targetCount * 8} total)\n`);
-  console.log(`â° Started at: ${new Date().toISOString()}\n`);
+async function updateSingleCommodity(commodity, targetCount) {
+  console.log(`\n📦 Running updater for ${commodity} (target: ${targetCount} companies)\n`);
 
   const stats = {
     generated: 0,
@@ -212,15 +210,13 @@ async function updateMarketDirectory(commodity, targetCount) {
     failed: 0,
   };
 
-  console.log(`\nð¦ Running updater for ${commodity} (target: ${targetCount} companies)\n`);
-
   // Generate company names
   const companyNames = await generateCompanyNames(commodity, targetCount);
   stats.generated += companyNames.length;
 
   // Process each company
   for (const companyName of companyNames) {
-    console.log(`\nð Processing: ${companyName}`);
+    console.log(`\n🔍 Processing: ${companyName}`);
 
     // Verify with BrandFetch
     const brandData = await verifyWithBrandFetch(companyName);
@@ -261,33 +257,101 @@ async function updateMarketDirectory(commodity, targetCount) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  console.log(`\n\nâ Update Complete!`);
-  console.log(`\nð Final Statistics:`);
-  console.log(`   Generated: ${stats.generated} companies`);
-  console.log(`   Verified: ${stats.verified} companies`);
-  console.log(`   Added: ${stats.added} companies`);
-  console.log(`   Skipped: ${stats.skipped} companies (duplicates)`);
-  console.log(`   Failed: ${stats.failed} companies`);
-  console.log(`\nâ° Completed at: ${new Date().toISOString()}\n`);
-
   return stats;
+}
+
+/**
+ * Main update function - supports both single commodity and build-all modes
+ */
+async function updateMarketDirectory(options) {
+  const { buildAll, commodity, targetCount } = options;
+  
+  console.log(`\n🚀 Starting Autonomous Market Directory Update`);
+  
+  if (buildAll) {
+    const commodityList = Object.keys(COMMODITIES);
+    console.log(`📊 Target: ${targetCount} companies per commodity (${targetCount * commodityList.length} total)\n`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+    
+    const allStats = {
+      generated: 0,
+      verified: 0,
+      added: 0,
+      skipped: 0,
+      failed: 0,
+    };
+
+    // Process all commodities
+    for (const comm of commodityList) {
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`📦 Processing commodity: ${comm.toUpperCase()} (${COMMODITIES[comm]})`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      const stats = await updateSingleCommodity(comm, targetCount);
+      
+      // Aggregate stats
+      allStats.generated += stats.generated;
+      allStats.verified += stats.verified;
+      allStats.added += stats.added;
+      allStats.skipped += stats.skipped;
+      allStats.failed += stats.failed;
+      
+      console.log(`\n✅ ${comm} Complete!`);
+      console.log(`   Generated: ${stats.generated} | Verified: ${stats.verified} | Added: ${stats.added} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`);
+    }
+
+    console.log(`\n\n${'='.repeat(60)}`);
+    console.log(`🎉 ALL COMMODITIES COMPLETE!`);
+    console.log(`${'='.repeat(60)}\n`);
+    console.log(`📊 Final Statistics:`);
+    console.log(`   Generated: ${allStats.generated} companies`);
+    console.log(`   Verified: ${allStats.verified} companies`);
+    console.log(`   Added: ${allStats.added} companies`);
+    console.log(`   Skipped: ${allStats.skipped} companies (duplicates)`);
+    console.log(`   Failed: ${allStats.failed} companies`);
+    console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
+
+    return allStats;
+  } else {
+    // Single commodity mode
+    console.log(`📊 Target: ${targetCount} companies for ${commodity}\n`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+    
+    const stats = await updateSingleCommodity(commodity, targetCount);
+    
+    console.log(`\n\n✅ Update Complete!`);
+    console.log(`\n📊 Final Statistics:`);
+    console.log(`   Generated: ${stats.generated} companies`);
+    console.log(`   Verified: ${stats.verified} companies`);
+    console.log(`   Added: ${stats.added} companies`);
+    console.log(`   Skipped: ${stats.skipped} companies (duplicates)`);
+    console.log(`   Failed: ${stats.failed} companies`);
+    console.log(`\n⏰ Completed at: ${new Date().toISOString()}\n`);
+
+    return stats;
+  }
 }
 
 // Parse command line arguments
 const args = process.argv.slice(2);
+const buildAllFlag = args.includes('--build-all');
 const commodityArg = args.find(arg => arg.startsWith('--commodity='));
-const countArg = args.find(arg => arg.startsWith('--count='));
+const countArg = args.find(arg => arg.startsWith('--count=')) || args.find(arg => arg.startsWith('--target='));
 
 const commodity = commodityArg ? commodityArg.split('=')[1] : 'gold';
 const count = countArg ? parseInt(countArg.split('=')[1]) : 50;
 
 // Run the updater
-updateMarketDirectory(commodity, count)
+updateMarketDirectory({
+  buildAll: buildAllFlag,
+  commodity: commodity,
+  targetCount: count,
+})
   .then(() => {
-    console.log('â Autonomous updater completed successfully!');
+    console.log('✅ Autonomous updater completed successfully!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('â Autonomous updater failed:', error);
+    console.error('❌ Autonomous updater failed:', error);
     process.exit(1);
   });
