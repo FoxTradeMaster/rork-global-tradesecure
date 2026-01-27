@@ -113,25 +113,29 @@ export default function MarketDirectoryScreen() {
     return total;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
+const filteredParticipants = useMemo(() => {
+  return allParticipants.filter(participant => {
+    // Safe string matching with fallbacks to prevent crashes from undefined/null values
+    const name = (participant.name || '').toLowerCase();
+    const description = (participant.description || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    
+    const matchesSearch = name.includes(query) || description.includes(query);
+    
+    const matchesType = selectedType === 'all' || participant.type === selectedType;
+    
+    const matchesCommodity = selectedCommodity === 'all' || 
+                             (participant.commodities || []).includes(selectedCommodity as any);
+    
+    const matchesBusinessType = selectedBusinessType === 'all' || 
+                                (participant.type === 'trading_house' && 
+                                 (participant.businessType === selectedBusinessType || 
+                                  participant.businessType === 'both'));
+    
+    return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
+  });
+}, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
 
-  const filteredParticipants = useMemo(() => {
-    return allParticipants.filter(participant => {
-      const matchesSearch = participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           participant.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesType = selectedType === 'all' || participant.type === selectedType;
-      
-      const matchesCommodity = selectedCommodity === 'all' || 
-                               participant.commodities.includes(selectedCommodity as any);
-      
-      const matchesBusinessType = selectedBusinessType === 'all' || 
-                                  (participant.type === 'trading_house' && 
-                                   (participant.businessType === selectedBusinessType || 
-                                    participant.businessType === 'both'));
-      
-      return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
-    });
-  }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
 
   const stats = useMemo(() => {
     if (isLoadingData) {
