@@ -790,13 +790,12 @@ let isLoaded = false;
 let loadingPromise: Promise<void> | null = null;
 
 export const baseMarketParticipants: MarketParticipant[] = [
-  ...tradingHouses,
-  ...edibleOilsBuyers,
-  ...edibleOilsBuyersExtended,
-  ...brokers,
-  ...platforms,
+  // Mock data disabled - using ONLY real Supabase data
+// Users want real data, not mock data!
+export const baseMarketParticipants: MarketParticipant[] = [
+  // Keeping only a few examples for demo mode fallback
+  ...tradingHouses.slice(0, 3), // Keep 3 major trading houses for demo
 ];
-
 export const allMarketParticipants: MarketParticipant[] = baseMarketParticipants;
 
 export const getAllMarketParticipants = (): MarketParticipant[] => {
