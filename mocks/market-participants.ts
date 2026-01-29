@@ -802,7 +802,7 @@ export const getAllMarketParticipants = (): MarketParticipant[] => {
   if (!isLoaded) {
     console.warn('[MarketParticipants] ⚠️ WARNING: getAllMarketParticipants called before data loaded!');
   }
-  const all = [...baseMarketParticipants, ...supabaseParticipants, ...importedParticipants];
+  const all = [...supabaseParticipants, ...importedParticipants, ...baseMarketParticipants];
   console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', supabase =', supabaseParticipants.length, ', local imported =', importedParticipants.length, ', total =', all.length);
   return all;
 };
