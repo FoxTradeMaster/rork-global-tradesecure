@@ -115,11 +115,10 @@ export default function MarketDirectoryScreen() {
   }, [importedParticipants, refreshKey]);
 const filteredParticipants = useMemo(() => {
   return allParticipants.filter(participant => {
-    // Safe string matching with fallbacks to prevent crashes from undefined/null values
-    const name = (participant.name || '').toLowerCase();
-    const description = (participant.description || '').toLowerCase();
-    const query = searchQuery.toLowerCase();
-    
+ // Ultra-safe string matching with String() conversion to handle null/undefined/any type
+    const name = String(participant.name || '').toLowerCase();
+const description = String(participant.description || '').toLowerCase();
+const query = String(searchQuery || '').toLowerCase();
     const matchesSearch = name.includes(query) || description.includes(query);
     
     const matchesType = selectedType === 'all' || participant.type === selectedType;
