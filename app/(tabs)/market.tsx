@@ -125,10 +125,17 @@ const filteredParticipants = useMemo(() => {
     return [];
   }
   return allParticipants.filter(participant => {
-      const name = (participant.name || '').toLowerCase();
-      const description = (participant.description || '').toLowerCase();
-      const query = (debouncedSearchQuery || '').toLowerCase();
-      const matchesSearch = name.includes(query) || description.includes(query);
+      const name = String(participant?.name || '').toLowerCase();
+const description = String(participant?.description || '').toLowerCase();
+const headquarters = String(participant?.headquarters || '').toLowerCase();
+const specialization = String(participant?.specialization || '').toLowerCase();
+const query = String(debouncedSearchQuery || '').toLowerCase();
+const matchesSearch = name.includes(query) || 
+                      description.includes(query) || 
+                      headquarters.includes(query) ||
+                      specialization.includes(query);
+
+
       
       const matchesType = selectedType === 'all' || participant.type === selectedType;
       
