@@ -1,3 +1,4 @@
+// Force redeploy - Jan 30, 2026
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useMemo, useCallback } from 'react';
