@@ -538,14 +538,14 @@ const query = String(searchQuery || '').toLowerCase();
               </Text>
 
               <View style={styles.commodityTags}>
-                {participant.commodities.slice(0, 3).map(commodity => (
+                {(participant.commodities || []).slice(0, 3).map(commodity => (
                   <View key={commodity} style={styles.commodityTag}>
                     <Text style={styles.commodityTagText}>{getCommodityLabel(commodity)}</Text>
                   </View>
                 ))}
-                {participant.commodities.length > 3 && (
+                {(participant.commodities || []).length > 3 && (
                   <View style={styles.commodityTag}>
-                    <Text style={styles.commodityTagText}>+{participant.commodities.length - 3}</Text>
+                    <Text style={styles.commodityTagText}>+{(participant.commodities || []).length - 3}</Text>
                   </View>
                 )}
               </View>
@@ -657,7 +657,7 @@ const query = String(searchQuery || '').toLowerCase();
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Commodities</Text>
                     <View style={styles.detailCommodities}>
-                      {selectedParticipant.commodities.map(commodity => (
+                      {(selectedParticipant.commodities || []).map(commodity => (
                         <View key={commodity} style={styles.detailCommodityChip}>
                           <Text style={styles.detailCommodityText}>{getCommodityLabel(commodity)}</Text>
                         </View>
