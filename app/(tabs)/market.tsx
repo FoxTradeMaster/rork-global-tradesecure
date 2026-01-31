@@ -466,8 +466,7 @@ const filteredParticipants = useMemo(() => {
           <Text style={styles.resultsCount}>
             {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
           </Text>
-
-          {filteredParticipants.map(participant => {
+          {filteredParticipants.slice(0, 50).map(participant => {
             const isSelected = selectedCompanies.find(p => p.id === participant.id);
             const verification = verifications[participant.id];
             const avgRating = getAverageRating(participant.id);
