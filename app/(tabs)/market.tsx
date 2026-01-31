@@ -1,7 +1,7 @@
 // Force redeploy - Jan 31, 2026
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { 
@@ -53,6 +53,7 @@ export default function MarketDirectoryScreen() {
   const { verifications, getAverageRating } = useMarket();
   const { currentUser } = useTrading();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
   const [selectedBusinessType, setSelectedBusinessType] = useState<'all' | 'buyer' | 'seller' | 'both'>('all');
@@ -103,8 +104,13 @@ export default function MarketDirectoryScreen() {
       loadAllParticipants();
     }, [loadAllParticipants])
   );
-
-
+ // Debounce search query to prevent crash from rapid re-renders
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
@@ -121,7 +127,7 @@ const filteredParticipants = useMemo(() => {
   return allParticipants.filter(participant => {
       const name = (participant.name || '').toLowerCase();
       const description = (participant.description || '').toLowerCase();
-      const query = (searchQuery || '').toLowerCase();
+      const query = (debouncedSearchQuery || '').toLowerCase();
       const matchesSearch = name.includes(query) || description.includes(query);
       
       const matchesType = selectedType === 'all' || participant.type === selectedType;
@@ -136,7 +142,7 @@ const filteredParticipants = useMemo(() => {
       
       return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
     });
-  }, [allParticipants, searchQuery, selectedType, selectedCommodity, selectedBusinessType]);
+}, [allParticipants, debouncedSearchQuery, selectedType, selectedCommodity, selectedBusinessType]);
 
 
 
