@@ -49,7 +49,7 @@ const MARKET_IMPORT_FIELDS = [
   { field: 'type', label: 'Company Type', required: false },
 ];
 
-export default function MarketDirectoryScreen() {
+export function MarketDirectoryScreen() {
   const { verifications, getAverageRating } = useMarket();
   const { currentUser } = useTrading();
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -1636,3 +1636,17 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
 });
+
+
+// Wrap in Error Boundary to catch crashes
+import ErrorBoundary from '../../components/ErrorBoundary';
+
+export default function MarketScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary componentName="Market Directory">
+      <MarketDirectoryScreen />
+    </ErrorBoundary>
+  );
+}
+
+
