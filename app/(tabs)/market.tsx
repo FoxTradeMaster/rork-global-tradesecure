@@ -115,7 +115,10 @@ export default function MarketDirectoryScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
 const filteredParticipants = useMemo(() => {
-    return allParticipants.filter(participant => {
+  if (!Array.isArray(allParticipants)) {
+    return [];
+  }
+  return allParticipants.filter(participant => {
       const name = (participant.name || '').toLowerCase();
       const description = (participant.description || '').toLowerCase();
       const query = (searchQuery || '').toLowerCase();
