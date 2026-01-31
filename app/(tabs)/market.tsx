@@ -114,24 +114,27 @@ export default function MarketDirectoryScreen() {
     return total;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
-const filteredParticipants = allParticipants.filter(participant => {
-  const name = (participant.name || '').toLowerCase();
-  const description = (participant.description || '').toLowerCase();
-  const query = (searchQuery || '').toLowerCase();
-  const matchesSearch = name.includes(query) || description.includes(query);
-  
-  const matchesType = selectedType === 'all' || participant.type === selectedType;
-  
-  const matchesCommodity = selectedCommodity === 'all' || 
-                           (participant.commodities || []).includes(selectedCommodity as any);
-  
-  const matchesBusinessType = selectedBusinessType === 'all' || 
-                              (participant.type === 'trading_house' && 
-                               (participant.businessType === selectedBusinessType || 
-                                participant.businessType === 'both'));
-  
-  return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
-});
+const filteredParticipants = useMemo(() => {
+    return allParticipants.filter(participant => {
+      const name = (participant.name || '').toLowerCase();
+      const description = (participant.description || '').toLowerCase();
+      const query = (searchQuery || '').toLowerCase();
+      const matchesSearch = name.includes(query) || description.includes(query);
+      
+      const matchesType = selectedType === 'all' || participant.type === selectedType;
+      
+      const matchesCommodity = selectedCommodity === 'all' || 
+                               (participant.commodities || []).includes(selectedCommodity as any);
+      
+      const matchesBusinessType = selectedBusinessType === 'all' || 
+                                  (participant.type === 'trading_house' && 
+                                   ((participant as TradingHouse).businessType === selectedBusinessType || 
+                                    (participant as TradingHouse).businessType === 'both'));
+      
+      return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
+    });
+  }, [allParticipants, searchQuery, selectedType, selectedCommodity, selectedBusinessType]);
+
 
 
   const stats = useMemo(() => {
