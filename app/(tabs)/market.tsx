@@ -501,7 +501,7 @@ const query = String(searchQuery || '').toLowerCase();
                     </View>
                     <View style={styles.participantMeta}>
                       <MapPin size={12} color="#6B7280" />
-                      <Text style={styles.participantLocation}>{participant.headquarters}</Text>
+                      <Text style={styles.participantLocation}>{participant.headquarters || 'Unknown'}</Text>
                     </View>
                   </View>
                 </View>
@@ -533,11 +533,9 @@ const query = String(searchQuery || '').toLowerCase();
                   <Text style={styles.ratingLabel}>• Tap to review</Text>
                 </TouchableOpacity>
               )}
-
               <Text style={styles.participantDescription} numberOfLines={2}>
-                {participant.description}
-              </Text>
-
+  {participant.description || 'No description available'}
+</Text>
               <View style={styles.commodityTags}>
                 {(participant.commodities || []).slice(0, 3).map(commodity => (
                   <View key={commodity} style={styles.commodityTag}>
@@ -555,8 +553,8 @@ const query = String(searchQuery || '').toLowerCase();
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Specialization:</Text>
                   <Text style={styles.footerValue} numberOfLines={1}>
-                    {(participant as TradingHouse).specialization}
-                  </Text>
+  {(participant as TradingHouse).specialization || 'General trading'}
+</Text>
                 </View>
               )}
 
@@ -564,7 +562,7 @@ const query = String(searchQuery || '').toLowerCase();
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Regulated by:</Text>
                   <View style={styles.regulationTags}>
-                    {(participant as Broker).regulatedBy.slice(0, 3).map(auth => (
+                    {((participant as Broker).regulatedBy || []).slice(0, 3).map(auth => (
                       <View key={auth} style={styles.regulationTag}>
                         <Text style={styles.regulationTagText}>{auth}</Text>
                       </View>
@@ -577,7 +575,8 @@ const query = String(searchQuery || '').toLowerCase();
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Framework:</Text>
                   <Text style={styles.footerValue} numberOfLines={1}>
-                    {(participant as MarketPlatform).framework}
+  {(participant as MarketPlatform).framework || 'Standard framework'}
+</Text>
                   </Text>
                 </View>
               )}
@@ -744,7 +743,7 @@ const query = String(searchQuery || '').toLowerCase();
                       <View style={styles.detailSection}>
                         <Text style={styles.detailSectionTitle}>Regulatory Authorities</Text>
                         <View style={styles.regulationList}>
-                          {(selectedParticipant as Broker).regulatedBy.map(auth => (
+                          {((selectedParticipant as Broker).regulatedBy || []).map(auth => (
                             <View key={auth} style={styles.regulationChip}>
                               <Shield size={14} color="#10B981" />
                               <Text style={styles.regulationChipText}>{auth}</Text>
