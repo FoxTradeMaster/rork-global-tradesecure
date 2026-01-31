@@ -788,6 +788,9 @@ let importedParticipants: MarketParticipant[] = [];
 let supabaseParticipants: MarketParticipant[] = [];
 let isLoaded = false;
 let loadingPromise: Promise<void> | null = null;
+let cachedAllParticipants: MarketParticipant[] | null = null;
+let lastCacheKey = '';
+
 export const baseMarketParticipants: MarketParticipant[] = [
   // Keeping only a few examples for demo mode fallback
   ...tradingHouses.slice(0, 3), // Keep 3 major trading houses for demo
@@ -795,13 +798,27 @@ export const baseMarketParticipants: MarketParticipant[] = [
 export const allMarketParticipants: MarketParticipant[] = baseMarketParticipants;
 
 export const getAllMarketParticipants = (): MarketParticipant[] => {
+  // Create cache key based on array lengths to detect changes
+  const cacheKey = `<LaTex>${supabaseParticipants.length}-$</LaTex>{importedParticipants.length}-${baseMarketParticipants.length}`;
+  
+  // Return cached result if data hasn't changed
+  if (cachedAllParticipants && cacheKey === lastCacheKey) {
+    return cachedAllParticipants;
+  }
+  
   if (!isLoaded) {
     console.warn('[MarketParticipants] ⚠️ WARNING: getAllMarketParticipants called before data loaded!');
   }
+  
+  // Recalculate and cache
   const all = [...supabaseParticipants, ...importedParticipants, ...baseMarketParticipants];
-  console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', supabase =', supabaseParticipants.length, ', local imported =', importedParticipants.length, ', total =', all.length);
+  cachedAllParticipants = all;
+  lastCacheKey = cacheKey;
+  
+  console.log('[MarketParticipants] 📊 getAllMarketParticipants: base =', baseMarketParticipants.length, ', supabase =', supabaseParticipants.length, ', local imported =', importedParticipants.length, ', total =', all.length, '(cached)');
   return all;
 };
+
 
 export const loadImportedParticipants = async () => {
   if (isLoaded) {
