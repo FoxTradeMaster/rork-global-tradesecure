@@ -577,13 +577,11 @@ const query = String(searchQuery || '').toLowerCase();
                   <Text style={styles.footerValue} numberOfLines={1}>
   {(participant as MarketPlatform).framework || 'Standard framework'}
 </Text>
-                  </Text>
                 </View>
               )}
             </TouchableOpacity>
             );
           })}
-
           {filteredParticipants.length === 0 && (
             <View style={styles.emptyState}>
               <Search size={48} color="#374151" />
