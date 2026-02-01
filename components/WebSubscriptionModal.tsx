@@ -17,8 +17,25 @@ export function WebSubscriptionModal({ visible, onClose, onSubscribe }: WebSubsc
     setSelectedPlan(planId);
     
     try {
-      // Create PayPal subscription
-      const subscription = await createPayPalSubscription(planId);
+      // Call server-side API to create PayPal subscription
+      const response = await fetch('/api/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId,
+          returnUrl: typeof window !== 'undefined' ? `${window.location.origin}/subscription/success` : undefined,
+          cancelUrl: typeof window !== 'undefined' ? `${window.location.origin}/subscription/cancel` : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create subscription');
+      }
+
+      const subscription = await response.json();
       
       // Find the approval URL
       const approvalUrl = subscription.links?.find(
@@ -36,9 +53,9 @@ export function WebSubscriptionModal({ visible, onClose, onSubscribe }: WebSubsc
       if (onSubscribe) {
         await onSubscribe(planId);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Subscription error:', error);
-      alert('Failed to start subscription. Please try again.');
+      alert(`Failed to start subscription: ${error.message}`);
       setIsLoading(false);
       setSelectedPlan(null);
     }
