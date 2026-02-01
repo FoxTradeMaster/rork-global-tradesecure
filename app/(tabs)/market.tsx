@@ -1,5 +1,5 @@
 // BRAND NEW Market Directory Component - Built from scratch for reliability
-// Force redeploy - Jan 31, 2026 - V2.1
+// Force redeploy - Jan 31, 2026 - V2.2
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar } from 'react-native';
 import { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
