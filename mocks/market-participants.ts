@@ -838,7 +838,7 @@ export const loadImportedParticipants = async () => {
     try {
       console.log('[MarketParticipants] 🔄 Loading participants from Supabase shared database...');
       
-      const { data: supabaseData, error: supabaseError } = await supabaseAdmin
+      const { data: supabaseData, error: supabaseError } = await supabase
         .from('market_participants')
         .select('*');
 
