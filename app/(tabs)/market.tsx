@@ -103,10 +103,14 @@ export function MarketDirectoryScreen() {
       console.error('[Market] ❌ Error loading AI participants:', error);
     }
     
-    // Load data from Supabase via loadImportedParticipants() in market-participants.ts
-    console.log('[Market] 📊 Loading Supabase database...');
-    await loadImportedParticipants();
-    console.log('[Market] ✅ Supabase data loaded');
+    // Load data from Supabase via loadImportedParticipants() in market-participants.ts (non-blocking)
+    console.log('[Market] 📊 Loading Supabase database in background...');
+    loadImportedParticipants().then(() => {
+      console.log('[Market] ✅ Supabase data loaded, refreshing UI');
+      setRefreshKey(prev => prev + 1);
+    }).catch(err => {
+      console.error('[Market] ⚠️ Supabase load failed, using hardcoded data:', err);
+    });
 
     await new Promise(resolve => setTimeout(resolve, 100));
     
