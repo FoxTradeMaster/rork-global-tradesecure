@@ -1,5 +1,5 @@
 // BRAND NEW Market Directory Component - Built from scratch for reliability
-// Force redeploy - Jan 31, 2026 - V2.3 - CACHE BUST - 2026-01-31-19:35
+// V2.4 - Load full 1,207+ companies from Supabase - 2026-01-31-20:50
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar } from 'react-native';
 import { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ import {
   Globe,
   X
 } from 'lucide-react-native';
-import { getAllMarketParticipants } from '@/mocks/market-participants';
+import { getAllMarketParticipants, loadImportedParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse } from '@/types';
 
 // Safe string conversion helper - NEVER crashes
@@ -37,22 +37,41 @@ export function MarketDirectoryScreen() {
   const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
   const [selectedParticipant, setSelectedParticipant] = useState<MarketParticipant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
+  // Load Supabase data when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[Market V2.4] 🔄 Loading Supabase data...');
+      loadImportedParticipants()
+        .then(() => {
+          console.log('[Market V2.4] ✅ Supabase data loaded successfully');
+          setDataLoaded(true);
+          setRefreshKey(prev => prev + 1);
+        })
+        .catch((error) => {
+          console.error('[Market V2.4] ❌ Error loading Supabase data:', error);
+          setDataLoaded(true); // Still set to true to show base data
+        });
+    }, [])
+  );
 
   // Load all participants - simple and safe
   const allParticipants = useMemo(() => {
     try {
       const participants = getAllMarketParticipants();
       if (!Array.isArray(participants)) {
-        console.warn('[Market V2] getAllMarketParticipants returned non-array');
+        console.warn('[Market V2.4] getAllMarketParticipants returned non-array');
         return [];
       }
-      console.log('[Market V2] Loaded', participants.length, 'participants');
+      console.log('[Market V2.4] 📊 Loaded', participants.length, 'participants from all sources');
       return participants;
     } catch (error) {
-      console.error('[Market V2] Error loading participants:', error);
+      console.error('[Market V2.4] Error loading participants:', error);
       return [];
     }
-  }, []);
+  }, [refreshKey]);
 
   // Filter participants - ULTRA DEFENSIVE
   const filteredParticipants = useMemo(() => {
