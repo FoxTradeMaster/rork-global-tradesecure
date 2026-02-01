@@ -843,8 +843,9 @@ export const loadImportedParticipants = async () => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        console.error('[MarketParticipants] ❌ Error loading from API:', result.error || 'Unknown error');
+        console.error('[MarketParticipants] ❌ Error loading from API:', result.error || 'Unknown error', 'Details:', result.details);
         supabaseParticipants = [];
+        isLoaded = false; // Don't mark as loaded if API failed
       } else if (result.participants && result.participants.length > 0) {
         const supabaseData = result.participants;
         supabaseParticipants = supabaseData.map((row: any) => {
@@ -895,6 +896,7 @@ export const loadImportedParticipants = async () => {
       } else {
         console.log('[MarketParticipants] ⚠️ No participants found in Supabase (this is normal for first run)');
         supabaseParticipants = [];
+        isLoaded = true; // Mark as loaded even if empty (successful API call)
       }
     } catch (error) {
       console.error('[MarketParticipants] ❌ CRITICAL: Error loading from Supabase:', JSON.stringify({
@@ -902,8 +904,8 @@ export const loadImportedParticipants = async () => {
         stack: error instanceof Error ? error.stack : undefined,
       }, null, 2));
       supabaseParticipants = [];
+      isLoaded = false; // Don't mark as loaded on error
     } finally {
-      isLoaded = true;
       loadingPromise = null;
     }
   })();
