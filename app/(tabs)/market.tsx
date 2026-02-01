@@ -1,9 +1,6 @@
-// Force redeploy - Jan 31, 2026-Fix 2
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Modal, Alert, Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
 import { 
   Search, 
   Building2, 
@@ -25,7 +22,7 @@ import {
   FileText,
   MoreVertical
 } from 'lucide-react-native';
-import { getCommodityLabel, getCategoryLabel, addMarketParticipants, getAllMarketParticipants, forceReloadParticipants } from '@/mocks/market-participants';
+import { allMarketParticipants, getCommodityLabel, getCategoryLabel, addMarketParticipants, getImportedParticipants, loadImportedParticipants } from '@/mocks/market-participants';
 import type { MarketParticipant, TradingHouse, Broker, MarketPlatform, CommodityType, SavedSearch } from '@/types';
 import ImportModal from '@/components/ImportModal';
 import EmailOutreachModal from '@/components/EmailOutreachModal';
@@ -37,21 +34,14 @@ import { ParsedRow } from '@/lib/fileParser';
 import { useMarket } from '@/contexts/MarketContext';
 import { useTrading } from '@/contexts/TradingContext';
 
-// Safe string conversion helper - NEVER crashes
+// Safe string helpers to prevent search crashes
 const safeString = (value: any): string => {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value;
-  try {
-    return String(value);
-  } catch {
-    return '';
-  }
+  try { return String(value); } catch { return ''; }
 };
 
-// Safe lowercase conversion - NEVER crashes
-const safeLower = (value: any): string => {
-  return safeString(value).toLowerCase();
-};
+const safeLower = (value: any): string => safeString(value).toLowerCase();
 
 const MARKET_IMPORT_FIELDS = [
   { field: 'name', label: 'Company Name', required: true },
@@ -65,11 +55,10 @@ const MARKET_IMPORT_FIELDS = [
   { field: 'type', label: 'Company Type', required: false },
 ];
 
-export function MarketDirectoryScreen() {
+export default function MarketDirectoryScreen() {
   const { verifications, getAverageRating } = useMarket();
   const { currentUser } = useTrading();
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<'all' | 'trading_house' | 'broker' | 'platform'>('all');
   const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
   const [selectedBusinessType, setSelectedBusinessType] = useState<'all' | 'buyer' | 'seller' | 'both'>('all');
@@ -85,107 +74,61 @@ export function MarketDirectoryScreen() {
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
-  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
-
-  const loadAllParticipants = useCallback(async () => {
-    console.log('[Market] 📂 Loading all persisted participants');
-    setIsLoadingData(true);
-    
-    try {
-      const persisted = await forceReloadParticipants();
-      console.log('[Market] ✅ Loaded AI-generated participants:', persisted.length);
-      
-      if (persisted.length > 0) {
-        console.log('[Market] 🎯 Forcing UI refresh with', persisted.length, 'AI companies');
-        setRefreshKey(prev => prev + 1);
-      }
-    } catch (error) {
-      console.error('[Market] ❌ Error loading AI participants:', error);
-    }
-    
-    // Load data from Supabase via loadImportedParticipants() in market-participants.ts (non-blocking)
-    console.log('[Market] 📊 Loading Supabase database in background...');
-    loadImportedParticipants().then(() => {
-      console.log('[Market] ✅ Supabase data loaded, refreshing UI');
-      setRefreshKey(prev => prev + 1);
-    }).catch(err => {
-      console.error('[Market] ⚠️ Supabase load failed, using hardcoded data:', err);
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    setIsLoadingData(false);
+  const refreshParticipants = useCallback(async () => {
+    await loadImportedParticipants();
+    const aiGenerated = getImportedParticipants();
+    console.log('[Market] Refreshed - AI generated:', aiGenerated.length, 'Local imported:', importedParticipants.length);
     setRefreshKey(prev => prev + 1);
-    
-    console.log('[Market] ✅ Load complete');
+  }, [importedParticipants.length]);
+
+  useEffect(() => {
+    loadImportedParticipants().then(() => {
+      console.log('[Market] Loaded persisted participants');
+    });
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log('[Market] 🎯 Tab focused - reloading data');
-      loadAllParticipants();
-    }, [loadAllParticipants])
-  );
- // Debounce search query to prevent crash from rapid re-renders
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    const interval = setInterval(() => {
+      refreshParticipants();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [refreshParticipants]);
 
   const commodities = ['all', 'gold', 'fuel_oil', 'steam_coal', 'anthracite_coal', 'urea', 'edible_oils', 'bio_fuels', 'iron_ore'];
 
   const allParticipants = useMemo(() => {
-    const total = [...getAllMarketParticipants(), ...importedParticipants];
-    console.log('[Market] 📊 Total participants:', total.length, '(getAllMarketParticipants:', getAllMarketParticipants().length, 'Local imported:', importedParticipants.length, ')');
-    return total;
+    const aiGeneratedParticipants = getImportedParticipants();
+    return [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
-const filteredParticipants = useMemo(() => {
-  if (!Array.isArray(allParticipants)) {
-    return [];
-  }
-  return allParticipants.filter(participant => {
-      const name = safeLower(participant?.name);
-const description = safeLower(participant?.description);
-const headquarters = safeLower(participant?.headquarters);
-const specialization = safeLower(participant?.specialization);
-const query = safeLower(debouncedSearchQuery);
-const matchesSearch = name.includes(query) || 
-                      description.includes(query) || 
-                      headquarters.includes(query) ||
-                      specialization.includes(query);
 
-
+  const filteredParticipants = useMemo(() => {
+    return allParticipants.filter(participant => {
+      const matchesSearch = safeLower(participant.name).includes(safeLower(searchQuery)) ||
+                           safeLower(participant.description).includes(safeLower(searchQuery));
       
       const matchesType = selectedType === 'all' || participant.type === selectedType;
       
       const matchesCommodity = selectedCommodity === 'all' || 
-                               (participant.commodities || []).includes(selectedCommodity as any);
+                               participant.commodities.includes(selectedCommodity as any);
       
       const matchesBusinessType = selectedBusinessType === 'all' || 
                                   (participant.type === 'trading_house' && 
-                                   ((participant as TradingHouse).businessType === selectedBusinessType || 
-                                    (participant as TradingHouse).businessType === 'both'));
+                                   (participant.businessType === selectedBusinessType || 
+                                    participant.businessType === 'both'));
       
       return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
     });
-}, [allParticipants, debouncedSearchQuery, selectedType, selectedCommodity, selectedBusinessType]);
-
-
+  }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
 
   const stats = useMemo(() => {
-    if (isLoadingData) {
-      return { total: 0, tradingHouses: 0, brokers: 0, platforms: 0 };
-    }
     return {
       total: allParticipants.length,
       tradingHouses: allParticipants.filter(p => p.type === 'trading_house').length,
       brokers: allParticipants.filter(p => p.type === 'broker').length,
       platforms: allParticipants.filter(p => p.type === 'platform').length,
     };
-  }, [allParticipants, isLoadingData]);
+  }, [allParticipants]);
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -224,7 +167,7 @@ const matchesSearch = name.includes(query) ||
     setTimeout(() => setSelectedParticipant(null), 300);
   };
 
-  const handleImport = useCallback(async (data: ParsedRow[], categorySettings?: { commodity: string; businessType: 'buyer' | 'seller' | 'both' }) => {
+  const handleImport = useCallback((data: ParsedRow[], categorySettings?: { commodity: string; businessType: 'buyer' | 'seller' | 'both' }) => {
     console.log('[Market] Importing', data.length, 'market participants', categorySettings);
     
     const newParticipants: MarketParticipant[] = data.map((row, index) => {
@@ -288,27 +231,13 @@ const matchesSearch = name.includes(query) ||
     }).filter(p => p.name.trim() !== '');
 
     if (newParticipants.length > 0) {
-      try {
-        // Save to Supabase database (now handled by addMarketParticipants)
-        await addMarketParticipants(newParticipants);
-        
-        // Only update local state if Supabase save succeeds
-        const updated = [...importedParticipants, ...newParticipants];
-        setImportedParticipants(updated);
-        
-        Alert.alert(
-          'Import Successful ✅',
-          `Successfully saved ${newParticipants.length} companies to Supabase cloud database! [v2.0]`,
-          [{ text: 'OK' }]
-        );
-      } catch (error) {
-        console.error('[Market] Import failed:', error);
-        Alert.alert(
-          'Import Failed',
-          `Failed to save to database: ${error instanceof Error ? error.message : String(error)}`,
-          [{ text: 'OK' }]
-        );
-      }
+      setImportedParticipants(prev => [...prev, ...newParticipants]);
+      addMarketParticipants(newParticipants);
+      Alert.alert(
+        'Import Successful',
+        `Successfully imported ${newParticipants.length} market participants.`,
+        [{ text: 'OK' }]
+      );
     } else {
       Alert.alert(
         'Import Failed',
@@ -316,7 +245,7 @@ const matchesSearch = name.includes(query) ||
         [{ text: 'OK' }]
       );
     }
-  }, [importedParticipants]);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -342,8 +271,8 @@ const matchesSearch = name.includes(query) ||
           </View>
           <Text style={styles.subtitle}>
             {selectedCompanies.length > 0 
-              ? `${selectedCompanies.length} selected • All data verified`
-              : 'Real company data from proprietary sources'
+              ? `${selectedCompanies.length} selected • Long press more to select`
+              : 'Long press companies to select for email outreach'
             }
           </Text>
         </View>
@@ -495,16 +424,11 @@ const matchesSearch = name.includes(query) ||
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {isLoadingData ? (
-            <View style={styles.loadingState}>
-              <Text style={styles.loadingText}>Loading companies...</Text>
-            </View>
-          ) : (
-            <>
           <Text style={styles.resultsCount}>
             {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
           </Text>
-          {filteredParticipants.slice(0, 50).map(participant => {
+
+          {filteredParticipants.map(participant => {
             const isSelected = selectedCompanies.find(p => p.id === participant.id);
             const verification = verifications[participant.id];
             const avgRating = getAverageRating(participant.id);
@@ -538,7 +462,7 @@ const matchesSearch = name.includes(query) ||
                     </View>
                     <View style={styles.participantMeta}>
                       <MapPin size={12} color="#6B7280" />
-                      <Text style={styles.participantLocation}>{participant.headquarters || 'Unknown'}</Text>
+                      <Text style={styles.participantLocation}>{participant.headquarters}</Text>
                     </View>
                   </View>
                 </View>
@@ -556,9 +480,11 @@ const matchesSearch = name.includes(query) ||
                 </View>
               </View>
 
-              <View style={styles.verificationContainer}>
-                <PremiumBadge verification={verification} participant={participant} compact />
-              </View>
+              {verification && (
+                <View style={styles.verificationContainer}>
+                  <PremiumBadge verification={verification} compact />
+                </View>
+              )}
 
               {avgRating > 0 && (
                 <TouchableOpacity 
@@ -570,18 +496,20 @@ const matchesSearch = name.includes(query) ||
                   <Text style={styles.ratingLabel}>• Tap to review</Text>
                 </TouchableOpacity>
               )}
+
               <Text style={styles.participantDescription} numberOfLines={2}>
-  {participant.description || 'No description available'}
-</Text>
+                {participant.description}
+              </Text>
+
               <View style={styles.commodityTags}>
-                {(participant.commodities || []).slice(0, 3).map(commodity => (
+                {participant.commodities.slice(0, 3).map(commodity => (
                   <View key={commodity} style={styles.commodityTag}>
                     <Text style={styles.commodityTagText}>{getCommodityLabel(commodity)}</Text>
                   </View>
                 ))}
-                {(participant.commodities || []).length > 3 && (
+                {participant.commodities.length > 3 && (
                   <View style={styles.commodityTag}>
-                    <Text style={styles.commodityTagText}>+{(participant.commodities || []).length - 3}</Text>
+                    <Text style={styles.commodityTagText}>+{participant.commodities.length - 3}</Text>
                   </View>
                 )}
               </View>
@@ -590,8 +518,8 @@ const matchesSearch = name.includes(query) ||
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Specialization:</Text>
                   <Text style={styles.footerValue} numberOfLines={1}>
-  {(participant as TradingHouse).specialization || 'General trading'}
-</Text>
+                    {(participant as TradingHouse).specialization}
+                  </Text>
                 </View>
               )}
 
@@ -599,7 +527,7 @@ const matchesSearch = name.includes(query) ||
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Regulated by:</Text>
                   <View style={styles.regulationTags}>
-                    {((participant as Broker).regulatedBy || []).slice(0, 3).map(auth => (
+                    {(participant as Broker).regulatedBy.slice(0, 3).map(auth => (
                       <View key={auth} style={styles.regulationTag}>
                         <Text style={styles.regulationTagText}>{auth}</Text>
                       </View>
@@ -612,13 +540,14 @@ const matchesSearch = name.includes(query) ||
                 <View style={styles.participantFooter}>
                   <Text style={styles.footerLabel}>Framework:</Text>
                   <Text style={styles.footerValue} numberOfLines={1}>
-  {(participant as MarketPlatform).framework || 'Standard framework'}
-</Text>
+                    {(participant as MarketPlatform).framework}
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
             );
           })}
+
           {filteredParticipants.length === 0 && (
             <View style={styles.emptyState}>
               <Search size={48} color="#374151" />
@@ -630,8 +559,6 @@ const matchesSearch = name.includes(query) ||
           )}
 
           <View style={styles.bottomPadding} />
-            </>
-          )}
         </ScrollView>
       </SafeAreaView>
 
@@ -692,7 +619,7 @@ const matchesSearch = name.includes(query) ||
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Commodities</Text>
                     <View style={styles.detailCommodities}>
-                      {(selectedParticipant.commodities || []).map(commodity => (
+                      {selectedParticipant.commodities.map(commodity => (
                         <View key={commodity} style={styles.detailCommodityChip}>
                           <Text style={styles.detailCommodityText}>{getCommodityLabel(commodity)}</Text>
                         </View>
@@ -778,7 +705,7 @@ const matchesSearch = name.includes(query) ||
                       <View style={styles.detailSection}>
                         <Text style={styles.detailSectionTitle}>Regulatory Authorities</Text>
                         <View style={styles.regulationList}>
-                          {((selectedParticipant as Broker).regulatedBy || []).map(auth => (
+                          {(selectedParticipant as Broker).regulatedBy.map(auth => (
                             <View key={auth} style={styles.regulationChip}>
                               <Shield size={14} color="#10B981" />
                               <Text style={styles.regulationChipText}>{auth}</Text>
@@ -1353,15 +1280,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
-  loadingState: {
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0284C7',
-  },
   bottomPadding: {
     height: 20,
   },
@@ -1665,17 +1583,3 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
 });
-
-
-// Wrap in Error Boundary to catch crashes
-import ErrorBoundary from '../../components/ErrorBoundary';
-
-export default function MarketScreenWithErrorBoundary() {
-  return (
-    <ErrorBoundary componentName="Market Directory">
-      <MarketDirectoryScreen />
-    </ErrorBoundary>
-  );
-}
-
-
