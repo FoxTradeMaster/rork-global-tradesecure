@@ -98,6 +98,12 @@ export default function MarketDirectoryScreen() {
 
   const allParticipants = useMemo(() => {
     const aiGeneratedParticipants = getImportedParticipants();
+    console.log('[Market] Building allParticipants:', {
+      hardcoded: allMarketParticipants.length,
+      imported: importedParticipants.length,
+      aiGenerated: aiGeneratedParticipants.length,
+      total: allMarketParticipants.length + importedParticipants.length + aiGeneratedParticipants.length
+    });
     return [...allMarketParticipants, ...importedParticipants, ...aiGeneratedParticipants];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedParticipants, refreshKey]);
