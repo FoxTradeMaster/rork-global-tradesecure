@@ -37,7 +37,6 @@ import { ParsedRow } from '@/lib/fileParser';
 import { useMarket } from '@/contexts/MarketContext';
 import { useTrading } from '@/contexts/TradingContext';
 
-// ========== SEARCH CRASH FIX - START ==========
 // Safe string conversion helper - NEVER crashes
 const safeString = (value: any): string => {
   if (value === null || value === undefined) return '';
@@ -53,7 +52,6 @@ const safeString = (value: any): string => {
 const safeLower = (value: any): string => {
   return safeString(value).toLowerCase();
 };
-// ========== SEARCH CRASH FIX - END ==========
 
 const MARKET_IMPORT_FIELDS = [
   { field: 'name', label: 'Company Name', required: true },
@@ -143,12 +141,11 @@ const filteredParticipants = useMemo(() => {
     return [];
   }
   return allParticipants.filter(participant => {
-      // Use safe string conversion to prevent crashes
       const name = safeLower(participant?.name);
-      const description = safeLower(participant?.description);
-      const headquarters = safeLower(participant?.headquarters);
-      const specialization = safeLower(participant?.specialization);
-      const query = safeLower(debouncedSearchQuery);
+const description = safeLower(participant?.description);
+const headquarters = safeLower(participant?.headquarters);
+const specialization = safeLower(participant?.specialization);
+const query = safeLower(debouncedSearchQuery);
 const matchesSearch = name.includes(query) || 
                       description.includes(query) || 
                       headquarters.includes(query) ||
