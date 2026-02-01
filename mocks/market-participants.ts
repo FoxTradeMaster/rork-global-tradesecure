@@ -836,21 +836,17 @@ export const loadImportedParticipants = async () => {
   
   loadingPromise = (async () => {
     try {
-      console.log('[MarketParticipants] 🔄 Loading participants from Supabase shared database...');
+      console.log('[MarketParticipants] 🔄 Loading participants from API...');
       
-      const { data: supabaseData, error: supabaseError } = await supabase
-        .from('market_participants')
-        .select('*');
+      // Call server-side API endpoint instead of direct Supabase query
+      const response = await fetch('/api/market-participants');
+      const result = await response.json();
 
-      if (supabaseError) {
-        console.error('[MarketParticipants] ❌ Error loading from Supabase:', JSON.stringify({
-          message: supabaseError.message,
-          details: supabaseError.details,
-          hint: supabaseError.hint,
-          code: supabaseError.code,
-        }, null, 2));
+      if (!response.ok || !result.success) {
+        console.error('[MarketParticipants] ❌ Error loading from API:', result.error || 'Unknown error');
         supabaseParticipants = [];
-      } else if (supabaseData && supabaseData.length > 0) {
+      } else if (result.participants && result.participants.length > 0) {
+        const supabaseData = result.participants;
         supabaseParticipants = supabaseData.map((row: any) => {
           const base = {
             id: row.id,
