@@ -1049,3 +1049,4 @@ export const getCategoryLabel = (category: string): string => {
   };
   return labels[category] || category;
 };
+// Deploy trigger: Sun Feb  1 10:32:30 EST 2026
