@@ -792,8 +792,10 @@ let cachedAllParticipants: MarketParticipant[] | null = null;
 let lastCacheKey = '';
 
 export const baseMarketParticipants: MarketParticipant[] = [
-  // Keeping only a few examples for demo mode fallback
-  ...tradingHouses.slice(0, 3), // Keep 3 major trading houses for demo
+  ...tradingHouses,
+  ...brokers,
+  ...platforms,
+  ...edibleOilsBuyers,
 ];
 export const allMarketParticipants: MarketParticipant[] = baseMarketParticipants;
 
