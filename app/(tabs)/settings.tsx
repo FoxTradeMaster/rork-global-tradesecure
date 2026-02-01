@@ -6,13 +6,13 @@ import { useAIMarketUpdater } from '@/contexts/AIMarketUpdaterContext';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Crown, User, Info, FileText, Shield, ChevronRight, HelpCircle, LogOut, Zap, Play, Pause, Clock, Activity, CheckCircle, XCircle, TestTube2, Lock } from 'lucide-react-native';
 import PremiumBadge from '@/components/PremiumBadge';
-import PaywallModal from '@/components/PaywallModal';
+
 import AdminPasswordModal from '@/components/AdminPasswordModal';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
-  const { subscriptionStatus, isPremium, manageSubscription } = useSubscription();
+  const { subscriptionStatus, isPremium, manageSubscription, showPaywall: showPaywallModal } = useSubscription();
   const { currentUser, updateUserRole, clearUser, isDemoMode } = useTrading();
   const metrics = usePortfolioMetrics();
   const { isAuthenticated, logout } = useAdminAuth();
@@ -26,7 +26,7 @@ export default function SettingsScreen() {
     manualUpdate, 
     getTimeUntilNextUpdate 
   } = useAIMarketUpdater();
-  const [showPaywall, setShowPaywall] = useState(false);
+
   const [showUpdateLogs, setShowUpdateLogs] = useState(false);
   const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -36,7 +36,7 @@ export default function SettingsScreen() {
     if (isPremium) {
       manageSubscription();
     } else {
-      setShowPaywall(true);
+      showPaywallModal();
     }
   };
 
@@ -219,7 +219,7 @@ export default function SettingsScreen() {
 
                   <TouchableOpacity
                     style={styles.upgradeButton}
-                    onPress={() => setShowPaywall(true)}
+                    onPress={() => showPaywallModal()}
                     activeOpacity={0.8}
                   >
                     <Crown size={20} color="#FFFFFF" fill="#FFFFFF" />
@@ -532,10 +532,6 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      <PaywallModal
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-      />
       
       <AdminPasswordModal
         visible={showAdminPasswordModal}
