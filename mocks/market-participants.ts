@@ -1004,8 +1004,9 @@ export const getImportedParticipants = (): MarketParticipant[] => {
   if (!isLoaded) {
     console.warn('[MarketParticipants] ⚠️ WARNING: getImportedParticipants called before data loaded!');
   }
-  console.log('[MarketParticipants] 📊 Current imported count:', importedParticipants.length, '(loaded:', isLoaded, ')');
-  return importedParticipants;
+  const combined = [...supabaseParticipants, ...importedParticipants];
+  console.log('[MarketParticipants] 📊 Returning:', supabaseParticipants.length, 'from Supabase +', importedParticipants.length, 'local =', combined.length, 'total (loaded:', isLoaded, ')');
+  return combined;
 };
 
 export const forceReloadParticipants = async () => {
