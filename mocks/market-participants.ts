@@ -1,6 +1,6 @@
 import { TradingHouse, Broker, MarketPlatform, MarketParticipant } from '@/types';
 import { edibleOilsBuyersExtended } from './edible-oils-buyers-extended';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export const tradingHouses: TradingHouse[] = [
   {
@@ -838,7 +838,7 @@ export const loadImportedParticipants = async () => {
     try {
       console.log('[MarketParticipants] 🔄 Loading participants from Supabase shared database...');
       
-      const { data: supabaseData, error: supabaseError } = await supabase
+      const { data: supabaseData, error: supabaseError } = await supabaseAdmin
         .from('market_participants')
         .select('*');
 
