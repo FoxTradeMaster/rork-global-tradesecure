@@ -29,7 +29,6 @@ export default function SettingsScreen() {
 
   const [showUpdateLogs, setShowUpdateLogs] = useState(false);
   const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
   const router = useRouter();
 
   const handleManageSubscription = () => {
@@ -41,13 +40,12 @@ export default function SettingsScreen() {
   };
 
   const handleChangeRole = () => {
-    setShowRoleModal(true);
+    // Exit demo mode and navigate to welcome/signup screen
+    clearUser();
+    router.replace('/');
   };
 
-  const handleSelectNewRole = async (roleId: string) => {
-    await updateUserRole(roleId as any);
-    setShowRoleModal(false);
-  };
+
 
 
 
@@ -483,54 +481,6 @@ export default function SettingsScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-
-      <Modal
-        visible={showRoleModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowRoleModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.roleModalContent}>
-            <Text style={styles.roleModalTitle}>Select Your Role</Text>
-            <Text style={styles.roleModalSubtitle}>Choose a role to explore different features</Text>
-            
-            <View style={styles.rolesList}>
-              {[
-                { id: 'trade_originator', title: 'Trade Originator', description: 'Create and manage trades' },
-                { id: 'compliance_officer', title: 'Compliance Officer', description: 'Ensure regulatory compliance' },
-                { id: 'risk_manager', title: 'Risk Manager', description: 'Assess counterparty risk' },
-                { id: 'legal_reviewer', title: 'Legal Reviewer', description: 'Review contracts' },
-                { id: 'senior_management', title: 'Senior Management', description: 'Oversee operations' },
-              ].map((role) => (
-                <TouchableOpacity
-                  key={role.id}
-                  style={[
-                    styles.roleOption,
-                    currentUser?.role === role.id && styles.roleOptionSelected
-                  ]}
-                  onPress={() => handleSelectNewRole(role.id)}
-                >
-                  <View>
-                    <Text style={styles.roleOptionTitle}>{role.title}</Text>
-                    <Text style={styles.roleOptionDescription}>{role.description}</Text>
-                  </View>
-                  {currentUser?.role === role.id && (
-                    <CheckCircle size={20} color="#3B82F6" />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={styles.roleModalCloseButton}
-              onPress={() => setShowRoleModal(false)}
-            >
-              <Text style={styles.roleModalCloseText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       
       <AdminPasswordModal
