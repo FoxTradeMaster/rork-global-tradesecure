@@ -29,10 +29,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log('[API] Loading market participants from Supabase...');
 
+    // Supabase has a default limit of 1000 rows, so we need to explicitly set a higher limit
+    // or use pagination. For now, we'll set a high limit to get all companies.
     const { data, error } = await supabase
       .from('market_participants')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10000); // Increased limit to accommodate growing database
 
     if (error) {
       console.error('[API] Supabase error:', error);
