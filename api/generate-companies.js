@@ -20,8 +20,15 @@ const COMMODITIES = {
 async function generateCompanyNames(openai, commodity, count) {
   console.log(`🤖 Generating ${count} ${commodity} companies using AI...`);
   
-  const prompt = `Generate a list of ${count} real, verified companies that operate in the ${COMMODITIES[commodity]} industry. 
-Include companies from different regions (North America, Europe, Asia, Africa, South America, Australia).
+  const prompt = `Generate a list of ${count} real, verified SMALLER and NICHE companies that operate in the ${COMMODITIES[commodity]} industry.
+Focus on:
+- Mid-sized regional players (not Fortune 500 or global giants)
+- Emerging companies and startups in the sector
+- Specialized niche operators
+- Lesser-known but legitimate companies
+- Companies from diverse regions (North America, Europe, Asia, Africa, South America, Australia)
+
+AVOID major multinational corporations and industry leaders.
 Return ONLY a JSON array of company names, nothing else.
 Format: ["Company Name 1", "Company Name 2", ...]`;
 
