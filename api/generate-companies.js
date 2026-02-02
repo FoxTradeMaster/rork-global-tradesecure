@@ -1,12 +1,235 @@
 // api/generate-companies.js
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import OpenAI from 'openai';
+import { createClient } from '@supabase/supabase-js';
 
-const execAsync = promisify(exec);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Commodity mappings
+const COMMODITIES = {
+  gold: 'Gold Mining',
+  fuel_oil: 'Fuel Oil Trading',
+  steam_coal: 'Steam Coal',
+  anthracite_coal: 'Anthracite Coal',
+  urea: 'Urea/Fertilizer',
+  edible_oils: 'Edible Oils',
+  bio_fuels: 'Bio-Fuels',
+  iron_ore: 'Iron Ore',
+};
+
+/**
+ * Generate company names using OpenAI
+ */
+async function generateCompanyNames(openai, commodity, count) {
+  console.log(`🤖 Generating ${count} ${commodity} companies using AI...`);
+  
+  const prompt = `Generate a list of ${count} real, verified companies that operate in the ${COMMODITIES[commodity]} industry. 
+Include companies from different regions (North America, Europe, Asia, Africa, South America, Australia).
+Return ONLY a JSON array of company names, nothing else.
+Format: ["Company Name 1", "Company Name 2", ...]`;
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4.1-mini',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.8,
+  });
+
+  const content = response.choices[0].message.content.trim();
+  
+  // Remove markdown code blocks if present
+  const jsonContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  
+  const companies = JSON.parse(jsonContent);
+  console.log(`✅ Generated ${companies.length} company names`);
+  return companies;
+}
+
+/**
+ * Verify company with BrandFetch
+ */
+async function verifyWithBrandFetch(companyName, brandfetchApiKey) {
+  try {
+    // Normalize company name for search
+    const searchName = companyName
+      .replace(/\s+(Inc\.|LLC|Ltd\.|Limited|Corp\.|Corporation|S\.A\.|AG|GmbH|PLC)/gi, '')
+      .trim();
+
+    // Search for company
+    const searchResponse = await fetch(
+      `https://api.brandfetch.io/v2/search/${encodeURIComponent(searchName)}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${brandfetchApiKey}`,
+        },
+      }
+    );
+
+    if (!searchResponse.ok) {
+      return null;
+    }
+
+    const searchData = await searchResponse.json();
+    
+    if (!searchData || searchData.length === 0) {
+      return null;
+    }
+
+    // Get the first result's domain
+    const domain = searchData[0].domain;
+
+    // Get full brand data
+    const brandResponse = await fetch(
+      `https://api.brandfetch.io/v2/brands/${domain}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${brandfetchApiKey}`,
+        },
+      }
+    );
+
+    if (!brandResponse.ok) {
+      // Return basic data from search if brand fetch fails
+      return {
+        name: searchData[0].name || companyName,
+        domain: domain,
+        logo: searchData[0].icon || null,
+        description: null,
+        website: `https://${domain}`,
+      };
+    }
+
+    const brandData = await brandResponse.json();
+
+    return {
+      name: brandData.name || companyName,
+      domain: domain,
+      logo: brandData.logos?.[0]?.formats?.[0]?.src || brandData.icon || null,
+      description: brandData.description || null,
+      website: `https://${domain}`,
+    };
+  } catch (error) {
+    console.error(`⚠️  BrandFetch error for ${companyName}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Add company to database
+ */
+async function addCompanyToDatabase(supabase, companyData, commodity) {
+  try {
+    // Check if company already exists by domain
+    if (companyData.domain) {
+      const { data: existing } = await supabase
+        .from('market_participants')
+        .select('id')
+        .eq('domain', companyData.domain)
+        .single();
+
+      if (existing) {
+        console.log(`⏭️  Skipped: ${companyData.name} (domain already exists)`);
+        return { success: false, reason: 'duplicate' };
+      }
+    }
+
+    // Calculate quality score
+    let qualityScore = 0;
+    if (companyData.name) qualityScore += 20;
+    if (companyData.domain) qualityScore += 20;
+    if (companyData.logo) qualityScore += 20;
+    if (companyData.description) qualityScore += 20;
+    if (companyData.website) qualityScore += 20;
+
+    // Insert company
+    const { data, error } = await supabase
+      .from('market_participants')
+      .insert({
+        name: companyData.name,
+        type: 'company',
+        commodities: [commodity],
+        logo: companyData.logo,
+        description: companyData.description,
+        website: companyData.website,
+        domain: companyData.domain,
+        data_quality_score: qualityScore,
+        brandfetch_verified: companyData.domain ? true : false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`❌ Database error for ${companyData.name}:`, error.message);
+      return { success: false, reason: 'database_error', error };
+    }
+
+    console.log(`✅ Added: ${companyData.name} (quality: ${qualityScore}%)`);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`❌ Error adding ${companyData.name}:`, error.message);
+    return { success: false, reason: 'exception', error };
+  }
+}
+
+/**
+ * Update market directory for a single commodity
+ */
+async function updateSingleCommodity(openai, supabase, brandfetchApiKey, commodity, targetCount) {
+  console.log(`\n📦 Running updater for ${commodity} (target: ${targetCount} companies)\n`);
+
+  const stats = {
+    generated: 0,
+    verified: 0,
+    added: 0,
+    skipped: 0,
+    failed: 0,
+  };
+
+  // Generate company names
+  const companyNames = await generateCompanyNames(openai, commodity, targetCount);
+  stats.generated += companyNames.length;
+
+  // Process each company
+  for (const companyName of companyNames) {
+    console.log(`\n🔍 Processing: ${companyName}`);
+
+    // Verify with BrandFetch
+    const brandData = await verifyWithBrandFetch(companyName, brandfetchApiKey);
+
+    if (brandData) {
+      stats.verified++;
+      
+      // Add to database
+      const result = await addCompanyToDatabase(supabase, brandData, commodity);
+      
+      if (result.success) {
+        stats.added++;
+      } else if (result.reason === 'duplicate') {
+        stats.skipped++;
+      } else {
+        stats.failed++;
+      }
+    } else {
+      // Add with minimal data if BrandFetch fails
+      const fallbackData = {
+        name: companyName,
+        domain: null,
+        logo: null,
+        description: null,
+        website: null,
+      };
+      
+      const result = await addCompanyToDatabase(supabase, fallbackData, commodity);
+      
+      if (result.success) {
+        stats.added++;
+      } else {
+        stats.failed++;
+      }
+    }
+
+    // Rate limiting delay (reduced for serverless)
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  return stats;
+}
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -54,60 +277,41 @@ export default async function handler(req, res) {
 
     console.log(`[Autonomous Updater] Starting generation: ${count} ${commodity} companies`);
 
-    // Path to the populate-market script
-    const scriptPath = path.join(__dirname, '..', 'scripts', 'populate-market.mjs');
-
-    // Build command with environment variables
-    const command = `node "${scriptPath}" --commodity ${commodity} --count ${count}`;
-
-    console.log(`[Autonomous Updater] Executing: ${command}`);
-
-    // Execute the script with a timeout of 5 minutes
-    const { stdout, stderr } = await execAsync(command, {
-      env: {
-        ...process.env,
-        OPENAI_API_KEY: requiredEnvVars.OPENAI_API_KEY,
-        BRANDFETCH_API_KEY: requiredEnvVars.BRANDFETCH_API_KEY,
-        EXPO_PUBLIC_SUPABASE_URL: requiredEnvVars.EXPO_PUBLIC_SUPABASE_URL,
-        SUPABASE_SERVICE_ROLE_KEY: requiredEnvVars.SUPABASE_SERVICE_ROLE_KEY,
-      },
-      timeout: 300000, // 5 minutes
-      maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+    // Initialize clients
+    const openai = new OpenAI({
+      apiKey: requiredEnvVars.OPENAI_API_KEY,
     });
 
-    console.log('[Autonomous Updater] Script output:', stdout);
-    if (stderr) {
-      console.warn('[Autonomous Updater] Script warnings:', stderr);
-    }
+    const supabase = createClient(
+      requiredEnvVars.EXPO_PUBLIC_SUPABASE_URL,
+      requiredEnvVars.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    // Parse the output to extract success count
-    const successMatch = stdout.match(/Successfully added (\d+)/i);
-    const successCount = successMatch ? parseInt(successMatch[1]) : 0;
+    // Run the update
+    const stats = await updateSingleCommodity(
+      openai,
+      supabase,
+      requiredEnvVars.BRANDFETCH_API_KEY,
+      commodity,
+      count
+    );
+
+    console.log('[Autonomous Updater] Complete:', stats);
 
     return res.status(200).json({
       success: true,
-      message: `Successfully generated and saved ${successCount} companies with Brandfetch verification`,
+      message: `Successfully generated and saved ${stats.added} companies with Brandfetch verification`,
       commodity,
       requested: count,
-      added: successCount,
-      output: stdout,
+      stats: stats,
     });
 
   } catch (error) {
     console.error('[Autonomous Updater] Error:', error);
-    
-    // Check if it's a timeout error
-    if (error.killed) {
-      return res.status(504).json({ 
-        error: 'Request timeout - generation took too long',
-        details: 'The company generation process exceeded the 5-minute limit'
-      });
-    }
 
     return res.status(500).json({ 
       error: 'Failed to generate companies',
       details: error.message,
-      stderr: error.stderr,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
