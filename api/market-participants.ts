@@ -8,6 +8,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Get pagination parameters from query string
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit - 1;
+
     const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
@@ -27,15 +33,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
 
-    console.log('[API] Loading market participants from Supabase...');
+    console.log(`[API] Loading market participants page ${page} (limit: ${limit})...`);
 
-    // Supabase has a hard limit of 1000 rows per query even with .limit()
-    // We need to use .range() to fetch more than 1000 rows
+    // Get total count first
+    const { count: totalCount } = await supabase
+      .from('market_participants')
+      .select('*', { count: 'exact', head: true });
+
+    // Fetch paginated data (limit to 1000 total to prevent browser crashes)
+    const maxRows = 1000;
+    const actualEndIndex = Math.min(endIndex, maxRows - 1);
+    
     const { data, error } = await supabase
       .from('market_participants')
       .select('*')
       .order('created_at', { ascending: false })
-      .range(0, 9999); // Fetch up to 10,000 companies (rows 0-9999)
+      .range(startIndex, actualEndIndex);
 
     if (error) {
       console.error('[API] Supabase error:', error);
@@ -46,13 +59,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    console.log(`[API] Successfully loaded ${data?.length || 0} participants`);
+    console.log(`[API] Successfully loaded ${data?.length || 0} participants (page ${page} of ${Math.ceil((totalCount || 0) / limit)})`);
 
     // Set cache headers (cache for 5 minutes)
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
     
     return res.status(200).json({
       success: true,
+      page,
+      limit,
+      total: totalCount || 0,
+      totalPages: Math.ceil((totalCount || 0) / limit),
       count: data?.length || 0,
       participants: data || []
     });
