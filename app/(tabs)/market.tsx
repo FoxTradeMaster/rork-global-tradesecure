@@ -133,7 +133,7 @@ export default function MarketDirectoryScreen() {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return filteredParticipants.slice(startIndex, endIndex);
-  }, [filteredParticipants, currentPage, ITEMS_PER_PAGE]);
+  }, [filteredParticipants, currentPage]);
 
   const totalPages = Math.ceil(filteredParticipants.length / ITEMS_PER_PAGE);
 
