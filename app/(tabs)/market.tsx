@@ -73,6 +73,8 @@ export default function MarketDirectoryScreen() {
   const [importedParticipants, setImportedParticipants] = useState<MarketParticipant[]>([]);
   const [showActionsMenu, setShowActionsMenu] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ITEMS_PER_PAGE = 100;
 
   const refreshParticipants = useCallback(async () => {
     await loadImportedParticipants();
@@ -126,6 +128,18 @@ export default function MarketDirectoryScreen() {
       return matchesSearch && matchesType && matchesCommodity && matchesBusinessType;
     });
   }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType, allParticipants]);
+
+  const paginatedParticipants = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredParticipants.slice(startIndex, endIndex);
+  }, [filteredParticipants, currentPage, ITEMS_PER_PAGE]);
+
+  const totalPages = Math.ceil(filteredParticipants.length / ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedType, selectedCommodity, selectedBusinessType]);
 
   const stats = useMemo(() => {
     return {
@@ -430,11 +444,14 @@ export default function MarketDirectoryScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.resultsCount}>
-            {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
-          </Text>
+          <View style={styles.resultsHeader}>
+            <Text style={styles.resultsCount}>
+              {filteredParticipants.length} {filteredParticipants.length === 1 ? 'result' : 'results'}
+              {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+            </Text>
+          </View>
 
-          {filteredParticipants.map(participant => {
+          {paginatedParticipants.map(participant => {
             const isSelected = selectedCompanies.find(p => p.id === participant.id);
             const verification = verifications[participant.id];
             const avgRating = getAverageRating(participant.id);
@@ -561,6 +578,39 @@ export default function MarketDirectoryScreen() {
               <Text style={styles.emptyStateText}>
                 Try adjusting your search or filters
               </Text>
+            </View>
+          )}
+
+          {totalPages > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity
+                style={[styles.paginationButton, currentPage === 1 && styles.paginationButtonDisabled]}
+                onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <Text style={[styles.paginationButtonText, currentPage === 1 && styles.paginationButtonTextDisabled]}>
+                  Previous
+                </Text>
+              </TouchableOpacity>
+              
+              <View style={styles.paginationInfo}>
+                <Text style={styles.paginationText}>
+                  Page {currentPage} of {totalPages}
+                </Text>
+                <Text style={styles.paginationSubtext}>
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredParticipants.length)} of {filteredParticipants.length}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.paginationButton, currentPage === totalPages && styles.paginationButtonDisabled]}
+                onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <Text style={[styles.paginationButtonText, currentPage === totalPages && styles.paginationButtonTextDisabled]}>
+                  Next
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -1589,3 +1639,49 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
 });
+  paginationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  paginationButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  paginationButtonDisabled: {
+    backgroundColor: '#374151',
+    opacity: 0.5,
+  },
+  paginationButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  paginationButtonTextDisabled: {
+    color: '#6B7280',
+  },
+  paginationInfo: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  paginationText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  paginationSubtext: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  resultsHeader: {
+    marginBottom: 8,
+  },
