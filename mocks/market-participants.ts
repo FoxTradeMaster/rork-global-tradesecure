@@ -1005,8 +1005,10 @@ export const getImportedParticipants = (): MarketParticipant[] => {
     console.warn('[MarketParticipants] ⚠️ WARNING: getImportedParticipants called before data loaded!');
   }
   const combined = [...supabaseParticipants, ...importedParticipants];
-  console.log('[MarketParticipants] 📊 Returning:', supabaseParticipants.length, 'from Supabase +', importedParticipants.length, 'local =', combined.length, 'total (loaded:', isLoaded, ')');
-  return combined;
+  // Limit to 1000 companies to prevent browser crashes on tablets/laptops
+  const limited = combined.slice(0, 1000);
+  console.log('[MarketParticipants] 📊 Returning:', supabaseParticipants.length, 'from Supabase +', importedParticipants.length, 'local =', combined.length, 'total (limited to', limited.length, ') (loaded:', isLoaded, ')');
+  return limited;
 };
 
 export const forceReloadParticipants = async () => {
