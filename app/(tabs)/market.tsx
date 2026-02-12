@@ -1638,7 +1638,6 @@ const styles = StyleSheet.create({
   clearText: {
     color: '#EF4444',
   },
-});
   paginationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1685,3 +1684,4 @@ const styles = StyleSheet.create({
   resultsHeader: {
     marginBottom: 8,
   },
+});
