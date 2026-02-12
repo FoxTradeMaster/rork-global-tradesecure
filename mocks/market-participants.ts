@@ -836,18 +836,42 @@ export const loadImportedParticipants = async () => {
   
   loadingPromise = (async () => {
     try {
-      console.log('[MarketParticipants] 🔄 Loading participants from API...');
+      console.log('[MarketParticipants] 🔄 Loading participants from API (fetching up to 1000 companies)...');
       
-      // Call server-side API endpoint instead of direct Supabase query
-      const response = await fetch('/api/market-participants');
-      const result = await response.json();
+      // Fetch 10 pages to get up to 1000 companies (100 per page)
+      const allParticipants = [];
+      const maxPages = 10;
+      
+      for (let page = 1; page <= maxPages; page++) {
+        const response = await fetch(`/api/market-participants?page=${page}&limit=100`);
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+          console.error('[MarketParticipants] ❌ Error loading page', page, ':', result.error || 'Unknown error');
+          break; // Stop fetching on error
+        }
+        
+        if (result.participants && result.participants.length > 0) {
+          allParticipants.push(...result.participants);
+          console.log(`[MarketParticipants] 📄 Loaded page ${page}/${maxPages}: ${result.participants.length} companies (total so far: ${allParticipants.length})`);
+          
+          // Stop if we got fewer results than requested (last page)
+          if (result.participants.length < 100) {
+            console.log('[MarketParticipants] ℹ️ Reached last page');
+            break;
+          }
+        } else {
+          console.log('[MarketParticipants] ℹ️ No more participants on page', page);
+          break;
+        }
+      }
 
-      if (!response.ok || !result.success) {
-        console.error('[MarketParticipants] ❌ Error loading from API:', result.error || 'Unknown error', 'Details:', result.details);
+      if (allParticipants.length === 0) {
+        console.log('[MarketParticipants] ⚠️ No participants found in Supabase (this is normal for first run)');
         supabaseParticipants = [];
-        isLoaded = false; // Don't mark as loaded if API failed
-      } else if (result.participants && result.participants.length > 0) {
-        const supabaseData = result.participants;
+        isLoaded = true;
+      } else {
+        const supabaseData = allParticipants;
         supabaseParticipants = supabaseData.map((row: any) => {
           const base = {
             id: row.id,
@@ -893,10 +917,6 @@ export const loadImportedParticipants = async () => {
           }
         });
         console.log('[MarketParticipants] ✅ Successfully loaded', supabaseParticipants.length, 'participants from Supabase');
-      } else {
-        console.log('[MarketParticipants] ⚠️ No participants found in Supabase (this is normal for first run)');
-        supabaseParticipants = [];
-        isLoaded = true; // Mark as loaded even if empty (successful API call)
       }
     } catch (error) {
       console.error('[MarketParticipants] ❌ CRITICAL: Error loading from Supabase:', JSON.stringify({
