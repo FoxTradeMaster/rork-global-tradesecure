@@ -28,7 +28,7 @@ export default function SupportScreen() {
   };
 
   const handleSupportWebsitePress = () => {
-    Linking.openURL('https://support.foxtrademasters.com');
+    Linking.openURL('https://www.FoxTradeMaster.App');
   };
 
   return (
